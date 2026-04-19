@@ -3,108 +3,261 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Amategeko y'Umuhanda - Rwanda</title>
+  <title>💰 Crypto Exchange - Rwanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-      background: linear-gradient(135deg, #0f172a, #1e293b);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: linear-gradient(135deg, #0a0e27, #1a1f3a);
       color: #fff; 
       min-height: 100vh;
     }
     .header { 
-      background: linear-gradient(135deg, #1e40af, #3b82f6); 
-      padding: 20px; 
-      text-align: center; 
-      font-size: 20px; 
-      font-weight: bold;
-    }
-    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
-    .card { 
-      background: rgba(30, 41, 59, 0.9);
-      margin: 12px 0; 
-      padding: 20px; 
-      border-radius: 16px; 
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-    .card:hover { 
-      background: rgba(51, 65, 85, 1);
-      transform: translateY(-2px);
-    }
-    button { 
-      width: 100%; 
-      padding: 14px; 
-      margin: 8px 0; 
-      border: none; 
-      border-radius: 12px; 
-      font-size: 16px; 
-      font-weight: 600; 
-      cursor: pointer;
-    }
-    .primary { 
-      background: linear-gradient(135deg, #22c55e, #16a34a); 
-      color: white; 
-    }
-    .option { 
-      background: #475569; 
-      color: white; 
-      text-align: left;
+      background: linear-gradient(135deg, #f7931a, #f1c40f);
       padding: 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .correct { background: #22c55e !important; }
-    .wrong { background: #ef4444 !important; }
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #334155;
-      border-radius: 4px;
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+    
+    /* Balance Card */
+    .balance-card {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      padding: 20px;
+      border-radius: 20px;
+      margin: 16px 0;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .balance-amount {
+      font-size: 36px;
+      font-weight: bold;
+      color: #f1c40f;
+    }
+    .balance-label {
+      color: #a0c4ff;
+      font-size: 14px;
+    }
+    
+    /* Crypto Cards */
+    .crypto-grid {
+      display: grid;
+      gap: 12px;
       margin: 16px 0;
     }
-    .progress-fill {
-      height: 100%;
-      background: #3b82f6;
-      border-radius: 4px;
-      width: 0%;
+    .crypto-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
     }
+    .crypto-card:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+    .crypto-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .crypto-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .crypto-symbol {
+      color: #a0c4ff;
+      font-size: 14px;
+    }
+    .crypto-price {
+      font-size: 20px;
+      font-weight: bold;
+      color: #f1c40f;
+    }
+    .change-positive {
+      color: #00ff88;
+    }
+    .change-negative {
+      color: #ff4444;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #f7931a, #f1c40f);
+      color: #000;
+    }
+    .btn-secondary {
+      background: #2a3a5c;
+      color: #fff;
+    }
+    .btn-success {
+      background: #00ff88;
+      color: #000;
+    }
+    .btn-danger {
+      background: #ff4444;
+      color: #fff;
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    
+    /* Trade Form */
+    .trade-form {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .input-group {
+      margin: 16px 0;
+    }
+    .input-label {
+      color: #a0c4ff;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .input-field {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #f7931a;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1f3a;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .nav-item {
+      text-align: center;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .nav-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    .nav-label {
+      font-size: 12px;
+      color: #a0c4ff;
+    }
+    
+    /* Trade History */
+    .trade-item {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 8px 0;
+    }
+    
+    /* Loading */
     .loading {
       text-align: center;
       padding: 40px;
     }
-    .error-box {
-      background: rgba(220, 38, 38, 0.2);
-      border: 1px solid #dc2626;
-      padding: 16px;
-      border-radius: 12px;
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #f7931a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
       margin: 16px 0;
     }
-    .success-box {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid #22c55e;
-      padding: 16px;
-      border-radius: 12px;
-      margin: 16px 0;
-    }
-    textarea, input {
-      width: 100%;
+    .tab {
+      flex: 1;
       padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: white;
-      font-size: 14px;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: #f7931a;
+      color: #000;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
+  <div class="header">💰 Crypto Exchange</div>
   <div class="container" id="main">
     <div class="loading">
-      <p>⏳ Tugerageza kwihuza na Database...</p>
+      <div class="spinner"></div>
+      <p>Tugerageza kwinjira...</p>
+    </div>
+  </div>
+  
+  <div class="bottom-nav" id="bottomNav" style="display: none;">
+    <div class="nav-item" onclick="window.showHome()">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Ahabanza</div>
+    </div>
+    <div class="nav-item" onclick="window.showTrade()">
+      <div class="nav-icon">💱</div>
+      <div class="nav-label">Gucuruza</div>
+    </div>
+    <div class="nav-item" onclick="window.showPortfolio()">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Konti</div>
+    </div>
+    <div class="nav-item" onclick="window.showHistory()">
+      <div class="nav-icon">📜</div>
+      <div class="nav-label">Amateka</div>
     </div>
   </div>
 
@@ -117,309 +270,490 @@
         tg.expand();
       }
       
-      // Supabase Config - Koresha URL nshya yawe!
+      // Supabase Config
       const SUPABASE_URL = "https://igcaqhepqtzogxfbekqs.supabase.co";
-      const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnY2FxaGVwcXR6b2d4ZmJla3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwNDc2MDAsImV4cCI6MjA2MDYyMzYwMH0.ujH2kG3LxQm7PZD8N1WvKqR5vCxYwM8PJ9nF2tB4s6A"; // Ukeneye guhindura iyi KEY ukoresheje ANON KEY nshya!
+      const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnY2FxaGVwcXR6b2d4ZmJla3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwNDc2MDAsImV4cCI6MjA2MDYyMzYwMH0.ujH2kG3LxQm7PZD8N1WvKqR5vCxYwM8PJ9nF2tB4s6A";
       
       let supabase;
-      let currentQuestions = [];
-      let currentIndex = 0;
-      let score = 0;
-      let selectedAnswer = null;
+      let currentUser = null;
+      let cryptoPrices = [];
+      let selectedCrypto = null;
+      let tradeType = 'buy';
       
       const ADMIN_ID = 8616193014;
       const userId = tg?.initDataUnsafe?.user?.id || ADMIN_ID;
-      const isAdmin = userId === ADMIN_ID;
+      const username = tg?.initDataUnsafe?.user?.username || 'User';
+      const firstName = tg?.initDataUnsafe?.user?.first_name || 'Mugenzi';
       
-      // Initialize Supabase
+      // Initialize
       try {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-        console.log('✅ Supabase initialized');
+        console.log('✅ Supabase ready');
       } catch (e) {
         console.error('❌ Supabase error:', e);
-        showError('Supabase initialization failed: ' + e.message);
+        showError('Database connection failed');
         return;
       }
       
+      // Get or create user
+      async function initUser() {
+        try {
+          // Reba niba umukoresha ariho
+          let { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('telegram_id', userId)
+            .single();
+          
+          if (!user) {
+            // Kora umukoresha mushya
+            const { data: newUser, error: createError } = await supabase
+              .from('users')
+              .insert([{
+                telegram_id: userId,
+                username: username,
+                first_name: firstName,
+                balance_usd: 10000
+              }])
+              .select()
+              .single();
+            
+            if (createError) throw createError;
+            currentUser = newUser;
+          } else {
+            currentUser = user;
+          }
+          
+          return true;
+        } catch (e) {
+          console.error('User init error:', e);
+          return false;
+        }
+      }
+      
+      // Get crypto prices
+      async function getPrices() {
+        try {
+          const { data, error } = await supabase
+            .from('crypto_prices')
+            .select('*')
+            .order('symbol');
+          
+          if (error) throw error;
+          cryptoPrices = data;
+          return data;
+        } catch (e) {
+          console.error('Prices error:', e);
+          return [];
+        }
+      }
+      
+      // Show error
       function showError(msg) {
         document.getElementById('main').innerHTML = `
-          <div class="error-box">
+          <div style="text-align: center; padding: 40px;">
             <h3>❌ Ikibazo</h3>
             <p>${msg}</p>
-            <button class="primary" onclick="location.reload()" style="margin-top: 16px;">🔄 Ongera Ugerageze</button>
+            <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 20px;">🔄 Ongera Ugerageze</button>
           </div>
         `;
       }
       
-      // Test connection
-      async function testConnection() {
-        try {
-          const start = Date.now();
-          const { data, error, count } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true });
-          
-          const ping = Date.now() - start;
-          
-          if (error) {
-            console.error('Connection error:', error);
-            return { success: false, error: error.message, count: 0, ping: 0 };
-          }
-          
-          return { success: true, error: null, count: count || 0, ping };
-        } catch (e) {
-          console.error('Test failed:', e);
-          return { success: false, error: e.message, count: 0, ping: 0 };
+      // Format price
+      function formatPrice(price) {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(price);
+      }
+      
+      // Format crypto amount
+      function formatCrypto(amount, symbol) {
+        if (symbol === 'USDT') {
+          return amount.toFixed(2);
         }
+        return amount.toFixed(6);
       }
       
-      // Show main menu
-      async function showMainMenu() {
-        document.getElementById('main').innerHTML = '<div class="loading"><p>⏳ Tugerageza kwihuza...</p></div>';
+      // Show home
+      window.showHome = async function() {
+        document.getElementById('bottomNav').style.display = 'grid';
         
-        const result = await testConnection();
-        
-        let html = '';
-        
-        if (result.success) {
-          html += `
-            <div class="success-box">
-              <h3>✅ Database irahari!</h3>
-              <p>Ping: ${result.ping}ms | Ibibazo: ${result.count}</p>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="error-box">
-              <h3>❌ Database ntabwo ibonetse</h3>
-              <p>${result.error}</p>
-              <p style="margin-top: 8px; font-size: 14px;">
-                Ukeneye: 1) Kurema table "questions" 2) Gushyiraho RLS policies
-              </p>
-            </div>
-          `;
-        }
-        
-        html += `
-          <div class="card" onclick="window.goTo('lessons')">
-            <h3>📚 Amasomo y'Ibyapa</h3>
-            <p style="color: #94a3b8; margin-top: 8px;">Menya ibimenyetso by'umuhanda</p>
-          </div>
-          <div class="card" onclick="window.goTo('quiz')">
-            <h3>❓ Quiz (5 ibibazo)</h3>
-            <p style="color: #94a3b8; margin-top: 8px;">Ikizamini kigufi cyo kwitoza</p>
-          </div>
-          <div class="card" onclick="window.goTo('exam')">
-            <h3>📝 Mock Exam (15 ibibazo)</h3>
-            <p style="color: #94a3b8; margin-top: 8px;">Ikizamini gishyitse nk'icy'ukuri</p>
-          </div>
-          <div class="card" onclick="window.goTo('premium')">
-            <h3>💎 Premium</h3>
-            <p style="color: #94a3b8; margin-top: 8px;">Fungura ibindi bintu byose</p>
-          </div>
-          ${isAdmin ? `
-            <div class="card" style="background: #22c55e;" onclick="window.showAdminPanel()">
-              <h3>👑 ADMIN PANEL</h3>
-              <p style="color: #fff; margin-top: 8px;">Genzura ibibazo</p>
-            </div>
-          ` : ''}
-        `;
-        
-        document.getElementById('main').innerHTML = html;
-      }
-      
-      window.goTo = async function(page) {
-        if (page === 'quiz' || page === 'exam') {
-          const limit = page === 'quiz' ? 5 : 15;
-          
-          document.getElementById('main').innerHTML = '<div class="loading"><p>⏳ Gukura ibibazo...</p></div>';
-          
-          try {
-            const { data: questions, error } = await supabase
-              .from('questions')
-              .select('*')
-              .limit(limit);
-            
-            if (error) throw error;
-            
-            if (!questions || questions.length === 0) {
-              alert('❌ Nta bibazo bihari. Ongeramo muri Admin Panel.');
-              showMainMenu();
-              return;
-            }
-            
-            startQuiz(questions.sort(() => Math.random() - 0.5));
-          } catch (err) {
-            alert('❌ Error: ' + err.message);
-            showMainMenu();
-          }
-        } else if (page === 'premium') {
-          alert('💎 Premium: 5,000 RWF\nMoMo: *182*8*1*0706405# (Lambert)');
-        } else if (page === 'lessons') {
-          showLessons();
-        }
-      };
-      
-      function showLessons() {
-        document.getElementById('main').innerHTML = `
-          <div class="card">
-            <h3>📚 Ibimenyetso by'Umuhanda</h3>
-            <p>🔴 Umutuku: Itegeko (STOP)</p>
-            <p>🟡 Umuhondo: Iburira (ishuri)</p>
-            <p>🔵 Ubururu: Amakuru (hospital)</p>
-          </div>
-          <div class="card">
-            <h3>🚦 Amatara</h3>
-            <p>🔴 Hagarara | 🟡 Itegereze | 🟢 Genda</p>
-          </div>
-          <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
-        `;
-      }
-      
-      function startQuiz(questions) {
-        currentQuestions = questions;
-        currentIndex = 0;
-        score = 0;
-        selectedAnswer = null;
-        showQuestion();
-      }
-      
-      function showQuestion() {
-        const q = currentQuestions[currentIndex];
-        const options = q.options.split('\n').map(o => o.trim()).filter(o => o);
-        const progress = (currentIndex / currentQuestions.length) * 100;
+        await initUser();
+        const prices = await getPrices();
         
         let html = `
-          <div class="card">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-              <span>Ikibazo ${currentIndex + 1}/${currentQuestions.length}</span>
-              <span>Amanota: ${score}</span>
+          <div class="balance-card">
+            <div class="balance-label">Umutungo Wose</div>
+            <div class="balance-amount">${formatPrice(currentUser?.balance_usd || 0)}</div>
+            <div style="display: flex; justify-content: space-between; margin-top: 16px;">
+              <span>₿ ${formatCrypto(currentUser?.balance_btc || 0, 'BTC')} BTC</span>
+              <span>Ξ ${formatCrypto(currentUser?.balance_eth || 0, 'ETH')} ETH</span>
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${progress}%"></div>
-            </div>
-            <h3 style="margin: 20px 0;">${q.question}</h3>
+          </div>
+          
+          <h3 style="margin: 20px 0 12px;">📈 Ibicuruzwa</h3>
+          <div class="crypto-grid">
         `;
         
-        options.forEach((opt, idx) => {
-          const letter = String.fromCharCode(65 + idx);
-          html += `<button class="option" onclick="window.selectAnswer('${letter}', this)">${opt}</button>`;
+        prices.forEach(crypto => {
+          const changeClass = crypto.change_24h >= 0 ? 'change-positive' : 'change-negative';
+          const changeSign = crypto.change_24h >= 0 ? '+' : '';
+          
+          html += `
+            <div class="crypto-card" onclick="window.selectCrypto('${crypto.symbol}')">
+              <div class="crypto-row">
+                <div>
+                  <div class="crypto-name">${crypto.name}</div>
+                  <div class="crypto-symbol">${crypto.symbol}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="crypto-price">${formatPrice(crypto.price_usd)}</div>
+                  <div class="${changeClass}">${changeSign}${crypto.change_24h}%</div>
+                </div>
+              </div>
+            </div>
+          `;
         });
         
-        html += `
-            <button class="primary" onclick="window.nextQuestion()" id="nextBtn" style="display: none;">Komeza →</button>
+        html += '</div>';
+        
+        // Admin panel
+        const isAdmin = userId === ADMIN_ID;
+        if (isAdmin) {
+          html += `
+            <div style="margin-top: 20px;">
+              <button class="btn btn-secondary" onclick="window.showAdminPanel()">👑 Admin Panel</button>
+            </div>
+          `;
+        }
+        
+        document.getElementById('main').innerHTML = html;
+      };
+      
+      // Select crypto for trade
+      window.selectCrypto = function(symbol) {
+        selectedCrypto = cryptoPrices.find(c => c.symbol === symbol);
+        window.showTrade();
+      };
+      
+      // Show trade page
+      window.showTrade = async function() {
+        if (!selectedCrypto) {
+          selectedCrypto = cryptoPrices[0];
+        }
+        
+        const crypto = selectedCrypto;
+        const maxAmount = tradeType === 'buy' 
+          ? currentUser.balance_usd / crypto.price_usd
+          : currentUser[`balance_${crypto.symbol.toLowerCase()}`] || 0;
+        
+        let html = `
+          <div class="tabs">
+            <div class="tab ${tradeType === 'buy' ? 'active' : ''}" onclick="window.setTradeType('buy')">💰 Gura</div>
+            <div class="tab ${tradeType === 'sell' ? 'active' : ''}" onclick="window.setTradeType('sell')">💸 Gura</div>
+          </div>
+          
+          <div class="trade-form">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+              <span>${crypto.name} (${crypto.symbol})</span>
+              <span class="crypto-price">${formatPrice(crypto.price_usd)}</span>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label">Ingano ya ${crypto.symbol}</label>
+              <input type="number" id="cryptoAmount" class="input-field" placeholder="0.00" step="0.000001" 
+                     oninput="window.updateTotal()">
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label">Agaciro muri USD</label>
+              <input type="number" id="usdAmount" class="input-field" placeholder="0.00" step="0.01"
+                     oninput="window.updateCrypto()">
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin: 16px 0;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>${tradeType === 'buy' ? 'Ushoboye kugura:' : 'Ushoboye kugurisha:'}</span>
+                <span>${formatCrypto(maxAmount, crypto.symbol)} ${crypto.symbol}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                <span>${tradeType === 'buy' ? 'Balance yawe:' : 'Ufite:'}</span>
+                <span>${tradeType === 'buy' 
+                  ? formatPrice(currentUser.balance_usd)
+                  : formatCrypto(currentUser[`balance_${crypto.symbol.toLowerCase()}`] || 0, crypto.symbol) + ' ' + crypto.symbol
+                }</span>
+              </div>
+            </div>
+            
+            <button class="btn ${tradeType === 'buy' ? 'btn-success' : 'btn-danger'}" 
+                    onclick="window.executeTrade()" style="width: 100%;">
+              ${tradeType === 'buy' ? '✅ Gura' : '📤 Gurisha'} ${crypto.symbol}
+            </button>
+          </div>
+          
+          <div style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="window.showHome()">← Subira Ahabanza</button>
           </div>
         `;
         
         document.getElementById('main').innerHTML = html;
-      }
-      
-      window.selectAnswer = function(answer, btn) {
-        if (selectedAnswer !== null) return;
-        
-        selectedAnswer = answer;
-        const q = currentQuestions[currentIndex];
-        const isCorrect = answer === q.correct;
-        
-        if (isCorrect) {
-          score++;
-          btn.classList.add('correct');
-        } else {
-          btn.classList.add('wrong');
-          const options = document.querySelectorAll('.option');
-          q.options.split('\n').forEach((opt, idx) => {
-            const letter = String.fromCharCode(65 + idx);
-            if (letter === q.correct) {
-              options[idx].classList.add('correct');
-            }
-          });
-        }
-        
-        document.querySelectorAll('.option').forEach(b => {
-          b.disabled = true;
-          b.style.cursor = 'not-allowed';
-        });
-        
-        document.getElementById('nextBtn').style.display = 'block';
       };
       
-      window.nextQuestion = function() {
-        currentIndex++;
-        
-        if (currentIndex < currentQuestions.length) {
-          selectedAnswer = null;
-          showQuestion();
-        } else {
-          showResults();
-        }
+      // Set trade type
+      window.setTradeType = function(type) {
+        tradeType = type;
+        window.showTrade();
       };
       
-      function showResults() {
-        const percent = Math.round((score / currentQuestions.length) * 100);
-        const passed = percent >= 60;
-        
-        document.getElementById('main').innerHTML = `
-          <div class="card" style="text-align: center;">
-            <h2>🎯 Ibisubizo</h2>
-            <div style="font-size: 64px; font-weight: bold; color: ${passed ? '#22c55e' : '#ef4444'}; margin: 20px 0;">
-              ${score}/${currentQuestions.length}
-            </div>
-            <p style="font-size: 28px;">${percent}%</p>
-            <p style="margin: 20px 0;">${passed ? '✅ Watsinze!' : '📚 Komeza wige'}</p>
-            <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
-            <button class="option" style="text-align: center; margin-top: 12px;" onclick="startQuiz(currentQuestions)">🔄 Ongera Ugerageze</button>
-          </div>
-        `;
-      }
-      
-      window.showAdminPanel = function() {
-        document.getElementById('main').innerHTML = `
-          <div class="card">
-            <h3>➕ Ongera Ikibazo</h3>
-            <textarea id="q" placeholder="Ikibazo..." rows="3"></textarea>
-            <textarea id="o" placeholder="A. Igisubizo 1&#10;B. Igisubizo 2&#10;C. Igisubizo 3&#10;D. Igisubizo 4" rows="5"></textarea>
-            <input id="c" placeholder="A, B, C, cyangwa D" maxlength="1">
-            <button class="primary" onclick="window.addQuestion()">✅ Bika Ikibazo</button>
-          </div>
-          <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
-        `;
+      // Update total when crypto amount changes
+      window.updateTotal = function() {
+        const cryptoAmount = parseFloat(document.getElementById('cryptoAmount').value) || 0;
+        const usdAmount = cryptoAmount * selectedCrypto.price_usd;
+        document.getElementById('usdAmount').value = usdAmount.toFixed(2);
       };
       
-      window.addQuestion = async function() {
-        const question = document.getElementById('q').value.trim();
-        const options = document.getElementById('o').value.trim();
-        const correct = document.getElementById('c').value.trim().toUpperCase();
+      // Update crypto when USD amount changes
+      window.updateCrypto = function() {
+        const usdAmount = parseFloat(document.getElementById('usdAmount').value) || 0;
+        const cryptoAmount = usdAmount / selectedCrypto.price_usd;
+        document.getElementById('cryptoAmount').value = cryptoAmount.toFixed(6);
+      };
+      
+      // Execute trade
+      window.executeTrade = async function() {
+        const cryptoAmount = parseFloat(document.getElementById('cryptoAmount').value);
+        const usdAmount = parseFloat(document.getElementById('usdAmount').value);
         
-        if (!question || !options || !correct) {
-          alert('Uzuza byose!');
+        if (!cryptoAmount || cryptoAmount <= 0) {
+          alert('❌ Ingano y\'ubucuruzi sibyo');
           return;
         }
         
-        if (!['A', 'B', 'C', 'D'].includes(correct)) {
-          alert('Igisubizo kigomba kuba A, B, C, cyangwa D');
-          return;
+        const crypto = selectedCrypto;
+        const symbol = crypto.symbol;
+        
+        // Check balance
+        if (tradeType === 'buy') {
+          if (usdAmount > currentUser.balance_usd) {
+            alert('❌ Amafaranga ntahagije');
+            return;
+          }
+        } else {
+          const balance = currentUser[`balance_${symbol.toLowerCase()}`] || 0;
+          if (cryptoAmount > balance) {
+            alert(`❌ ${symbol} ntihagije`);
+            return;
+          }
         }
         
         try {
-          const { error } = await supabase
-            .from('questions')
-            .insert([{ question, options, correct }]);
+          // Update balances
+          let newBalances = {};
+          if (tradeType === 'buy') {
+            newBalances = {
+              balance_usd: currentUser.balance_usd - usdAmount,
+              [`balance_${symbol.toLowerCase()}`]: (currentUser[`balance_${symbol.toLowerCase()}`] || 0) + cryptoAmount
+            };
+          } else {
+            newBalances = {
+              balance_usd: currentUser.balance_usd + usdAmount,
+              [`balance_${symbol.toLowerCase()}`]: (currentUser[`balance_${symbol.toLowerCase()}`] || 0) - cryptoAmount
+            };
+          }
+          
+          // Update user
+          const { error: userError } = await supabase
+            .from('users')
+            .update(newBalances)
+            .eq('telegram_id', userId);
+          
+          if (userError) throw userError;
+          
+          // Save trade
+          const { error: tradeError } = await supabase
+            .from('trades')
+            .insert([{
+              user_id: userId,
+              symbol: symbol,
+              type: tradeType,
+              amount: cryptoAmount,
+              price: crypto.price_usd,
+              total: usdAmount
+            }]);
+          
+          if (tradeError) throw tradeError;
+          
+          // Refresh user
+          await initUser();
+          
+          alert(`✅ ${tradeType === 'buy' ? 'Waguze' : 'Wagurishije'} ${formatCrypto(cryptoAmount, symbol)} ${symbol}`);
+          window.showHome();
+        } catch (e) {
+          alert('❌ Byanze: ' + e.message);
+        }
+      };
+      
+      // Show portfolio
+      window.showPortfolio = async function() {
+        let html = `
+          <h3 style="margin-bottom: 20px;">📊 Umutungo Wawe</h3>
+          
+          <div class="balance-card">
+            <div class="balance-label">Balance USD</div>
+            <div class="balance-amount">${formatPrice(currentUser?.balance_usd || 0)}</div>
+          </div>
+          
+          <div class="crypto-grid">
+            <div class="crypto-card">
+              <div class="crypto-row">
+                <span>₿ Bitcoin (BTC)</span>
+                <span>${formatCrypto(currentUser?.balance_btc || 0, 'BTC')} BTC</span>
+              </div>
+            </div>
+            <div class="crypto-card">
+              <div class="crypto-row">
+                <span>Ξ Ethereum (ETH)</span>
+                <span>${formatCrypto(currentUser?.balance_eth || 0, 'ETH')} ETH</span>
+              </div>
+            </div>
+            <div class="crypto-card">
+              <div class="crypto-row">
+                <span>💵 Tether (USDT)</span>
+                <span>${formatCrypto(currentUser?.balance_usdt || 0, 'USDT')} USDT</span>
+              </div>
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" onclick="window.showHome()">← Subira Ahabanza</button>
+        `;
+        
+        document.getElementById('main').innerHTML = html;
+      };
+      
+      // Show trade history
+      window.showHistory = async function() {
+        try {
+          const { data: trades, error } = await supabase
+            .from('trades')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(20);
           
           if (error) throw error;
           
-          alert('✅ Ikibazo cyongewe!');
-          showAdminPanel();
-        } catch (err) {
-          alert('❌ Error: ' + err.message);
+          let html = '<h3 style="margin-bottom: 20px;">📜 Amateka y\'Ubucuruzi</h3>';
+          
+          if (!trades || trades.length === 0) {
+            html += '<p style="text-align: center; color: #a0c4ff;">Nta bucuruzi bwakozwe</p>';
+          } else {
+            trades.forEach(trade => {
+              const date = new Date(trade.created_at).toLocaleString();
+              html += `
+                <div class="trade-item">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: ${trade.type === 'buy' ? '#00ff88' : '#ff4444'}; font-weight: bold;">
+                      ${trade.type === 'buy' ? '✅ Gura' : '📤 Gurisha'}
+                    </span>
+                    <span style="color: #a0c4ff; font-size: 12px;">${date}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                    <span>${formatCrypto(trade.amount, trade.symbol)} ${trade.symbol}</span>
+                    <span>@ ${formatPrice(trade.price)}</span>
+                  </div>
+                  <div style="text-align: right; margin-top: 4px; color: #f1c40f;">
+                    Total: ${formatPrice(trade.total)}
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          html += '<button class="btn btn-primary" onclick="window.showHome()" style="margin-top: 20px;">← Subira Ahabanza</button>';
+          
+          document.getElementById('main').innerHTML = html;
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      };
+      
+      // Admin panel
+      window.showAdminPanel = function() {
+        let html = `
+          <h3>👑 Admin Panel</h3>
+          
+          <div class="trade-form">
+            <h4>Hindura Ibicuruzwa</h4>
+            <select id="adminSymbol" class="input-field">
+        `;
+        
+        cryptoPrices.forEach(c => {
+          html += `<option value="${c.symbol}">${c.name} (${c.symbol})</option>`;
+        });
+        
+        html += `
+            </select>
+            <input type="number" id="adminPrice" class="input-field" placeholder="Igiciro gishya" step="0.01">
+            <input type="number" id="adminChange" class="input-field" placeholder="Change 24h (%)" step="0.1">
+            <button class="btn btn-primary" onclick="window.updatePrice()">💾 Hindura Igiciro</button>
+          </div>
+          
+          <button class="btn btn-secondary" onclick="window.showHome()">← Subira Ahabanza</button>
+        `;
+        
+        document.getElementById('main').innerHTML = html;
+      };
+      
+      // Update price (admin)
+      window.updatePrice = async function() {
+        const symbol = document.getElementById('adminSymbol').value;
+        const price = parseFloat(document.getElementById('adminPrice').value);
+        const change = parseFloat(document.getElementById('adminChange').value);
+        
+        if (!price) {
+          alert('Injiza igiciro gishya');
+          return;
+        }
+        
+        try {
+          const updateData = { price_usd: price };
+          if (!isNaN(change)) {
+            updateData.change_24h = change;
+          }
+          
+          const { error } = await supabase
+            .from('crypto_prices')
+            .update(updateData)
+            .eq('symbol', symbol);
+          
+          if (error) throw error;
+          
+          alert('✅ Igiciro cyahinduwe!');
+          await getPrices();
+          window.showHome();
+        } catch (e) {
+          alert('Error: ' + e.message);
         }
       };
       
       // Make functions global
-      window.showMainMenu = showMainMenu;
-      window.startQuiz = startQuiz;
+      window.showHome = showHome;
+      window.showTrade = showTrade;
+      window.showPortfolio = showPortfolio;
+      window.showHistory = showHistory;
+      window.showAdminPanel = showAdminPanel;
+      window.selectCrypto = selectCrypto;
+      window.setTradeType = setTradeType;
+      window.updateTotal = updateTotal;
+      window.updateCrypto = updateCrypto;
+      window.executeTrade = executeTrade;
+      window.updatePrice = updatePrice;
       
       // Start app
-      showMainMenu();
+      showHome();
     })();
   </script>
 </body>
