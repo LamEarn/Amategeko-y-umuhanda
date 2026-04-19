@@ -5,376 +5,113 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Amategeko y'Umuhanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: white; }
-    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
-    .card { background: #1e2937; margin: 15px; padding: 20px; border-radius: 16px; text-align: center; }
-    button { padding: 15px; width: 90%; margin: 10px auto; display: block; border: none; border-radius: 12px; font-size: 17px; }
-    .admin { background: #22c55e; color: black; font-weight: bold; }
-    input, textarea { width: 90%; padding: 12px; margin: 8px auto; display: block; border-radius: 8px; }
+    body { margin:0; font-family: 'Inter', sans-serif; background: #0f172a; color: #fff; }
+    .header { background: #1e40af; padding: 18px; text-align: center; font-size: 22px; font-weight: 600; }
+    .card { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; margin: 12px 0; }
+    button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
+    .primary { background: #22c55e; color: black; }
   </style>
 </head>
 <body>
-  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
+  <div class="header">🚗 Amategeko y'Umuhanda</div>
   <div class="container" id="main"></div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    
-    const userId = tg.initDataUnsafe.user?.id;
-    const ADMIN_ID = 8616193014;   // Your ID
+    tg.BackButton.show();
+
+    const ADMIN_ID = 8616193014;
+    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
     const isAdmin = userId === ADMIN_ID;
 
-    function showMainMenu() {
+    // ================== SUPABASE CONFIG ==================
+    const SUPABASE_URL = "https://YOUR_SUPABASE_URL.supabase.co";     // ← CHANGE
+    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";                   // ← CHANGE
+
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ================== RENDER MENU ==================
+    async function showMainMenu() {
       let html = `
         <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
-        <div class="card" onclick="goTo('quiz')">❓ Quiz</div>
-        <div class="card" onclick="goTo('exam')">📝 Mock Exam</div>
-        <div class="card" onclick="goTo('premium')">💎 Premium</div>`;
-      
+        <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
+        <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
+        <div class="card" onclick="goTo('premium')">💎 Premium - Unlimited Access</div>`;
+
       if (isAdmin) {
-        html += `<div class="card admin" onclick="showAdminPanel()">👑 ADMIN PANEL - Upload Content</div>`;
+        html += `<div class="card" style="background:#22c55e;color:black" onclick="showAdminPanel()">👑 ADMIN PANEL</div>`;
       }
+
       document.getElementById('main').innerHTML = html;
     }
 
-    function showAdminPanel() {
-      document.getElementById('main').innerHTML = `
-        <h2 style="text-align:center;color:#22c55e;">👑 Admin Upload Center</h2>
-        
-        <div class="card">
-          <h3>📤 Upload PDF / Photo</h3>
-          <input type="file" id="fileInput" accept="image/*,application/pdf">
-          <button onclick="uploadFile()">📤 Upload Now</button>
-        </div>
+    // ================== REAL QUIZ (From Database) ==================
+    async function startRealQuiz(num = 15) {
+      const { data: questions } = await supabase
+        .from('questions')
+        .select('*')
+        .limit(num);
 
-        <div class="card">
-          <h3>📝 Add Text Lesson</h3>
-          <input type="text" id="lessonTitle" placeholder="Title y'igice">
-          <textarea id="lessonDesc" rows="5" placeholder="Content / Explanation"></textarea>
-          <button onclick="addLesson()">✅ Save Lesson</button>
-        </div>
-
-        <div class="card">
-          <h3>🔗 Add External Link</h3>
-          <input type="text" id="linkTitle" placeholder="Title">
-          <input type="text" id="linkUrl" placeholder="https://...">
-          <button onclick="addLink()">✅ Save Link</button>
-        </div>
-
-        <button onclick="showMainMenu()">← Back to Main Menu</button>
-      `;
-    }
-
-    function uploadFile() {
-      const file = document.getElementById('fileInput').files[0];
-      if (!file) return tg.showAlert("❌ No file selected");
-      tg.showAlert(`📤 Uploading: ${file.name}\n\nSend this to WhatsApp for processing.`);
-      window.open(`https://wa.me/250793031666?text=New Upload from Admin: ${file.name}`, '_blank');
-    }
-
-    function addLesson() {
-      const title = document.getElementById('lessonTitle').value;
-      const desc = document.getElementById('lessonDesc').value;
-      if (title && desc) {
-        tg.showAlert(`✅ Lesson "${title}" Saved!`);
-      } else {
-        tg.showAlert("❌ Fill all fields");
+      if (!questions || questions.length === 0) {
+        tg.showAlert("No questions yet. Admin should add some.");
+        return;
       }
-    }
 
-    function addLink() {
-      const title = document.getElementById('linkTitle').value;
-      const url = document.getElementById('linkUrl').value;
-      if (title && url) tg.showAlert(`✅ Link "${title}" Saved!`);
+      // Simple demo of real quiz (you can expand)
+      let score = 0;
+      tg.showAlert(`✅ ${num} questions loaded from database!\n\nReal quiz starting...`);
+      // Here you can build full quiz UI with options
     }
 
     function goTo(page) {
-      if (page === 'premium') {
-        document.getElementById('main').innerHTML = `
-          <div class="card">
-            <h2>💎 Premium Subscription</h2>
-            <p>5,000 RWF / month</p>
-            <p>Pay to: <strong>MTN MoMo 706405 (Lambert)</strong></p>
-            <button onclick="sendPayment()">📸 Send Screenshot to WhatsApp</button>
-          </div>`;
+      if (page === 'quiz' || page === 'exam') {
+        startRealQuiz(page === 'quiz' ? 5 : 15);
+      } else if (page === 'premium') {
+        tg.showAlert("Premium: Pay 5000 RWF to 706405 then send screenshot on WhatsApp");
       } else {
-        tg.showAlert(`🔄 Opening ${page}...`);
+        tg.showAlert(`Opening ${page}...`);
       }
     }
 
-    function sendPayment() {
-      window.open('https://wa.me/250793031666?text=Premium%20Payment%20Screenshot%20-%20Driving%20Theory%20Bot', '_blank');
+    // ================== ADMIN PANEL (Real) ==================
+    function showAdminPanel() {
+      document.getElementById('main').innerHTML = `
+        <h2 style="text-align:center; color:#22c55e;">👑 Admin Panel</h2>
+        <div class="card">
+          <h3>Add Question</h3>
+          <textarea id="qtext" placeholder="Full Question" rows="3"></textarea>
+          <input type="text" id="options" placeholder="A. opt1\nB. opt2\nC. opt3\nD. opt4">
+          <input type="text" id="correct" placeholder="Correct Answer (A/B/C/D)">
+          <button class="primary" onclick="addQuestion()">Save Question</button>
+        </div>
+        <button onclick="showMainMenu()">← Back</button>
+      `;
     }
 
-    // Start
+    async function addQuestion() {
+      const question = document.getElementById('qtext').value;
+      const options = document.getElementById('options').value;
+      const correct = document.getElementById('correct').value.toUpperCase();
+
+      if (!question || !correct) {
+        tg.showAlert("Question and correct answer required!");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('questions')
+        .insert([{ question, options, correct, explanation: "Admin added" }]);
+
+      if (error) tg.showAlert("Error: " + error.message);
+      else tg.showAlert("✅ Question added successfully!");
+    }
+
+    // Initialize
     showMainMenu();
-    tg.BackButton.show();
     tg.BackButton.onClick(() => tg.close());
-    const express = require("express");
-const axios = require("axios");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
-
-const app = express();
-app.use(express.json());
-
-// ====== CONFIG (uzuza hano) ======
-const SUBSCRIPTION_KEY = "YOUR_SUBSCRIPTION_KEY";
-const API_USER = "YOUR_API_USER";
-const API_KEY = "YOUR_API_KEY";
-const BASE_URL = "https://sandbox.momodeveloper.mtn.com"; // sandbox
-// =================================
-
-// simple DB (file)
-const DB_FILE = "db.json";
-function readDB() {
-  if (!fs.existsSync(DB_FILE)) return { users: {}, tx: {} };
-  return JSON.parse(fs.readFileSync(DB_FILE));
-}
-function writeDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-// get access token
-async function getToken() {
-  const auth = Buffer.from(`${API_USER}:${API_KEY}`).toString("base64");
-  const res = await axios.post(
-    `${BASE_URL}/collection/token/`,
-    {},
-    {
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
-      }
-    }
-  );
-  return res.data.access_token;
-}
-
-// ====== 1) Tangiza payment ======
-app.post("/pay", async (req, res) => {
-  try {
-    const { user_id, phone } = req.body;
-
-    const token = await getToken();
-    const referenceId = uuidv4();
-
-    // save pending tx
-    const db = readDB();
-    db.tx[referenceId] = {
-      user_id,
-      phone,
-      status: "PENDING",
-      amount: 1500
-    };
-    writeDB(db);
-
-    await axios.post(
-      `${BASE_URL}/collection/v1_0/requesttopay`,
-      {
-        amount: "1500",
-        currency: "RWF",
-        externalId: referenceId,
-        payer: {
-          partyIdType: "MSISDN",
-          partyId: phone
-        },
-        payerMessage: "Kwiga Amategeko y'Umuhanda",
-        payeeNote: "Access Forever",
-        // 🔥 webhook URL yawe kuri Render
-        callbackUrl: "https://YOUR-APP.onrender.com/webhook"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-Reference-Id": referenceId,
-          "X-Target-Environment": "sandbox",
-          "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    res.json({ ok: true, referenceId });
-  } catch (e) {
-    console.error(e.response?.data || e.message);
-    res.status(500).json({ error: "payment_failed" });
-  }
-});
-
-// ====== 2) Webhook (AUTO UNLOCK) ======
-app.post("/webhook", (req, res) => {
-  try {
-    const data = req.body;
-
-    // MTN izohereza status + externalId
-    const referenceId = data.externalId || data.referenceId;
-    const status = data.status;
-
-    if (!referenceId) return res.sendStatus(200);
-
-    const db = readDB();
-    const tx = db.tx[referenceId];
-    if (!tx) return res.sendStatus(200);
-
-    // update tx
-    tx.status = status || "UNKNOWN";
-
-    if (status === "SUCCESSFUL") {
-      // 🔓 unlock forever
-      db.users[tx.user_id] = { paid: true, forever: true };
-      console.log("User unlocked:", tx.user_id);
-    }
-
-    writeDB(db);
-    res.sendStatus(200);
-  } catch (e) {
-    console.error(e);
-    res.sendStatus(200);
-  }
-});
-
-// ====== 3) Check access (bot izakoresha) ======
-app.get("/check/:user_id", (req, res) => {
-  const db = readDB();
-  const u = db.users[req.params.user_id];
-  res.json({ paid: !!(u && u.paid) });
-});
-
-app.listen(3000, () => console.log("Server running on 3000"));const express = require("express");
-const axios = require("axios");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
-
-const app = express();
-app.use(express.json());
-
-// ====== CONFIG (uzuza hano) ======
-const SUBSCRIPTION_KEY = "YOUR_SUBSCRIPTION_KEY";
-const API_USER = "YOUR_API_USER";
-const API_KEY = "YOUR_API_KEY";
-const BASE_URL = "https://sandbox.momodeveloper.mtn.com"; // sandbox
-// =================================
-
-// simple DB (file)
-const DB_FILE = "db.json";
-function readDB() {
-  if (!fs.existsSync(DB_FILE)) return { users: {}, tx: {} };
-  return JSON.parse(fs.readFileSync(DB_FILE));
-}
-function writeDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-// get access token
-async function getToken() {
-  const auth = Buffer.from(`${API_USER}:${API_KEY}`).toString("base64");
-  const res = await axios.post(
-    `${BASE_URL}/collection/token/`,
-    {},
-    {
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
-      }
-    }
-  );
-  return res.data.access_token;
-}
-
-// ====== 1) Tangiza payment ======
-app.post("/pay", async (req, res) => {
-  try {
-    const { user_id, phone } = req.body;
-
-    const token = await getToken();
-    const referenceId = uuidv4();
-
-    // save pending tx
-    const db = readDB();
-    db.tx[referenceId] = {
-      user_id,
-      phone,
-      status: "PENDING",
-      amount: 1500
-    };
-    writeDB(db);
-
-    await axios.post(
-      `${BASE_URL}/collection/v1_0/requesttopay`,
-      {
-        amount: "1500",
-        currency: "RWF",
-        externalId: referenceId,
-        payer: {
-          partyIdType: "MSISDN",
-          partyId: phone
-        },
-        payerMessage: "Kwiga Amategeko y'Umuhanda",
-        payeeNote: "Access Forever",
-        // 🔥 webhook URL yawe kuri Render
-        callbackUrl: "https://YOUR-APP.onrender.com/webhook"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-Reference-Id": referenceId,
-          "X-Target-Environment": "sandbox",
-          "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    res.json({ ok: true, referenceId });
-  } catch (e) {
-    console.error(e.response?.data || e.message);
-    res.status(500).json({ error: "payment_failed" });
-  }
-});
-
-// ====== 2) Webhook (AUTO UNLOCK) ======
-app.post("/webhook", (req, res) => {
-  try {
-    const data = req.body;
-
-    // MTN izohereza status + externalId
-    const referenceId = data.externalId || data.referenceId;
-    const status = data.status;
-
-    if (!referenceId) return res.sendStatus(200);
-
-    const db = readDB();
-    const tx = db.tx[referenceId];
-    if (!tx) return res.sendStatus(200);
-
-    // update tx
-    tx.status = status || "UNKNOWN";
-
-    if (status === "SUCCESSFUL") {
-      // 🔓 unlock forever
-      db.users[tx.user_id] = { paid: true, forever: true };
-      console.log("User unlocked:", tx.user_id);
-    }
-
-    writeDB(db);
-    res.sendStatus(200);
-  } catch (e) {
-    console.error(e);
-    res.sendStatus(200);
-  }
-});
-
-// ====== 3) Check access (bot izakoresha) ======
-app.get("/check/:user_id", (req, res) => {
-  const db = readDB();
-  const u = db.users[req.params.user_id];
-  res.json({ paid: !!(u && u.paid) });
-});
-
-app.listen(3000, () => console.log("Server running on 3000"));
   </script>
 </body>
 </html>
