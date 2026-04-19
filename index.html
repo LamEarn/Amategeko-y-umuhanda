@@ -2,340 +2,335 @@
 <html lang="rw">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Amategeko y'Umuhanda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amategeko y'Umuhanda - Rwanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      margin: 0; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
       background: #0f172a; 
       color: #fff; 
       min-height: 100vh;
     }
     .header { 
-      background: linear-gradient(135deg, #1e40af, #3b82f6); 
+      background: #1e40af; 
       padding: 20px; 
       text-align: center; 
-      font-size: 22px; 
+      font-size: 20px; 
       font-weight: bold; 
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
-    .container { 
-      padding: 16px; 
-      max-width: 600px; 
-      margin: 0 auto; 
-    }
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
     .card { 
-      background: rgba(255,255,255,0.08); 
+      background: #1e293b; 
       margin: 12px 0; 
       padding: 20px; 
-      border-radius: 16px; 
-      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; 
       cursor: pointer;
-      transition: all 0.2s;
-      backdrop-filter: blur(10px);
+      transition: background 0.3s;
     }
-    .card:hover { 
-      background: rgba(255,255,255,0.15); 
-      transform: translateY(-2px);
-    }
+    .card:hover { background: #334155; }
     button { 
       width: 100%; 
-      padding: 16px; 
+      padding: 14px; 
       margin: 8px 0; 
       border: none; 
-      border-radius: 12px; 
+      border-radius: 8px; 
       font-size: 16px; 
       font-weight: 600; 
       cursor: pointer;
-      transition: all 0.2s;
     }
-    .primary { 
-      background: linear-gradient(135deg, #22c55e, #16a34a); 
-      color: white; 
-    }
-    .primary:hover { 
-      opacity: 0.9; 
-    }
-    .option { 
-      background: #334155; 
-      text-align: left; 
+    .primary { background: #22c55e; color: white; }
+    .option { background: #475569; color: white; text-align: left; }
+    .error-message {
+      background: #dc2626;
       color: white;
-      margin: 8px 0;
-    }
-    .option:hover { 
-      background: #475569; 
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
     }
     textarea, input {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid #475569;
+      background: #0f172a;
       color: white;
       font-size: 14px;
     }
-    textarea:focus, input:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-    .progress {
+    .loading {
+      text-align: center;
+      padding: 40px;
       color: #94a3b8;
-      margin-bottom: 16px;
-    }
-    .score {
-      font-size: 48px;
-      font-weight: bold;
-      color: #22c55e;
     }
   </style>
 </head>
 <body>
   <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
-  <div class="container" id="main"></div>
+  <div class="container" id="main">
+    <div class="loading">⏳ Iri gutangira...</div>
+  </div>
 
   <script>
-    (function() {
-      // Initialize Telegram WebApp
-      const tg = window.Telegram.WebApp;
+    // Gereza niba Telegram ibonetse
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
       tg.ready();
       tg.expand();
-      
-      // Initialize Supabase
-      const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
-      const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
-      
-      // Fix: Use the correct Supabase initialization
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-      
-      const ADMIN_ID = 8616193014;
-      const userId = tg.initDataUnsafe?.user?.id || ADMIN_ID;
-      const isAdmin = userId === ADMIN_ID;
-      
-      let currentQuestions = [];
-      let currentIndex = 0;
-      let score = 0;
-      
-      // Make functions globally available
-      window.showMainMenu = async function() {
-        tg.BackButton.hide();
-        const mainElement = document.getElementById('main');
-        mainElement.innerHTML = `
-          <div class="card" onclick="window.goTo('lessons')">
-            <h3>📚 Amasomo y'Ibyapa</h3>
-            <p style="color: #94a3b8; margin: 8px 0 0;">Learn road signs and regulations</p>
-          </div>
-          <div class="card" onclick="window.goTo('quiz')">
-            <h3>❓ Quiz (5 ibibazo)</h3>
-            <p style="color: #94a3b8; margin: 8px 0 0;">Quick practice test</p>
-          </div>
-          <div class="card" onclick="window.goTo('exam')">
-            <h3>📝 Mock Exam (15 ibibazo)</h3>
-            <p style="color: #94a3b8; margin: 8px 0 0;">Full practice exam</p>
-          </div>
-          <div class="card" onclick="window.goTo('premium')">
-            <h3>💎 Premium</h3>
-            <p style="color: #94a3b8; margin: 8px 0 0;">Unlock all features</p>
-          </div>
-          ${isAdmin ? `
-            <div class="card" style="background: linear-gradient(135deg, #22c55e, #16a34a);" onclick="window.showAdminPanel()">
-              <h3>👑 ADMIN PANEL</h3>
-              <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">Manage questions</p>
-            </div>
-          ` : ''}
-        `;
-      };
-      
-      window.goTo = async function(page) {
-        if (page === 'quiz' || page === 'exam') {
-          const limit = page === 'quiz' ? 5 : 15;
-          
-          try {
-            const { data: questions, error } = await supabase
-              .from('questions')
-              .select('*')
-              .limit(limit);
-            
-            if (error) {
-              console.error('Supabase error:', error);
-              tg.showAlert("❌ Database error: " + error.message);
-              return;
-            }
-            
-            if (!questions || questions.length === 0) {
-              tg.showAlert("❌ No questions found. Admin needs to add questions first.");
-              return;
-            }
-            
-            window.startRealQuiz(questions);
-          } catch (err) {
-            console.error('Error:', err);
-            tg.showAlert("❌ Error loading questions: " + err.message);
-          }
-        } else if (page === 'premium') {
-          tg.showAlert("💎 Premium Access: 5,000 RWF\n\nPay via MTN MoMo: *182*8*1*0706405# (Lambert)\n\nAfter payment, send screenshot to WhatsApp: +250 123 456 789");
-        } else {
-          tg.showAlert("📚 Coming soon! We're working on comprehensive driving lessons.");
+    }
+    
+    // Supabase configuration
+    const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
+    
+    let supabase;
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    
+    // ADMIN ID
+    const ADMIN_ID = 8616193014;
+    const userId = tg?.initDataUnsafe?.user?.id || ADMIN_ID;
+    const isAdmin = userId === ADMIN_ID;
+    
+    // Initialize Supabase
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      console.log('✅ Supabase initialized');
+    } catch (e) {
+      console.error('❌ Supabase initialization error:', e);
+      document.getElementById('main').innerHTML = `
+        <div class="error-message">
+          ❌ Supabase ntibonetse<br>
+          <small>${e.message}</small>
+        </div>
+      `;
+    }
+    
+    // Test Supabase connection
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from('questions').select('count', { count: 'exact', head: true });
+        if (error) {
+          console.error('Connection error:', error);
+          return false;
         }
-      };
+        return true;
+      } catch (e) {
+        console.error('Test failed:', e);
+        return false;
+      }
+    }
+    
+    // Main menu
+    async function showMainMenu() {
+      const connected = await testConnection();
       
-      window.startRealQuiz = function(questions) {
-        currentQuestions = questions;
-        currentIndex = 0;
-        score = 0;
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-          window.showMainMenu();
-        });
-        window.showCurrentQuestion();
-      };
+      let html = '';
       
-      window.showCurrentQuestion = function() {
-        const q = currentQuestions[currentIndex];
-        const options = q.options.split('\n').map(o => o.trim()).filter(o => o);
-        
-        let html = `
-          <div class="card">
-            <div class="progress">Question ${currentIndex + 1} of ${currentQuestions.length}</div>
-            <h3 style="margin-bottom: 20px;">${q.question}</h3>
-        `;
-        
-        options.forEach((opt, idx) => {
-          const letter = String.fromCharCode(65 + idx); // A, B, C, D
-          html += `<button class="option" onclick="window.selectAnswer('${letter}')">${opt}</button>`;
-        });
-        
-        html += '</div>';
-        document.getElementById('main').innerHTML = html;
-      };
-      
-      window.selectAnswer = function(chosen) {
-        const currentQ = currentQuestions[currentIndex];
-        if (chosen === currentQ.correct) {
-          score++;
-        }
-        currentIndex++;
-        
-        if (currentIndex < currentQuestions.length) {
-          window.showCurrentQuestion();
-        } else {
-          window.showResults();
-        }
-      };
-      
-      window.showResults = function() {
-        const perc = Math.round((score / currentQuestions.length) * 100);
-        const passed = perc >= 60;
-        
-        document.getElementById('main').innerHTML = `
-          <div class="card" style="text-align:center;">
-            <h2 style="margin-bottom: 20px;">🎯 Your Results</h2>
-            <div class="score">${score}/${currentQuestions.length}</div>
-            <p style="font-size: 24px; margin: 16px 0;">${perc}%</p>
-            <p style="font-size: 18px; margin: 20px 0; color: ${passed ? '#22c55e' : '#ef4444'};">
-              ${passed ? '✅ Congratulations! You would PASS the real exam!' : '📚 Keep practicing! You need 60% to pass.'}
-            </p>
-            <button class="primary" onclick="window.showMainMenu()">← Return to Menu</button>
-            <button class="option" style="text-align:center;" onclick="window.startRealQuiz(currentQuestions)">🔄 Try Again</button>
+      if (!connected) {
+        html += `
+          <div class="card" style="background: #7f1d1d; cursor: default;">
+            <h3>⚠️ Iburira</h3>
+            <p style="margin-top: 8px;">Database ntabwo ibonetse. Shobora kuba ukeneye:</p>
+            <ul style="margin: 12px 0 12px 20px;">
+              <li>Gukora "questions" table muri Supabase</li>
+              <li>Gutegereza iminota 1-2 ngo database ikore</li>
+            </ul>
           </div>
         `;
-        
-        tg.BackButton.hide();
-      };
+      }
       
-      window.showAdminPanel = function() {
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-          window.showMainMenu();
-        });
-        
-        document.getElementById('main').innerHTML = `
-          <div class="card">
-            <h3>➕ Add New Question</h3>
-            <label>Question:</label>
-            <textarea id="q" placeholder="Enter the full question here..." rows="3"></textarea>
-            
-            <label>Options (one per line):</label>
-            <textarea id="o" placeholder="A. First option&#10;B. Second option&#10;C. Third option&#10;D. Fourth option" rows="5"></textarea>
-            
-            <label>Correct Answer:</label>
-            <input id="c" placeholder="A, B, C, or D" maxlength="1" style="text-transform: uppercase;">
-            
-            <button class="primary" onclick="window.addQuestion()">✅ Save Question</button>
+      html += `
+        <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
+        <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
+        <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
+        <div class="card" onclick="goTo('premium')">💎 Premium</div>
+        ${isAdmin ? `
+          <div class="card" style="background: #22c55e;" onclick="showAdminPanel()">
+            👑 ADMIN PANEL
           </div>
-          
-          <div class="card">
-            <h3>📊 Database Stats</h3>
-            <button class="option" onclick="window.checkQuestionCount()">Check Total Questions</button>
-          </div>
-          
-          <button class="option" style="text-align:center;" onclick="window.showMainMenu()">← Back to Main Menu</button>
-        `;
-      };
+        ` : ''}
+      `;
       
-      window.addQuestion = async function() {
-        const question = document.getElementById('q').value.trim();
-        const options = document.getElementById('o').value.trim();
-        const correct = document.getElementById('c').value.trim().toUpperCase();
+      document.getElementById('main').innerHTML = html;
+    }
+    
+    // Go to section
+    window.goTo = async function(page) {
+      if (page === 'quiz' || page === 'exam') {
+        const limit = page === 'quiz' ? 5 : 15;
         
-        if (!question || !options || !correct) {
-          tg.showAlert("❌ Please fill in all fields!");
-          return;
-        }
-        
-        if (!['A', 'B', 'C', 'D'].includes(correct)) {
-          tg.showAlert("❌ Correct answer must be A, B, C, or D");
-          return;
-        }
+        document.getElementById('main').innerHTML = '<div class="loading">⏳ Irimo gukura ibibazo...</div>';
         
         try {
-          const { data, error } = await supabase
+          const { data: questions, error } = await supabase
             .from('questions')
-            .insert([{ 
-              question, 
-              options, 
-              correct,
-              created_at: new Date().toISOString()
-            }]);
+            .select('*')
+            .limit(limit);
           
-          if (error) {
-            tg.showAlert("❌ Error: " + error.message);
-          } else {
-            tg.showAlert("✅ Question added successfully!");
-            document.getElementById('q').value = '';
-            document.getElementById('o').value = '';
-            document.getElementById('c').value = '';
-          }
-        } catch (err) {
-          tg.showAlert("❌ Error: " + err.message);
-        }
-      };
-      
-      window.checkQuestionCount = async function() {
-        try {
-          const { count, error } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true });
+          if (error) throw error;
           
-          if (error) {
-            tg.showAlert("Error: " + error.message);
-          } else {
-            tg.showAlert(`📊 Total questions in database: ${count || 0}`);
+          if (!questions || questions.length === 0) {
+            if (tg) {
+              tg.showAlert("❌ Nta bibazo bihari. Tangira winjize ibibazo muri Admin Panel.");
+            } else {
+              alert("❌ Nta bibazo bihari. Tangira winjize ibibazo muri Admin Panel.");
+            }
+            showMainMenu();
+            return;
           }
+          
+          startQuiz(questions);
         } catch (err) {
-          tg.showAlert("Error: " + err.message);
+          console.error('Error:', err);
+          if (tg) {
+            tg.showAlert("❌ Byanze gukura ibibazo: " + err.message);
+          } else {
+            alert("❌ Byanze: " + err.message);
+          }
+          showMainMenu();
         }
-      };
+      } else if (page === 'premium') {
+        const msg = "💎 Premium: 5,000 RWF\nPay MTN MoMo: *182*8*1*0706405# (Lambert)";
+        if (tg) {
+          tg.showAlert(msg);
+        } else {
+          alert(msg);
+        }
+      } else {
+        alert("📚 Iri gukurikira vuba...");
+      }
+    };
+    
+    // Start quiz
+    function startQuiz(questions) {
+      currentQuestions = questions;
+      currentIndex = 0;
+      score = 0;
+      showQuestion();
+    }
+    
+    // Show question
+    function showQuestion() {
+      const q = currentQuestions[currentIndex];
+      const options = q.options.split('\n').map(o => o.trim()).filter(o => o);
       
-      // Initialize the app
-      window.showMainMenu();
-    })();
+      let html = `
+        <div class="card">
+          <p style="color: #94a3b8; margin-bottom: 16px;">
+            Ikibazo ${currentIndex + 1} / ${currentQuestions.length}
+          </p>
+          <h3 style="margin-bottom: 20px;">${q.question}</h3>
+      `;
+      
+      options.forEach((opt, idx) => {
+        const letter = String.fromCharCode(65 + idx);
+        html += `<button class="option" onclick="selectAnswer('${letter}')">${opt}</button>`;
+      });
+      
+      html += '</div>';
+      document.getElementById('main').innerHTML = html;
+    }
+    
+    // Select answer
+    window.selectAnswer = function(answer) {
+      if (answer === currentQuestions[currentIndex].correct) {
+        score++;
+      }
+      
+      currentIndex++;
+      
+      if (currentIndex < currentQuestions.length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    };
+    
+    // Show results
+    function showResults() {
+      const percent = Math.round((score / currentQuestions.length) * 100);
+      const passed = percent >= 60;
+      
+      document.getElementById('main').innerHTML = `
+        <div class="card" style="text-align: center;">
+          <h2>🎯 Ibisubizo</h2>
+          <div style="font-size: 48px; font-weight: bold; color: ${passed ? '#22c55e' : '#ef4444'}; margin: 20px 0;">
+            ${score}/${currentQuestions.length}
+          </div>
+          <p style="font-size: 24px; margin: 16px 0;">${percent}%</p>
+          <p style="margin: 20px 0; color: ${passed ? '#22c55e' : '#ef4444'};">
+            ${passed ? '✅ Wabonye byibuze 60%! Urabanza!' : '📚 Komeza wige, ukeneye 60%'}
+          </p>
+          <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
+        </div>
+      `;
+    }
+    
+    // Admin panel
+    window.showAdminPanel = function() {
+      document.getElementById('main').innerHTML = `
+        <div class="card">
+          <h3>➕ Ongera Ikibazo</h3>
+          <label>Ikibazo:</label>
+          <textarea id="q" placeholder="Andika ikibazo hano..." rows="3"></textarea>
+          
+          <label>Igisubizo (kimwe ku murongo):</label>
+          <textarea id="o" placeholder="A. Igisubizo cya mbere&#10;B. Igisubizo cya kabiri&#10;C. Igisubizo cya gatatu&#10;D. Igisubizo cya kane" rows="5"></textarea>
+          
+          <label>Igisubizo nyacyo:</label>
+          <input id="c" placeholder="A, B, C, cyangwa D" maxlength="1">
+          
+          <button class="primary" onclick="addQuestion()">✅ Bika Ikibazo</button>
+        </div>
+        
+        <button class="option" style="text-align: center;" onclick="showMainMenu()">← Subira Ahabanza</button>
+      `;
+    };
+    
+    // Add question
+    window.addQuestion = async function() {
+      const question = document.getElementById('q').value.trim();
+      const options = document.getElementById('o').value.trim();
+      const correct = document.getElementById('c').value.trim().toUpperCase();
+      
+      if (!question || !options || !correct) {
+        alert("❌ Uzuza byose!");
+        return;
+      }
+      
+      if (!['A', 'B', 'C', 'D'].includes(correct)) {
+        alert("❌ Igisubizo nyacyo kigomba kuba A, B, C, cyangwa D");
+        return;
+      }
+      
+      try {
+        const { error } = await supabase
+          .from('questions')
+          .insert([{ question, options, correct }]);
+        
+        if (error) throw error;
+        
+        alert("✅ Ikibazo cyongewe neza!");
+        document.getElementById('q').value = '';
+        document.getElementById('o').value = '';
+        document.getElementById('c').value = '';
+      } catch (err) {
+        alert("❌ Byanze: " + err.message);
+      }
+    };
+    
+    // Make functions global
+    window.showMainMenu = showMainMenu;
+    
+    // Start app
+    setTimeout(() => {
+      showMainMenu();
+    }, 1000);
   </script>
 </body>
 </html>
