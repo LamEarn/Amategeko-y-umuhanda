@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amategeko y'Umuhanda</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: white; }
+    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; }
+    .card { background: #1e2937; margin: 15px; padding: 20px; border-radius: 16px; text-align: center; }
+    button { padding: 15px; width: 90%; margin: 10px auto; display: block; border: none; border-radius: 12px; font-size: 17px; }
+    .premium { background: linear-gradient(45deg, #f59e0b, #d97706); color: black; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
+  <div class="container" id="main"></div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    const userId = tg.initDataUnsafe.user?.id;
+    const isAdmin = userId ===  YOUR_TELEGRAM_USER_ID;   // ← Shyira ID yawe hano
+
+    function showMainMenu() {
+      document.getElementById('main').innerHTML = `
+        <div class="card" onclick="goTo('lessons')">📚 Amasomo</div>
+        <div class="card" onclick="goTo('quiz')">❓ Quiz</div>
+        <div class="card" onclick="goTo('exam')">📝 Mock Exam</div>
+        <div class="card premium" onclick="goTo('premium')">💎 Premium (Unlimited Access)</div>
+      `;
+    }
+
+    async function goTo(page) {
+      if (page === 'premium') {
+        document.getElementById('main').innerHTML = `
+          <div class="card">
+            <h2>💎 Premium Subscription</h2>
+            <p>Price: 5,000 RWF / month</p>
+            <p>Pay via MTN MoMo kuri <strong>706405 (Lambert)</strong></p>
+            <button onclick="sendPaymentScreenshot()">📸 Send Screenshot to WhatsApp</button>
+          </div>`;
+      } else if (isAdmin && page === 'admin') {
+        // Admin panel (simple Google Form)
+        window.open('https://forms.gle/YOUR_GOOGLE_FORM_LINK_HERE', '_blank');
+      } else {
+        tg.showAlert(`🔄 ${page} iri gufungura... (Full content coming)`);
+      }
+    }
+
+    function sendPaymentScreenshot() {
+      tg.showAlert("✅ Ohereza screenshot y'ubwishyu kuri WhatsApp:\nhttps://wa.me/250793031666");
+      window.open('https://wa.me/250793031666?text=Premium%20Payment%20Screenshot%20for%20Driving%20Theory%20Bot', '_blank');
+    }
+
+    // Show Admin Button if admin
+    if (isAdmin) {
+      document.getElementById('main').innerHTML += `<button onclick="goTo('admin')">👑 Admin Panel - Add Lessons/Quizzes</button>`;
+    }
+
+    showMainMenu();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => tg.close());
+  </script>
+</body>
+</html>
