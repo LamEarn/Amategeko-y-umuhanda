@@ -2,17 +2,98 @@
 <html lang="rw">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Amategeko y'Umuhanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
-    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
-    .card { background: rgba(255,255,255,0.1); margin: 15px; padding: 20px; border-radius: 16px; }
-    button { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
-    .primary { background: #22c55e; color: black; }
-    .option { background: #334155; text-align: left; margin: 6px 0; }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+      background: #0f172a; 
+      color: #fff; 
+      min-height: 100vh;
+    }
+    .header { 
+      background: linear-gradient(135deg, #1e40af, #3b82f6); 
+      padding: 20px; 
+      text-align: center; 
+      font-size: 22px; 
+      font-weight: bold; 
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .container { 
+      padding: 16px; 
+      max-width: 600px; 
+      margin: 0 auto; 
+    }
+    .card { 
+      background: rgba(255,255,255,0.08); 
+      margin: 12px 0; 
+      padding: 20px; 
+      border-radius: 16px; 
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
+    .card:hover { 
+      background: rgba(255,255,255,0.15); 
+      transform: translateY(-2px);
+    }
+    button { 
+      width: 100%; 
+      padding: 16px; 
+      margin: 8px 0; 
+      border: none; 
+      border-radius: 12px; 
+      font-size: 16px; 
+      font-weight: 600; 
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .primary { 
+      background: linear-gradient(135deg, #22c55e, #16a34a); 
+      color: white; 
+    }
+    .primary:hover { 
+      opacity: 0.9; 
+    }
+    .option { 
+      background: #334155; 
+      text-align: left; 
+      color: white;
+      margin: 8px 0;
+    }
+    .option:hover { 
+      background: #475569; 
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 14px;
+    }
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .progress {
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+    .score {
+      font-size: 48px;
+      font-weight: bold;
+      color: #22c55e;
+    }
   </style>
 </head>
 <body>
@@ -20,114 +101,241 @@
   <div class="container" id="main"></div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.BackButton.show();
-
-    const ADMIN_ID = 8616193014;
-    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
-    const isAdmin = userId === ADMIN_ID;
-
-    // ================== SUPABASE (Your Keys) ==================
-    const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
-    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
-
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-    async function showMainMenu() {
-      document.getElementById('main').innerHTML = `
-        <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
-        <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
-        <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
-        <div class="card" onclick="goTo('premium')">💎 Premium</div>
-        ${isAdmin ? `<div class="card" style="background:#22c55e;color:black;font-weight:bold" onclick="showAdminPanel()">👑 ADMIN PANEL</div>` : ''}
-      `;
-    }
-
-    async function goTo(page) {
-      if (page === 'quiz' || page === 'exam') {
-        const limit = page === 'quiz' ? 5 : 15;
-        const { data: questions, error } = await supabase.from('questions').select('*').limit(limit);
+    (function() {
+      // Initialize Telegram WebApp
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      
+      // Initialize Supabase
+      const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
+      const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
+      
+      // Fix: Use the correct Supabase initialization
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      
+      const ADMIN_ID = 8616193014;
+      const userId = tg.initDataUnsafe?.user?.id || ADMIN_ID;
+      const isAdmin = userId === ADMIN_ID;
+      
+      let currentQuestions = [];
+      let currentIndex = 0;
+      let score = 0;
+      
+      // Make functions globally available
+      window.showMainMenu = async function() {
+        tg.BackButton.hide();
+        const mainElement = document.getElementById('main');
+        mainElement.innerHTML = `
+          <div class="card" onclick="window.goTo('lessons')">
+            <h3>📚 Amasomo y'Ibyapa</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0;">Learn road signs and regulations</p>
+          </div>
+          <div class="card" onclick="window.goTo('quiz')">
+            <h3>❓ Quiz (5 ibibazo)</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0;">Quick practice test</p>
+          </div>
+          <div class="card" onclick="window.goTo('exam')">
+            <h3>📝 Mock Exam (15 ibibazo)</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0;">Full practice exam</p>
+          </div>
+          <div class="card" onclick="window.goTo('premium')">
+            <h3>💎 Premium</h3>
+            <p style="color: #94a3b8; margin: 8px 0 0;">Unlock all features</p>
+          </div>
+          ${isAdmin ? `
+            <div class="card" style="background: linear-gradient(135deg, #22c55e, #16a34a);" onclick="window.showAdminPanel()">
+              <h3>👑 ADMIN PANEL</h3>
+              <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">Manage questions</p>
+            </div>
+          ` : ''}
+        `;
+      };
+      
+      window.goTo = async function(page) {
+        if (page === 'quiz' || page === 'exam') {
+          const limit = page === 'quiz' ? 5 : 15;
+          
+          try {
+            const { data: questions, error } = await supabase
+              .from('questions')
+              .select('*')
+              .limit(limit);
+            
+            if (error) {
+              console.error('Supabase error:', error);
+              tg.showAlert("❌ Database error: " + error.message);
+              return;
+            }
+            
+            if (!questions || questions.length === 0) {
+              tg.showAlert("❌ No questions found. Admin needs to add questions first.");
+              return;
+            }
+            
+            window.startRealQuiz(questions);
+          } catch (err) {
+            console.error('Error:', err);
+            tg.showAlert("❌ Error loading questions: " + err.message);
+          }
+        } else if (page === 'premium') {
+          tg.showAlert("💎 Premium Access: 5,000 RWF\n\nPay via MTN MoMo: *182*8*1*0706405# (Lambert)\n\nAfter payment, send screenshot to WhatsApp: +250 123 456 789");
+        } else {
+          tg.showAlert("📚 Coming soon! We're working on comprehensive driving lessons.");
+        }
+      };
+      
+      window.startRealQuiz = function(questions) {
+        currentQuestions = questions;
+        currentIndex = 0;
+        score = 0;
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+          window.showMainMenu();
+        });
+        window.showCurrentQuestion();
+      };
+      
+      window.showCurrentQuestion = function() {
+        const q = currentQuestions[currentIndex];
+        const options = q.options.split('\n').map(o => o.trim()).filter(o => o);
         
-        if (error || !questions || questions.length === 0) {
-          tg.showAlert("❌ No questions found. Go to Admin Panel and add some.");
+        let html = `
+          <div class="card">
+            <div class="progress">Question ${currentIndex + 1} of ${currentQuestions.length}</div>
+            <h3 style="margin-bottom: 20px;">${q.question}</h3>
+        `;
+        
+        options.forEach((opt, idx) => {
+          const letter = String.fromCharCode(65 + idx); // A, B, C, D
+          html += `<button class="option" onclick="window.selectAnswer('${letter}')">${opt}</button>`;
+        });
+        
+        html += '</div>';
+        document.getElementById('main').innerHTML = html;
+      };
+      
+      window.selectAnswer = function(chosen) {
+        const currentQ = currentQuestions[currentIndex];
+        if (chosen === currentQ.correct) {
+          score++;
+        }
+        currentIndex++;
+        
+        if (currentIndex < currentQuestions.length) {
+          window.showCurrentQuestion();
+        } else {
+          window.showResults();
+        }
+      };
+      
+      window.showResults = function() {
+        const perc = Math.round((score / currentQuestions.length) * 100);
+        const passed = perc >= 60;
+        
+        document.getElementById('main').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2 style="margin-bottom: 20px;">🎯 Your Results</h2>
+            <div class="score">${score}/${currentQuestions.length}</div>
+            <p style="font-size: 24px; margin: 16px 0;">${perc}%</p>
+            <p style="font-size: 18px; margin: 20px 0; color: ${passed ? '#22c55e' : '#ef4444'};">
+              ${passed ? '✅ Congratulations! You would PASS the real exam!' : '📚 Keep practicing! You need 60% to pass.'}
+            </p>
+            <button class="primary" onclick="window.showMainMenu()">← Return to Menu</button>
+            <button class="option" style="text-align:center;" onclick="window.startRealQuiz(currentQuestions)">🔄 Try Again</button>
+          </div>
+        `;
+        
+        tg.BackButton.hide();
+      };
+      
+      window.showAdminPanel = function() {
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+          window.showMainMenu();
+        });
+        
+        document.getElementById('main').innerHTML = `
+          <div class="card">
+            <h3>➕ Add New Question</h3>
+            <label>Question:</label>
+            <textarea id="q" placeholder="Enter the full question here..." rows="3"></textarea>
+            
+            <label>Options (one per line):</label>
+            <textarea id="o" placeholder="A. First option&#10;B. Second option&#10;C. Third option&#10;D. Fourth option" rows="5"></textarea>
+            
+            <label>Correct Answer:</label>
+            <input id="c" placeholder="A, B, C, or D" maxlength="1" style="text-transform: uppercase;">
+            
+            <button class="primary" onclick="window.addQuestion()">✅ Save Question</button>
+          </div>
+          
+          <div class="card">
+            <h3>📊 Database Stats</h3>
+            <button class="option" onclick="window.checkQuestionCount()">Check Total Questions</button>
+          </div>
+          
+          <button class="option" style="text-align:center;" onclick="window.showMainMenu()">← Back to Main Menu</button>
+        `;
+      };
+      
+      window.addQuestion = async function() {
+        const question = document.getElementById('q').value.trim();
+        const options = document.getElementById('o').value.trim();
+        const correct = document.getElementById('c').value.trim().toUpperCase();
+        
+        if (!question || !options || !correct) {
+          tg.showAlert("❌ Please fill in all fields!");
           return;
         }
-        startRealQuiz(questions);
-      } else if (page === 'premium') {
-        tg.showAlert("💎 Premium: 5,000 RWF → Pay to MTN MoMo 706405 (Lambert)\nThen send screenshot on WhatsApp");
-      } else {
-        tg.showAlert("Coming soon...");
-      }
-    }
-
-    let currentQuestions = [], currentIndex = 0, score = 0;
-
-    function startRealQuiz(questions) {
-      currentQuestions = questions;
-      currentIndex = 0;
-      score = 0;
-      showCurrentQuestion();
-    }
-
-    function showCurrentQuestion() {
-      const q = currentQuestions[currentIndex];
-      const options = q.options.split('\n').map(o => o.trim());
-
-      let html = `<div class="card"><h3>\( {currentIndex + 1}/ \){currentQuestions.length}</h3><p>${q.question}</p>`;
-      options.forEach(opt => {
-        html += `<button class="option" onclick="selectAnswer('\( {opt[0]}')"> \){opt}</button>`;
-      });
-      document.getElementById('main').innerHTML = html;
-    }
-
-    function selectAnswer(chosen) {
-      if (chosen === currentQuestions[currentIndex].correct) score++;
-      currentIndex++;
-      if (currentIndex < currentQuestions.length) showCurrentQuestion();
-      else showResults();
-    }
-
-    function showResults() {
-      const perc = Math.round((score / currentQuestions.length) * 100);
-      document.getElementById('main').innerHTML = `
-        <div class="card" style="text-align:center;">
-          <h2>🎯 RESULTS</h2>
-          <h1>\( {score}/ \){currentQuestions.length} (${perc}%)</h1>
-          <p>${perc >= 60 ? '✅ Congratulations! You would PASS the real exam!' : '📚 Keep practicing!'}</p>
-          <button class="primary" onclick="showMainMenu()">Return to Menu</button>
-        </div>`;
-    }
-
-    function showAdminPanel() {
-      document.getElementById('main').innerHTML = `
-        <div class="card">
-          <h3>Add New Question</h3>
-          <textarea id="q" placeholder="Full Question" rows="3"></textarea>
-          <textarea id="o" placeholder="A. Option 1\nB. Option 2\nC. Option 3\nD. Option 4" rows="5"></textarea>
-          <input id="c" placeholder="Correct Answer (A/B/C/D)" maxlength="1">
-          <button class="primary" onclick="addQuestion()">✅ Save Question</button>
-        </div>
-        <button onclick="showMainMenu()">← Back to Menu</button>
-      `;
-    }
-
-    async function addQuestion() {
-      const question = document.getElementById('q').value.trim();
-      const options = document.getElementById('o').value.trim();
-      const correct = document.getElementById('c').value.trim().toUpperCase();
-
-      if (!question || !options || !correct) {
-        tg.showAlert("❌ Fill all fields!");
-        return;
-      }
-
-      const { error } = await supabase.from('questions').insert([{ question, options, correct }]);
-      tg.showAlert(error ? "Error!" : "✅ Question added successfully!");
-    }
-
-    // Start the App
-    showMainMenu();
+        
+        if (!['A', 'B', 'C', 'D'].includes(correct)) {
+          tg.showAlert("❌ Correct answer must be A, B, C, or D");
+          return;
+        }
+        
+        try {
+          const { data, error } = await supabase
+            .from('questions')
+            .insert([{ 
+              question, 
+              options, 
+              correct,
+              created_at: new Date().toISOString()
+            }]);
+          
+          if (error) {
+            tg.showAlert("❌ Error: " + error.message);
+          } else {
+            tg.showAlert("✅ Question added successfully!");
+            document.getElementById('q').value = '';
+            document.getElementById('o').value = '';
+            document.getElementById('c').value = '';
+          }
+        } catch (err) {
+          tg.showAlert("❌ Error: " + err.message);
+        }
+      };
+      
+      window.checkQuestionCount = async function() {
+        try {
+          const { count, error } = await supabase
+            .from('questions')
+            .select('*', { count: 'exact', head: true });
+          
+          if (error) {
+            tg.showAlert("Error: " + error.message);
+          } else {
+            tg.showAlert(`📊 Total questions in database: ${count || 0}`);
+          }
+        } catch (err) {
+          tg.showAlert("Error: " + err.message);
+        }
+      };
+      
+      // Initialize the app
+      window.showMainMenu();
+    })();
   </script>
 </body>
 </html>
