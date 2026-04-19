@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Amategeko y'Umuhanda - Rwanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -15,7 +14,7 @@
       min-height: 100vh;
     }
     .header { 
-      background: #1e40af; 
+      background: linear-gradient(135deg, #1e40af, #3b82f6); 
       padding: 20px; 
       text-align: center; 
       font-size: 20px; 
@@ -29,6 +28,7 @@
       border-radius: 12px; 
       cursor: pointer;
       transition: background 0.3s;
+      border: 1px solid #334155;
     }
     .card:hover { background: #334155; }
     button { 
@@ -40,211 +40,306 @@
       font-size: 16px; 
       font-weight: 600; 
       cursor: pointer;
+      transition: opacity 0.3s;
     }
+    button:active { opacity: 0.8; }
     .primary { background: #22c55e; color: white; }
     .option { background: #475569; color: white; text-align: left; }
-    .error-message {
-      background: #dc2626;
-      color: white;
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-      text-align: center;
-    }
-    textarea, input {
+    .correct { background: #22c55e !important; }
+    .wrong { background: #ef4444 !important; }
+    .progress-bar {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: white;
-      font-size: 14px;
+      height: 8px;
+      background: #334155;
+      border-radius: 4px;
+      margin: 16px 0;
+      overflow: hidden;
     }
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #94a3b8;
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s;
     }
   </style>
 </head>
 <body>
   <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
-  <div class="container" id="main">
-    <div class="loading">⏳ Iri gutangira...</div>
-  </div>
+  <div class="container" id="main"></div>
 
   <script>
-    // Gereza niba Telegram ibonetse
+    // Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
       tg.expand();
     }
     
-    // Supabase configuration
-    const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
-    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
+    // Ibibazo by'urudaca (local questions)
+    const LOCAL_QUESTIONS = [
+      {
+        question: "Iki kimenyetso gisobanura iki? 🛑",
+        options: ["A. Hagarara", "B. Genda buhoro", "C. Komeza", "D. Hindukira"],
+        correct: "A"
+      },
+      {
+        question: "Umunara w'itara ritukura usobanura iki?",
+        options: ["A. Hagarara", "B. Itegereze", "C. Genda", "D. Hindukira"],
+        correct: "A"
+      },
+      {
+        question: "Umuvuduko ntarengwa mu mujyi ni angahe?",
+        options: ["A. 40 km/h", "B. 50 km/h", "C. 60 km/h", "D. 80 km/h"],
+        correct: "C"
+      },
+      {
+        question: "Ni nde ufite uburenganzira bwa mbere ku isangano?",
+        options: ["A. Ufite akamenyetso ka STOP", "B. Uwari ubanza kugera", "C. Uva iburyo", "D. Umugenzi"],
+        correct: "B"
+      },
+      {
+        question: "Ugomba gukoresha urumuri rw'akazu ry'umuhondo ryerekana iki?",
+        options: ["A. Imvura", "B. Ijoro", "C. Igihu", "D. Byose"],
+        correct: "D"
+      },
+      {
+        question: "Ni ryari wemerewe kurenga imodoka?",
+        options: ["A. Ku murongo uhumeka", "B. Ku isangano", "C. Ku muhanda ugoramye", "D. Aho byose bitemewe"],
+        correct: "A"
+      },
+      {
+        question: "Ikimenyetso cy'umutuku ufashe umuhanda gisobanura iki?",
+        options: ["A. Komeza", "B. Hagarara", "C. Itegereze", "D. Hindukira"],
+        correct: "B"
+      },
+      {
+        question: "Ugomba kugira ibyangombwa ibihe mu modoka?",
+        options: ["A. Permisiyo gusa", "B. Assurance gusa", "C. Permisiyo n'Assurance", "D. Nta na kimwe"],
+        correct: "C"
+      },
+      {
+        question: "Itara ritukura ryaka rimwe risobanura iki?",
+        options: ["A. Hagarara", "B. Itegereze", "C. Genda buhoro", "D. Hindukira"],
+        correct: "A"
+      },
+      {
+        question: "Ni gute ugomba gukora niba umuyobozi w'indorerezi akwereka akamenyetso ko uhagaze?",
+        options: ["A. Komeza", "B. Hagarara", "C. Ihute", "D. Hindukira"],
+        correct: "B"
+      },
+      {
+        question: "Umuhanda ufite imirongo ibiri itubutse isobanura iki?",
+        options: ["A. Urenga modoka", "B. Nturenga modoka", "C. Ihute", "D. Hagarara"],
+        correct: "B"
+      },
+      {
+        question: "Ni uwuhe munsi ushobora kubona traffic nyinshi mu mujyi?",
+        options: ["A. Kuwa mbere", "B. Kuwa gatanu nimugoroba", "C. Ku cyumweru", "D. Buri munsi"],
+        correct: "B"
+      },
+      {
+        question: "Niba wabonye akamenyetso k'ishuri, ugomba gukora iki?",
+        options: ["A. Genda buhoro", "B. Ihute", "C. Hagarara", "D. Hindukira"],
+        correct: "A"
+      },
+      {
+        question: "Ikibazo cya mbere ugomba gukora mbere yo gutwara imodoka ni iki?",
+        options: ["A. Kureba mirongo", "B. Kureba amavuta", "C. Kwambara umukandara", "D. Kureba amadirishya"],
+        correct: "C"
+      },
+      {
+        question: "Ikimenyetso gifite ishusho y'umwana gisobanura iki?",
+        options: ["A. Ishuri", "B. Ikinamico", "C. Aho abana bakinira", "D. Ikigo nderabuzima"],
+        correct: "A"
+      }
+    ];
     
-    let supabase;
     let currentQuestions = [];
     let currentIndex = 0;
     let score = 0;
+    let selectedAnswer = null;
     
-    // ADMIN ID
+    // ADMIN ID (ushobora guhindura uyu mubare)
     const ADMIN_ID = 8616193014;
     const userId = tg?.initDataUnsafe?.user?.id || ADMIN_ID;
     const isAdmin = userId === ADMIN_ID;
     
-    // Initialize Supabase
-    try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-      console.log('✅ Supabase initialized');
-    } catch (e) {
-      console.error('❌ Supabase initialization error:', e);
-      document.getElementById('main').innerHTML = `
-        <div class="error-message">
-          ❌ Supabase ntibonetse<br>
-          <small>${e.message}</small>
+    // Show main menu
+    function showMainMenu() {
+      const html = `
+        <div class="card" onclick="goTo('lessons')">
+          <h3>📚 Amasomo y'Ibyapa</h3>
+          <p style="color: #94a3b8; margin-top: 8px;">Menya ibimenyetso by'umuhanda</p>
         </div>
-      `;
-    }
-    
-    // Test Supabase connection
-    async function testConnection() {
-      try {
-        const { data, error } = await supabase.from('questions').select('count', { count: 'exact', head: true });
-        if (error) {
-          console.error('Connection error:', error);
-          return false;
-        }
-        return true;
-      } catch (e) {
-        console.error('Test failed:', e);
-        return false;
-      }
-    }
-    
-    // Main menu
-    async function showMainMenu() {
-      const connected = await testConnection();
-      
-      let html = '';
-      
-      if (!connected) {
-        html += `
-          <div class="card" style="background: #7f1d1d; cursor: default;">
-            <h3>⚠️ Iburira</h3>
-            <p style="margin-top: 8px;">Database ntabwo ibonetse. Shobora kuba ukeneye:</p>
-            <ul style="margin: 12px 0 12px 20px;">
-              <li>Gukora "questions" table muri Supabase</li>
-              <li>Gutegereza iminota 1-2 ngo database ikore</li>
-            </ul>
-          </div>
-        `;
-      }
-      
-      html += `
-        <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
-        <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
-        <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
-        <div class="card" onclick="goTo('premium')">💎 Premium</div>
+        <div class="card" onclick="goTo('quiz')">
+          <h3>❓ Quiz (5 ibibazo)</h3>
+          <p style="color: #94a3b8; margin-top: 8px;">Ikizamini kigufi cyo kwitoza</p>
+        </div>
+        <div class="card" onclick="goTo('exam')">
+          <h3>📝 Mock Exam (15 ibibazo)</h3>
+          <p style="color: #94a3b8; margin-top: 8px;">Ikizamini gishyitse nk'icy'ukuri</p>
+        </div>
+        <div class="card" onclick="goTo('premium')">
+          <h3>💎 Premium</h3>
+          <p style="color: #94a3b8; margin-top: 8px;">Fungura ibindi bintu byose</p>
+        </div>
         ${isAdmin ? `
           <div class="card" style="background: #22c55e;" onclick="showAdminPanel()">
-            👑 ADMIN PANEL
+            <h3>👑 ADMIN PANEL</h3>
+            <p style="color: #fff; margin-top: 8px;">Genzura ibibazo</p>
           </div>
         ` : ''}
+        <div style="margin-top: 20px; padding: 12px; text-align: center; color: #94a3b8; font-size: 12px;">
+          Ibibazo ${LOCAL_QUESTIONS.length} birahari
+        </div>
       `;
       
       document.getElementById('main').innerHTML = html;
     }
     
     // Go to section
-    window.goTo = async function(page) {
+    window.goTo = function(page) {
       if (page === 'quiz' || page === 'exam') {
+        // Shakisha ibibazo
         const limit = page === 'quiz' ? 5 : 15;
         
-        document.getElementById('main').innerHTML = '<div class="loading">⏳ Irimo gukura ibibazo...</div>';
+        // Hitamo ibibazo bidahuje (random)
+        const shuffled = [...LOCAL_QUESTIONS].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, Math.min(limit, LOCAL_QUESTIONS.length));
         
-        try {
-          const { data: questions, error } = await supabase
-            .from('questions')
-            .select('*')
-            .limit(limit);
-          
-          if (error) throw error;
-          
-          if (!questions || questions.length === 0) {
-            if (tg) {
-              tg.showAlert("❌ Nta bibazo bihari. Tangira winjize ibibazo muri Admin Panel.");
-            } else {
-              alert("❌ Nta bibazo bihari. Tangira winjize ibibazo muri Admin Panel.");
-            }
-            showMainMenu();
-            return;
-          }
-          
-          startQuiz(questions);
-        } catch (err) {
-          console.error('Error:', err);
-          if (tg) {
-            tg.showAlert("❌ Byanze gukura ibibazo: " + err.message);
-          } else {
-            alert("❌ Byanze: " + err.message);
-          }
+        if (selected.length === 0) {
+          alert("❌ Nta bibazo bihari!");
           showMainMenu();
+          return;
         }
+        
+        startQuiz(selected);
       } else if (page === 'premium') {
-        const msg = "💎 Premium: 5,000 RWF\nPay MTN MoMo: *182*8*1*0706405# (Lambert)";
+        const msg = "💎 Premium Access: 5,000 RWF\n\nIshyura ukoresheje MTN MoMo:\n*182*8*1*0706405# (Lambert)\n\nNyuma yo kwishyura, ohereza screenshot kuri WhatsApp";
         if (tg) {
           tg.showAlert(msg);
         } else {
           alert(msg);
         }
-      } else {
-        alert("📚 Iri gukurikira vuba...");
+      } else if (page === 'lessons') {
+        showLessons();
       }
     };
+    
+    // Show lessons
+    function showLessons() {
+      document.getElementById('main').innerHTML = `
+        <div class="card">
+          <h3>📚 Ibimenyetso by'Umuhanda</h3>
+          <p style="margin: 16px 0;">Hari ubwoko butatu bw'ibimenyetso:</p>
+          <ul style="margin-left: 20px; line-height: 1.8;">
+            <li><strong style="color: #ef4444;">Umutuku</strong> - Itegeko ntarengwa (STOP, ntiwinjire)</li>
+            <li><strong style="color: #fbbf24;">Umuhondo</strong> - Iburira (ishuri, gukata neza)</li>
+            <li><strong style="color: #3b82f6;">Ubururu</strong> - Amakuru (hospital, parking)</li>
+          </ul>
+        </div>
+        
+        <div class="card">
+          <h3>🚦 Amatara y'Umuhanda</h3>
+          <ul style="margin-left: 20px; line-height: 1.8;">
+            <li>🔴 <strong>Umutuku</strong> - Hagarara</li>
+            <li>🟡 <strong>Umuhondo</strong> - Itegereze (niba bishoboka, hagarara)</li>
+            <li>🟢 <strong>Icyatsi</strong> - Genda</li>
+          </ul>
+        </div>
+        
+        <div class="card">
+          <h3>⚡ Umuvuduko Ntarengwa</h3>
+          <ul style="margin-left: 20px; line-height: 1.8;">
+            <li>Mu mujyi: <strong>60 km/h</strong></li>
+            <li>Mu nzira nyabagendwa: <strong>80 km/h</strong></li>
+            <li>Ahantu h'abantu benshi: <strong>40 km/h</strong></li>
+          </ul>
+        </div>
+        
+        <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
+      `;
+    }
     
     // Start quiz
     function startQuiz(questions) {
       currentQuestions = questions;
       currentIndex = 0;
       score = 0;
+      selectedAnswer = null;
       showQuestion();
     }
     
     // Show question
     function showQuestion() {
       const q = currentQuestions[currentIndex];
-      const options = q.options.split('\n').map(o => o.trim()).filter(o => o);
+      const progress = ((currentIndex) / currentQuestions.length) * 100;
       
       let html = `
         <div class="card">
-          <p style="color: #94a3b8; margin-bottom: 16px;">
-            Ikibazo ${currentIndex + 1} / ${currentQuestions.length}
-          </p>
-          <h3 style="margin-bottom: 20px;">${q.question}</h3>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <span style="color: #94a3b8;">Ikibazo ${currentIndex + 1}/${currentQuestions.length}</span>
+            <span style="color: #3b82f6;">Amanota: ${score}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+          <h3 style="margin: 20px 0;">${q.question}</h3>
       `;
       
-      options.forEach((opt, idx) => {
+      q.options.forEach((opt, idx) => {
         const letter = String.fromCharCode(65 + idx);
-        html += `<button class="option" onclick="selectAnswer('${letter}')">${opt}</button>`;
+        html += `<button class="option" onclick="selectAnswer('${letter}', this)">${opt}</button>`;
       });
       
-      html += '</div>';
+      html += `
+          <div style="margin-top: 20px;">
+            <button class="primary" onclick="nextQuestion()" id="nextBtn" style="display: none;">Komeza →</button>
+          </div>
+        </div>
+      `;
+      
       document.getElementById('main').innerHTML = html;
     }
     
     // Select answer
-    window.selectAnswer = function(answer) {
-      if (answer === currentQuestions[currentIndex].correct) {
+    window.selectAnswer = function(answer, btn) {
+      if (selectedAnswer !== null) return; // Yaramaze guhitamo
+      
+      selectedAnswer = answer;
+      const q = currentQuestions[currentIndex];
+      const isCorrect = answer === q.correct;
+      
+      if (isCorrect) {
         score++;
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+        // Erekana igisubizo cy'ukuri
+        const options = document.querySelectorAll('.option');
+        q.options.forEach((opt, idx) => {
+          const letter = String.fromCharCode(65 + idx);
+          if (letter === q.correct) {
+            options[idx].classList.add('correct');
+          }
+        });
       }
       
+      // Hisha buttons z'ibisubizo
+      document.querySelectorAll('.option').forEach(b => {
+        b.disabled = true;
+        b.style.cursor = 'not-allowed';
+      });
+      
+      // Erekana button ya "Komeza"
+      document.getElementById('nextBtn').style.display = 'block';
+    };
+    
+    // Next question
+    window.nextQuestion = function() {
       currentIndex++;
       
       if (currentIndex < currentQuestions.length) {
+        selectedAnswer = null;
         showQuestion();
       } else {
         showResults();
@@ -256,17 +351,27 @@
       const percent = Math.round((score / currentQuestions.length) * 100);
       const passed = percent >= 60;
       
+      let message = '';
+      if (passed) {
+        message = '✅ Watsinze! Ufite amanota ahagije yo gutsindira ikizamini nyacyo!';
+      } else {
+        message = '📚 Komeza wige! Ukeneye byibuze 60% ngo utsinde.';
+      }
+      
       document.getElementById('main').innerHTML = `
         <div class="card" style="text-align: center;">
-          <h2>🎯 Ibisubizo</h2>
-          <div style="font-size: 48px; font-weight: bold; color: ${passed ? '#22c55e' : '#ef4444'}; margin: 20px 0;">
+          <h2 style="margin-bottom: 20px;">🎯 Ibisubizo byawe</h2>
+          <div style="font-size: 64px; font-weight: bold; color: ${passed ? '#22c55e' : '#ef4444'}; margin: 20px 0;">
             ${score}/${currentQuestions.length}
           </div>
-          <p style="font-size: 24px; margin: 16px 0;">${percent}%</p>
-          <p style="margin: 20px 0; color: ${passed ? '#22c55e' : '#ef4444'};">
-            ${passed ? '✅ Wabonye byibuze 60%! Urabanza!' : '📚 Komeza wige, ukeneye 60%'}
+          <p style="font-size: 28px; margin: 16px 0; color: ${passed ? '#22c55e' : '#ef4444'};">
+            ${percent}%
+          </p>
+          <p style="margin: 20px 0; line-height: 1.6;">
+            ${message}
           </p>
           <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
+          <button class="option" style="text-align: center; margin-top: 12px;" onclick="startQuiz(currentQuestions)">🔄 Ongera Ugerageze</button>
         </div>
       `;
     }
@@ -275,62 +380,27 @@
     window.showAdminPanel = function() {
       document.getElementById('main').innerHTML = `
         <div class="card">
-          <h3>➕ Ongera Ikibazo</h3>
-          <label>Ikibazo:</label>
-          <textarea id="q" placeholder="Andika ikibazo hano..." rows="3"></textarea>
-          
-          <label>Igisubizo (kimwe ku murongo):</label>
-          <textarea id="o" placeholder="A. Igisubizo cya mbere&#10;B. Igisubizo cya kabiri&#10;C. Igisubizo cya gatatu&#10;D. Igisubizo cya kane" rows="5"></textarea>
-          
-          <label>Igisubizo nyacyo:</label>
-          <input id="c" placeholder="A, B, C, cyangwa D" maxlength="1">
-          
-          <button class="primary" onclick="addQuestion()">✅ Bika Ikibazo</button>
+          <h3>📊 Statistiki</h3>
+          <p style="margin: 16px 0;">Ibibazo bihari: <strong>${LOCAL_QUESTIONS.length}</strong></p>
+          <p style="color: #94a3b8;">Kugira ngo wongere ibibazo bishya, ukeneye gukoresha Supabase.</p>
         </div>
         
-        <button class="option" style="text-align: center;" onclick="showMainMenu()">← Subira Ahabanza</button>
+        <div class="card">
+          <h3>ℹ️ Amakuru</h3>
+          <p>User ID: ${userId}</p>
+          <p>Admin: ${isAdmin ? 'Yego' : 'Oya'}</p>
+        </div>
+        
+        <button class="primary" onclick="showMainMenu()">← Subira Ahabanza</button>
       `;
-    };
-    
-    // Add question
-    window.addQuestion = async function() {
-      const question = document.getElementById('q').value.trim();
-      const options = document.getElementById('o').value.trim();
-      const correct = document.getElementById('c').value.trim().toUpperCase();
-      
-      if (!question || !options || !correct) {
-        alert("❌ Uzuza byose!");
-        return;
-      }
-      
-      if (!['A', 'B', 'C', 'D'].includes(correct)) {
-        alert("❌ Igisubizo nyacyo kigomba kuba A, B, C, cyangwa D");
-        return;
-      }
-      
-      try {
-        const { error } = await supabase
-          .from('questions')
-          .insert([{ question, options, correct }]);
-        
-        if (error) throw error;
-        
-        alert("✅ Ikibazo cyongewe neza!");
-        document.getElementById('q').value = '';
-        document.getElementById('o').value = '';
-        document.getElementById('c').value = '';
-      } catch (err) {
-        alert("❌ Byanze: " + err.message);
-      }
     };
     
     // Make functions global
     window.showMainMenu = showMainMenu;
+    window.startQuiz = startQuiz;
     
-    // Start app
-    setTimeout(() => {
-      showMainMenu();
-    }, 1000);
+    // Start the app
+    showMainMenu();
   </script>
 </body>
 </html>
