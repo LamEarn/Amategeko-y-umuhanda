@@ -2,393 +2,132 @@
 <html lang="rw">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Amategeko y'Umuhanda</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-    :root {
-      --primary: #1e40af;
-      --accent: #22c55e;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e3a8a);
-      color: #fff;
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-
-    .header {
-      background: var(--primary);
-      padding: 18px 20px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .container { padding: 20px; }
-
-    .card {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      background: rgba(255,255,255,0.12);
-    }
-
-    .admin-card {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-      color: #000;
-      font-weight: 600;
-    }
-
-    button {
-      width: 100%;
-      padding: 16px;
-      margin: 12px 0;
-      border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    button.primary { background: var(--accent); color: #000; }
-    button.secondary { background: #334155; color: #fff; }
-
-    input, textarea {
-      width: 100%;
-      padding: 14px;
-      margin: 8px 0;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 16px;
-    }
-
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .message {
-      padding: 12px 16px;
-      border-radius: 10px;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-
-    .success { background: rgba(134, 239, 172, 0.2); color: #86efac; }
-    .error { background: rgba(248, 113, 113, 0.2); color: #f87171; }
-
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0f172a;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      z-index: 100;
-    }
-
-    .nav-item {
-      text-align: center;
-      font-size: 13px;
-      color: #cbd5e1;
-      transition: color 0.3s;
-    }
-
-    .nav-item.active { color: var(--accent); }
+    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
+    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
+    .card { background: rgba(255,255,255,0.1); margin: 15px; padding: 20px; border-radius: 16px; }
+    button { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
+    .primary { background: #22c55e; color: black; }
+    .option { background: #334155; text-align: left; margin: 6px 0; }
   </style>
 </head>
 <body>
-  <div class="header" id="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
+  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
   <div class="container" id="main"></div>
 
-  <!-- Bottom Navigation -->
-  <div class="nav-bar" id="navBar">
-    <div class="nav-item" onclick="navigateTo('home')">🏠 Home</div>
-    <div class="nav-item" onclick="navigateTo('lessons')">📚 Lessons</div>
-    <div class="nav-item" onclick="navigateTo('quiz')">❓ Quiz</div>
-    <div class="nav-item" onclick="navigateTo('exam')">📝 Exam</div>
-  </div>
-
   <script>
-    // ====================== SAFE TELEGRAM INITIALIZATION ======================
-    let tg;
-    try {
-      tg = window.Telegram?.WebApp || null;
-      if (tg) {
-        tg.expand();
-        tg.BackButton.show();
-      }
-    } catch (e) {
-      console.warn("Telegram WebApp not available - running in browser fallback mode");
-      tg = null;
-    }
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
 
-    // ====================== USER ID HANDLING (Safe) ======================
-    let currentUserId = null;
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      currentUserId = tg.initDataUnsafe.user.id;
-    } else {
-      // Fallback for browser testing or direct link
-      currentUserId = parseInt(localStorage.getItem('testUserId')) || 8616193014;
-    }
+    const ADMIN_ID = 8616193014;
+    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
+    const isAdmin = userId === ADMIN_ID;
 
-    const ADMIN_ID = 8616193014; // Your Telegram ID
-    const isAdmin = currentUserId === ADMIN_ID;
+    // ================== SUPABASE (Your Keys) ==================
+    const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
 
-    // ====================== LOCAL STORAGE (Lessons + Links) ======================
-    let lessons = JSON.parse(localStorage.getItem('driving_lessons')) || [];
-    let links = JSON.parse(localStorage.getItem('driving_links')) || [];
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    function saveToLocalStorage() {
-      localStorage.setItem('driving_lessons', JSON.stringify(lessons));
-      localStorage.setItem('driving_links', JSON.stringify(links));
-    }
-
-    // ====================== NAVIGATION STATE ======================
-    let currentPage = 'home';
-
-    function renderHeader(title) {
-      document.getElementById('header').innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-          <div onclick="goBack()" style="cursor:pointer; font-size:24px;">←</div>
-          <div style="font-weight:600;">${title}</div>
-          <div></div>
-        </div>
+    async function showMainMenu() {
+      document.getElementById('main').innerHTML = `
+        <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
+        <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
+        <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
+        <div class="card" onclick="goTo('premium')">💎 Premium</div>
+        ${isAdmin ? `<div class="card" style="background:#22c55e;color:black;font-weight:bold" onclick="showAdminPanel()">👑 ADMIN PANEL</div>` : ''}
       `;
     }
 
-    function goBack() {
-      if (currentPage === 'home') {
-        if (tg) tg.close();
-        else window.history.back();
+    async function goTo(page) {
+      if (page === 'quiz' || page === 'exam') {
+        const limit = page === 'quiz' ? 5 : 15;
+        const { data: questions, error } = await supabase.from('questions').select('*').limit(limit);
+        
+        if (error || !questions || questions.length === 0) {
+          tg.showAlert("❌ No questions found. Go to Admin Panel and add some.");
+          return;
+        }
+        startRealQuiz(questions);
+      } else if (page === 'premium') {
+        tg.showAlert("💎 Premium: 5,000 RWF → Pay to MTN MoMo 706405 (Lambert)\nThen send screenshot on WhatsApp");
       } else {
-        navigateTo('home');
+        tg.showAlert("Coming soon...");
       }
     }
 
-    // ====================== MAIN RENDER FUNCTION ======================
-    function renderPage(page) {
-      currentPage = page;
-      const main = document.getElementById('main');
-      let html = '';
+    let currentQuestions = [], currentIndex = 0, score = 0;
 
-      if (page === 'home') {
-        renderHeader('Amategeko y\'Umuhanda');
-        html = `
-          <div class="card" onclick="navigateTo('lessons')">📚 Amasomo y'Ibyapa</div>
-          <div class="card" onclick="navigateTo('quiz')">❓ Quiz (5 ibibazo)</div>
-          <div class="card" onclick="navigateTo('exam')">📝 Mock Exam (15 ibibazo)</div>
-          <div class="card" onclick="navigateTo('premium')">💎 Premium - Unlimited Access</div>
-        `;
-
-        if (isAdmin) {
-          html += `<div class="card admin-card" onclick="showAdminPanel()">👑 ADMIN PANEL - Upload & Manage Content</div>`;
-        } else {
-          html += `<div class="message">👤 You are using the public version.<br>Admin features are hidden.</div>`;
-        }
-      }
-
-      else if (page === 'lessons') {
-        renderHeader('📚 Amasomo');
-        html = `<h3 style="margin-bottom:16px; text-align:center;">Available Lessons</h3>`;
-        if (lessons.length === 0) {
-          html += `<p style="text-align:center; opacity:0.7;">No lessons yet. Admin can add them.</p>`;
-        } else {
-          lessons.forEach((lesson, i) => {
-            html += `
-              <div class="card">
-                <strong>${lesson.title}</strong>
-                <p style="margin-top:8px; font-size:15px; opacity:0.9;">${lesson.desc.substring(0, 120)}...</p>
-              </div>`;
-          });
-        }
-      }
-
-      else if (page === 'quiz' || page === 'exam') {
-        renderHeader(page === 'quiz' ? '❓ Quiz' : '📝 Mock Exam');
-        const num = page === 'quiz' ? 5 : 15;
-        html = `
-          <div class="card" style="text-align:center;">
-            <h3>\( {page.toUpperCase()} ( \){num} ibibazo)</h3>
-            <p style="margin:20px 0;">Realistic questions based on Rwanda traffic rules.</p>
-            <button class="primary" onclick="startDemoQuiz('${page}')">Start ${page.toUpperCase()}</button>
-          </div>`;
-      }
-
-      else if (page === 'premium') {
-        renderHeader('💎 Premium');
-        html = `
-          <div class="card" style="text-align:center;">
-            <h2>Premium Subscription</h2>
-            <p style="margin:16px 0; font-size:18px;">5,000 RWF / month</p>
-            <p>Pay via MTN MoMo: <strong>706405</strong> (Lambert)</p>
-            <button class="primary" onclick="sendPaymentScreenshot()">📸 Send Payment Screenshot</button>
-            <p style="margin-top:20px; font-size:14px; opacity:0.8;">After payment, admin will activate your premium access manually.</p>
-          </div>`;
-      }
-
-      main.innerHTML = html;
+    function startRealQuiz(questions) {
+      currentQuestions = questions;
+      currentIndex = 0;
+      score = 0;
+      showCurrentQuestion();
     }
 
-    // ====================== NAVIGATION ======================
-    function navigateTo(page) {
-      renderPage(page);
+    function showCurrentQuestion() {
+      const q = currentQuestions[currentIndex];
+      const options = q.options.split('\n').map(o => o.trim());
+
+      let html = `<div class="card"><h3>\( {currentIndex + 1}/ \){currentQuestions.length}</h3><p>${q.question}</p>`;
+      options.forEach(opt => {
+        html += `<button class="option" onclick="selectAnswer('\( {opt[0]}')"> \){opt}</button>`;
+      });
+      document.getElementById('main').innerHTML = html;
     }
 
-    // ====================== ADMIN PANEL ======================
-    function showAdminPanel() {
-      currentPage = 'admin';
-      renderHeader('👑 Admin Panel');
-      const main = document.getElementById('main');
-
-      main.innerHTML = `
-        <div class="card admin-card">
-          <h3>📤 Upload PDF / Photo</h3>
-          <input type="file" id="fileInput" accept="image/*,application/pdf">
-          <button class="primary" onclick="handleFileUpload()">📤 Upload & Send to WhatsApp</button>
-        </div>
-
-        <div class="card">
-          <h3>📝 Add New Lesson</h3>
-          <input type="text" id="lessonTitle" placeholder="Lesson Title">
-          <textarea id="lessonDesc" rows="4" placeholder="Full explanation..."></textarea>
-          <button class="primary" onclick="addNewLesson()">✅ Save Lesson</button>
-        </div>
-
-        <div class="card">
-          <h3>🔗 Add External Link</h3>
-          <input type="text" id="linkTitle" placeholder="Link Title">
-          <input type="text" id="linkUrl" placeholder="https://example.com">
-          <button class="primary" onclick="addNewLink()">✅ Save Link</button>
-        </div>
-
-        <div class="message" style="text-align:center;">
-          All content is saved in browser localStorage for demo.<br>
-          In production this would sync to your bot database.
-        </div>
-
-        <button class="secondary" onclick="navigateTo('home')">← Back to Main Menu</button>
-      `;
+    function selectAnswer(chosen) {
+      if (chosen === currentQuestions[currentIndex].correct) score++;
+      currentIndex++;
+      if (currentIndex < currentQuestions.length) showCurrentQuestion();
+      else showResults();
     }
 
-    function handleFileUpload() {
-      const file = document.getElementById('fileInput').files[0];
-      if (!file) {
-        showMessage('❌ No file selected', 'error');
-        return;
-      }
-      showMessage(`✅ Uploading ${file.name}...`, 'success');
-      setTimeout(() => {
-        const message = `New Admin Upload: ${file.name} from Driving Theory Bot`;
-        window.open(`https://wa.me/250793031666?text=${encodeURIComponent(message)}`, '_blank');
-      }, 800);
-    }
-
-    function addNewLesson() {
-      const title = document.getElementById('lessonTitle').value.trim();
-      const desc = document.getElementById('lessonDesc').value.trim();
-      if (!title || !desc) {
-        showMessage('❌ Title and description are required', 'error');
-        return;
-      }
-      lessons.unshift({ title, desc });
-      saveToLocalStorage();
-      showMessage(`✅ Lesson "${title}" saved!`, 'success');
-      setTimeout(() => navigateTo('lessons'), 1200);
-    }
-
-    function addNewLink() {
-      const title = document.getElementById('linkTitle').value.trim();
-      let url = document.getElementById('linkUrl').value.trim();
-
-      if (!title || !url) {
-        showMessage('❌ Title and URL are required', 'error');
-        return;
-      }
-
-      // URL validation
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-
-      links.unshift({ title, url });
-      saveToLocalStorage();
-      showMessage(`✅ Link "${title}" saved!`, 'success');
-      setTimeout(() => navigateTo('home'), 1000);
-    }
-
-    // ====================== DEMO QUIZ ======================
-    function startDemoQuiz(type) {
-      const main = document.getElementById('main');
-      main.innerHTML = `
+    function showResults() {
+      const perc = Math.round((score / currentQuestions.length) * 100);
+      document.getElementById('main').innerHTML = `
         <div class="card" style="text-align:center;">
-          <h3>${type.toUpperCase()} Started</h3>
-          <p style="margin:30px 0;">This is a demo. In production this would load real questions from your database.</p>
-          <button class="primary" onclick="navigateTo('home')">Finish & Return Home</button>
+          <h2>🎯 RESULTS</h2>
+          <h1>\( {score}/ \){currentQuestions.length} (${perc}%)</h1>
+          <p>${perc >= 60 ? '✅ Congratulations! You would PASS the real exam!' : '📚 Keep practicing!'}</p>
+          <button class="primary" onclick="showMainMenu()">Return to Menu</button>
         </div>`;
     }
 
-    // ====================== PAYMENT ======================
-    function sendPaymentScreenshot() {
-      const message = "Premium Payment Screenshot - Driving Theory Bot (User ID: " + currentUserId + ")";
-      window.open(`https://wa.me/250793031666?text=${encodeURIComponent(message)}`, '_blank');
-      showMessage('✅ WhatsApp opened. Send your screenshot there.', 'success');
+    function showAdminPanel() {
+      document.getElementById('main').innerHTML = `
+        <div class="card">
+          <h3>Add New Question</h3>
+          <textarea id="q" placeholder="Full Question" rows="3"></textarea>
+          <textarea id="o" placeholder="A. Option 1\nB. Option 2\nC. Option 3\nD. Option 4" rows="5"></textarea>
+          <input id="c" placeholder="Correct Answer (A/B/C/D)" maxlength="1">
+          <button class="primary" onclick="addQuestion()">✅ Save Question</button>
+        </div>
+        <button onclick="showMainMenu()">← Back to Menu</button>
+      `;
     }
 
-    // ====================== HELPER: SHOW MESSAGE ======================
-    function showMessage(text, type = 'success') {
-      const msg = document.createElement('div');
-      msg.className = `message ${type}`;
-      msg.innerHTML = text;
-      document.getElementById('main').prepend(msg);
-      setTimeout(() => msg.remove(), 4000);
-    }
+    async function addQuestion() {
+      const question = document.getElementById('q').value.trim();
+      const options = document.getElementById('o').value.trim();
+      const correct = document.getElementById('c').value.trim().toUpperCase();
 
-    // ====================== INITIALIZE ======================
-    function init() {
-      // Show admin status in console
-      if (isAdmin) console.log('%c✅ ADMIN MODE ENABLED', 'color:#22c55e; font-weight:bold');
-
-      renderPage('home');
-
-      // Back button handling
-      if (tg) {
-        tg.BackButton.onClick(goBack);
-        tg.MainButton.hide();
+      if (!question || !options || !correct) {
+        tg.showAlert("❌ Fill all fields!");
+        return;
       }
 
-      // Keyboard support for testing
-      console.log('%c🚀 Telegram Web App ready. Admin ID: ' + currentUserId, 'color:#22c55e');
+      const { error } = await supabase.from('questions').insert([{ question, options, correct }]);
+      tg.showAlert(error ? "Error!" : "✅ Question added successfully!");
     }
 
-    // Start the app
-    window.onload = init;
+    // Start the App
+    showMainMenu();
   </script>
 </body>
 </html>
