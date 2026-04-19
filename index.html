@@ -11,26 +11,24 @@
     .card { background: #1e2937; margin: 15px; padding: 20px; border-radius: 16px; text-align: center; }
     button { padding: 15px; width: 90%; margin: 10px auto; display: block; border: none; border-radius: 12px; font-size: 17px; }
     .admin { background: #22c55e; color: black; font-weight: bold; }
-    input, textarea { width: 90%; padding: 12px; margin: 10px auto; display: block; border-radius: 8px; }
+    input, textarea { width: 90%; padding: 12px; margin: 8px auto; display: block; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="header">🚗 Amategeko y'Umuhanda - Admin Mode</div>
+  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
   <div class="container" id="main"></div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    const userId = tg.initDataUnsafe.user?.id;
     
-    // ← Shyira ID yawe ya Telegram hano (kugira admin)
-    const ADMIN_ID =  YOUR_TELEGRAM_ID_HERE;   
-
-    let isAdmin = userId === ADMIN_ID;
+    const userId = tg.initDataUnsafe.user?.id;
+    const ADMIN_ID = 8616193014;   // Your ID
+    const isAdmin = userId === ADMIN_ID;
 
     function showMainMenu() {
       let html = `
-        <div class="card" onclick="goTo('lessons')">📚 Amasomo</div>
+        <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
         <div class="card" onclick="goTo('quiz')">❓ Quiz</div>
         <div class="card" onclick="goTo('exam')">📝 Mock Exam</div>
         <div class="card" onclick="goTo('premium')">💎 Premium</div>`;
@@ -43,86 +41,74 @@
 
     function showAdminPanel() {
       document.getElementById('main').innerHTML = `
-        <h2 style="text-align:center; color:#22c55e;">👑 Admin Upload Center</h2>
+        <h2 style="text-align:center;color:#22c55e;">👑 Admin Upload Center</h2>
         
         <div class="card">
-          <h3>📄 Upload PDF / Photo</h3>
+          <h3>📤 Upload PDF / Photo</h3>
           <input type="file" id="fileInput" accept="image/*,application/pdf">
-          <button onclick="uploadFile()">📤 Upload File</button>
+          <button onclick="uploadFile()">📤 Upload Now</button>
         </div>
 
         <div class="card">
           <h3>📝 Add Text Lesson</h3>
-          <input type="text" id="lessonTitle" placeholder="Lesson Title">
-          <textarea id="lessonDesc" rows="4" placeholder="Explanation / Content"></textarea>
+          <input type="text" id="lessonTitle" placeholder="Title y'igice">
+          <textarea id="lessonDesc" rows="5" placeholder="Content / Explanation"></textarea>
           <button onclick="addLesson()">✅ Save Lesson</button>
         </div>
 
         <div class="card">
-          <h3>🔗 Add Link / Resource</h3>
-          <input type="text" id="linkTitle" placeholder="Title (e.g. Official RNP Rules)">
+          <h3>🔗 Add External Link</h3>
+          <input type="text" id="linkTitle" placeholder="Title">
           <input type="text" id="linkUrl" placeholder="https://...">
           <button onclick="addLink()">✅ Save Link</button>
         </div>
 
-        <div class="card">
-          <h3>➕ Add Quiz Question</h3>
-          <textarea id="questionText" placeholder="Full Question"></textarea>
-          <button onclick="addQuestion()">✅ Save Question</button>
-        </div>
-
-        <button onclick="showMainMenu()">← Back to Menu</button>
+        <button onclick="showMainMenu()">← Back to Main Menu</button>
       `;
     }
 
-    async function uploadFile() {
+    function uploadFile() {
       const file = document.getElementById('fileInput').files[0];
-      if (!file) return tg.showAlert("No file selected!");
-      
-      tg.showAlert(`📤 Uploading ${file.name}...\n\n(Admin will see it in bot soon)`);
-      // Real upload: Send to bot via Telegram (advanced) or use Google Drive link
-      window.open(`https://wa.me/250793031666?text=New%20Upload%3A%20${file.name}`, '_blank');
+      if (!file) return tg.showAlert("❌ No file selected");
+      tg.showAlert(`📤 Uploading: ${file.name}\n\nSend this to WhatsApp for processing.`);
+      window.open(`https://wa.me/250793031666?text=New Upload from Admin: ${file.name}`, '_blank');
     }
 
     function addLesson() {
       const title = document.getElementById('lessonTitle').value;
       const desc = document.getElementById('lessonDesc').value;
       if (title && desc) {
-        tg.showAlert(`✅ Lesson Saved: ${title}`);
-        // In real version, send to bot/database
+        tg.showAlert(`✅ Lesson "${title}" Saved!`);
+      } else {
+        tg.showAlert("❌ Fill all fields");
       }
     }
 
     function addLink() {
       const title = document.getElementById('linkTitle').value;
       const url = document.getElementById('linkUrl').value;
-      if (title && url) tg.showAlert(`✅ Link Saved: ${title}`);
-    }
-
-    function addQuestion() {
-      const q = document.getElementById('questionText').value;
-      if (q) tg.showAlert("✅ Question Saved!");
+      if (title && url) tg.showAlert(`✅ Link "${title}" Saved!`);
     }
 
     function goTo(page) {
       if (page === 'premium') {
         document.getElementById('main').innerHTML = `
           <div class="card">
-            <h2>💎 Premium Access</h2>
+            <h2>💎 Premium Subscription</h2>
             <p>5,000 RWF / month</p>
-            <p>Pay to MTN MoMo: <strong>706405</strong> (Lambert)</p>
-            <button onclick="sendPayment()">📸 Send Screenshot</button>
+            <p>Pay to: <strong>MTN MoMo 706405 (Lambert)</strong></p>
+            <button onclick="sendPayment()">📸 Send Screenshot to WhatsApp</button>
           </div>`;
       } else {
-        tg.showAlert(`Opening ${page}...`);
+        tg.showAlert(`🔄 Opening ${page}...`);
       }
     }
 
     function sendPayment() {
-      window.open('https://wa.me/250793031666?text=Premium%20Payment%20for%20Driving%20Theory%20Bot', '_blank');
+      window.open('https://wa.me/250793031666?text=Premium%20Payment%20Screenshot%20-%20Driving%20Theory%20Bot', '_blank');
     }
 
-    // Initialize
+    // Start
     showMainMenu();
     tg.BackButton.show();
     tg.BackButton.onClick(() => tg.close());
