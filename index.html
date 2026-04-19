@@ -112,6 +112,269 @@
     showMainMenu();
     tg.BackButton.show();
     tg.BackButton.onClick(() => tg.close());
+    const express = require("express");
+const axios = require("axios");
+const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
+
+const app = express();
+app.use(express.json());
+
+// ====== CONFIG (uzuza hano) ======
+const SUBSCRIPTION_KEY = "YOUR_SUBSCRIPTION_KEY";
+const API_USER = "YOUR_API_USER";
+const API_KEY = "YOUR_API_KEY";
+const BASE_URL = "https://sandbox.momodeveloper.mtn.com"; // sandbox
+// =================================
+
+// simple DB (file)
+const DB_FILE = "db.json";
+function readDB() {
+  if (!fs.existsSync(DB_FILE)) return { users: {}, tx: {} };
+  return JSON.parse(fs.readFileSync(DB_FILE));
+}
+function writeDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+// get access token
+async function getToken() {
+  const auth = Buffer.from(`${API_USER}:${API_KEY}`).toString("base64");
+  const res = await axios.post(
+    `${BASE_URL}/collection/token/`,
+    {},
+    {
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
+      }
+    }
+  );
+  return res.data.access_token;
+}
+
+// ====== 1) Tangiza payment ======
+app.post("/pay", async (req, res) => {
+  try {
+    const { user_id, phone } = req.body;
+
+    const token = await getToken();
+    const referenceId = uuidv4();
+
+    // save pending tx
+    const db = readDB();
+    db.tx[referenceId] = {
+      user_id,
+      phone,
+      status: "PENDING",
+      amount: 1500
+    };
+    writeDB(db);
+
+    await axios.post(
+      `${BASE_URL}/collection/v1_0/requesttopay`,
+      {
+        amount: "1500",
+        currency: "RWF",
+        externalId: referenceId,
+        payer: {
+          partyIdType: "MSISDN",
+          partyId: phone
+        },
+        payerMessage: "Kwiga Amategeko y'Umuhanda",
+        payeeNote: "Access Forever",
+        // 🔥 webhook URL yawe kuri Render
+        callbackUrl: "https://YOUR-APP.onrender.com/webhook"
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Reference-Id": referenceId,
+          "X-Target-Environment": "sandbox",
+          "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    res.json({ ok: true, referenceId });
+  } catch (e) {
+    console.error(e.response?.data || e.message);
+    res.status(500).json({ error: "payment_failed" });
+  }
+});
+
+// ====== 2) Webhook (AUTO UNLOCK) ======
+app.post("/webhook", (req, res) => {
+  try {
+    const data = req.body;
+
+    // MTN izohereza status + externalId
+    const referenceId = data.externalId || data.referenceId;
+    const status = data.status;
+
+    if (!referenceId) return res.sendStatus(200);
+
+    const db = readDB();
+    const tx = db.tx[referenceId];
+    if (!tx) return res.sendStatus(200);
+
+    // update tx
+    tx.status = status || "UNKNOWN";
+
+    if (status === "SUCCESSFUL") {
+      // 🔓 unlock forever
+      db.users[tx.user_id] = { paid: true, forever: true };
+      console.log("User unlocked:", tx.user_id);
+    }
+
+    writeDB(db);
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(200);
+  }
+});
+
+// ====== 3) Check access (bot izakoresha) ======
+app.get("/check/:user_id", (req, res) => {
+  const db = readDB();
+  const u = db.users[req.params.user_id];
+  res.json({ paid: !!(u && u.paid) });
+});
+
+app.listen(3000, () => console.log("Server running on 3000"));const express = require("express");
+const axios = require("axios");
+const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
+
+const app = express();
+app.use(express.json());
+
+// ====== CONFIG (uzuza hano) ======
+const SUBSCRIPTION_KEY = "YOUR_SUBSCRIPTION_KEY";
+const API_USER = "YOUR_API_USER";
+const API_KEY = "YOUR_API_KEY";
+const BASE_URL = "https://sandbox.momodeveloper.mtn.com"; // sandbox
+// =================================
+
+// simple DB (file)
+const DB_FILE = "db.json";
+function readDB() {
+  if (!fs.existsSync(DB_FILE)) return { users: {}, tx: {} };
+  return JSON.parse(fs.readFileSync(DB_FILE));
+}
+function writeDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+// get access token
+async function getToken() {
+  const auth = Buffer.from(`${API_USER}:${API_KEY}`).toString("base64");
+  const res = await axios.post(
+    `${BASE_URL}/collection/token/`,
+    {},
+    {
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
+      }
+    }
+  );
+  return res.data.access_token;
+}
+
+// ====== 1) Tangiza payment ======
+app.post("/pay", async (req, res) => {
+  try {
+    const { user_id, phone } = req.body;
+
+    const token = await getToken();
+    const referenceId = uuidv4();
+
+    // save pending tx
+    const db = readDB();
+    db.tx[referenceId] = {
+      user_id,
+      phone,
+      status: "PENDING",
+      amount: 1500
+    };
+    writeDB(db);
+
+    await axios.post(
+      `${BASE_URL}/collection/v1_0/requesttopay`,
+      {
+        amount: "1500",
+        currency: "RWF",
+        externalId: referenceId,
+        payer: {
+          partyIdType: "MSISDN",
+          partyId: phone
+        },
+        payerMessage: "Kwiga Amategeko y'Umuhanda",
+        payeeNote: "Access Forever",
+        // 🔥 webhook URL yawe kuri Render
+        callbackUrl: "https://YOUR-APP.onrender.com/webhook"
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Reference-Id": referenceId,
+          "X-Target-Environment": "sandbox",
+          "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    res.json({ ok: true, referenceId });
+  } catch (e) {
+    console.error(e.response?.data || e.message);
+    res.status(500).json({ error: "payment_failed" });
+  }
+});
+
+// ====== 2) Webhook (AUTO UNLOCK) ======
+app.post("/webhook", (req, res) => {
+  try {
+    const data = req.body;
+
+    // MTN izohereza status + externalId
+    const referenceId = data.externalId || data.referenceId;
+    const status = data.status;
+
+    if (!referenceId) return res.sendStatus(200);
+
+    const db = readDB();
+    const tx = db.tx[referenceId];
+    if (!tx) return res.sendStatus(200);
+
+    // update tx
+    tx.status = status || "UNKNOWN";
+
+    if (status === "SUCCESSFUL") {
+      // 🔓 unlock forever
+      db.users[tx.user_id] = { paid: true, forever: true };
+      console.log("User unlocked:", tx.user_id);
+    }
+
+    writeDB(db);
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(200);
+  }
+});
+
+// ====== 3) Check access (bot izakoresha) ======
+app.get("/check/:user_id", (req, res) => {
+  const db = readDB();
+  const u = db.users[req.params.user_id];
+  res.json({ paid: !!(u && u.paid) });
+});
+
+app.listen(3000, () => console.log("Server running on 3000"));
   </script>
 </body>
 </html>
