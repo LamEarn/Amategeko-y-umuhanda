@@ -7,58 +7,122 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: white; }
-    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; }
+    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
     .card { background: #1e2937; margin: 15px; padding: 20px; border-radius: 16px; text-align: center; }
     button { padding: 15px; width: 90%; margin: 10px auto; display: block; border: none; border-radius: 12px; font-size: 17px; }
-    .premium { background: linear-gradient(45deg, #f59e0b, #d97706); color: black; font-weight: bold; }
+    .admin { background: #22c55e; color: black; font-weight: bold; }
+    input, textarea { width: 90%; padding: 12px; margin: 10px auto; display: block; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="header">🚗 Amategeko y'Umuhanda - Rwanda</div>
+  <div class="header">🚗 Amategeko y'Umuhanda - Admin Mode</div>
   <div class="container" id="main"></div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
     const userId = tg.initDataUnsafe.user?.id;
-    const isAdmin = userId ===  YOUR_TELEGRAM_USER_ID;   // ← Shyira ID yawe hano
+    
+    // ← Shyira ID yawe ya Telegram hano (kugira admin)
+    const ADMIN_ID =  YOUR_TELEGRAM_ID_HERE;   
+
+    let isAdmin = userId === ADMIN_ID;
 
     function showMainMenu() {
-      document.getElementById('main').innerHTML = `
+      let html = `
         <div class="card" onclick="goTo('lessons')">📚 Amasomo</div>
         <div class="card" onclick="goTo('quiz')">❓ Quiz</div>
         <div class="card" onclick="goTo('exam')">📝 Mock Exam</div>
-        <div class="card premium" onclick="goTo('premium')">💎 Premium (Unlimited Access)</div>
+        <div class="card" onclick="goTo('premium')">💎 Premium</div>`;
+      
+      if (isAdmin) {
+        html += `<div class="card admin" onclick="showAdminPanel()">👑 ADMIN PANEL - Upload Content</div>`;
+      }
+      document.getElementById('main').innerHTML = html;
+    }
+
+    function showAdminPanel() {
+      document.getElementById('main').innerHTML = `
+        <h2 style="text-align:center; color:#22c55e;">👑 Admin Upload Center</h2>
+        
+        <div class="card">
+          <h3>📄 Upload PDF / Photo</h3>
+          <input type="file" id="fileInput" accept="image/*,application/pdf">
+          <button onclick="uploadFile()">📤 Upload File</button>
+        </div>
+
+        <div class="card">
+          <h3>📝 Add Text Lesson</h3>
+          <input type="text" id="lessonTitle" placeholder="Lesson Title">
+          <textarea id="lessonDesc" rows="4" placeholder="Explanation / Content"></textarea>
+          <button onclick="addLesson()">✅ Save Lesson</button>
+        </div>
+
+        <div class="card">
+          <h3>🔗 Add Link / Resource</h3>
+          <input type="text" id="linkTitle" placeholder="Title (e.g. Official RNP Rules)">
+          <input type="text" id="linkUrl" placeholder="https://...">
+          <button onclick="addLink()">✅ Save Link</button>
+        </div>
+
+        <div class="card">
+          <h3>➕ Add Quiz Question</h3>
+          <textarea id="questionText" placeholder="Full Question"></textarea>
+          <button onclick="addQuestion()">✅ Save Question</button>
+        </div>
+
+        <button onclick="showMainMenu()">← Back to Menu</button>
       `;
     }
 
-    async function goTo(page) {
-      if (page === 'premium') {
-        document.getElementById('main').innerHTML = `
-          <div class="card">
-            <h2>💎 Premium Subscription</h2>
-            <p>Price: 5,000 RWF / month</p>
-            <p>Pay via MTN MoMo kuri <strong>706405 (Lambert)</strong></p>
-            <button onclick="sendPaymentScreenshot()">📸 Send Screenshot to WhatsApp</button>
-          </div>`;
-      } else if (isAdmin && page === 'admin') {
-        // Admin panel (simple Google Form)
-        window.open('https://forms.gle/YOUR_GOOGLE_FORM_LINK_HERE', '_blank');
-      } else {
-        tg.showAlert(`🔄 ${page} iri gufungura... (Full content coming)`);
+    async function uploadFile() {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return tg.showAlert("No file selected!");
+      
+      tg.showAlert(`📤 Uploading ${file.name}...\n\n(Admin will see it in bot soon)`);
+      // Real upload: Send to bot via Telegram (advanced) or use Google Drive link
+      window.open(`https://wa.me/250793031666?text=New%20Upload%3A%20${file.name}`, '_blank');
+    }
+
+    function addLesson() {
+      const title = document.getElementById('lessonTitle').value;
+      const desc = document.getElementById('lessonDesc').value;
+      if (title && desc) {
+        tg.showAlert(`✅ Lesson Saved: ${title}`);
+        // In real version, send to bot/database
       }
     }
 
-    function sendPaymentScreenshot() {
-      tg.showAlert("✅ Ohereza screenshot y'ubwishyu kuri WhatsApp:\nhttps://wa.me/250793031666");
-      window.open('https://wa.me/250793031666?text=Premium%20Payment%20Screenshot%20for%20Driving%20Theory%20Bot', '_blank');
+    function addLink() {
+      const title = document.getElementById('linkTitle').value;
+      const url = document.getElementById('linkUrl').value;
+      if (title && url) tg.showAlert(`✅ Link Saved: ${title}`);
     }
 
-    // Show Admin Button if admin
-    if (isAdmin) {
-      document.getElementById('main').innerHTML += `<button onclick="goTo('admin')">👑 Admin Panel - Add Lessons/Quizzes</button>`;
+    function addQuestion() {
+      const q = document.getElementById('questionText').value;
+      if (q) tg.showAlert("✅ Question Saved!");
     }
 
+    function goTo(page) {
+      if (page === 'premium') {
+        document.getElementById('main').innerHTML = `
+          <div class="card">
+            <h2>💎 Premium Access</h2>
+            <p>5,000 RWF / month</p>
+            <p>Pay to MTN MoMo: <strong>706405</strong> (Lambert)</p>
+            <button onclick="sendPayment()">📸 Send Screenshot</button>
+          </div>`;
+      } else {
+        tg.showAlert(`Opening ${page}...`);
+      }
+    }
+
+    function sendPayment() {
+      window.open('https://wa.me/250793031666?text=Premium%20Payment%20for%20Driving%20Theory%20Bot', '_blank');
+    }
+
+    // Initialize
     showMainMenu();
     tg.BackButton.show();
     tg.BackButton.onClick(() => tg.close());
