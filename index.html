@@ -7,11 +7,12 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { margin:0; font-family: 'Inter', sans-serif; background: #0f172a; color: #fff; }
-    .header { background: #1e40af; padding: 18px; text-align: center; font-size: 22px; font-weight: 600; }
-    .card { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; margin: 12px 0; }
-    button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
-    .primary { background: #22c55e; color: black; }
+    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
+    .header { background: #1e40af; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
+    .card { background: rgba(255,255,255,0.1); margin: 15px; padding: 20px; border-radius: 16px; }
+    button { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-size: 17px; }
+    .primary { background: #22c55e; color: black; font-weight: bold; }
+    .option { background: #334155; text-align: left; }
   </style>
 </head>
 <body>
@@ -27,91 +28,122 @@
     const userId = tg.initDataUnsafe?.user?.id || 8616193014;
     const isAdmin = userId === ADMIN_ID;
 
-    // ================== SUPABASE CONFIG ==================
-    const SUPABASE_URL = "https://YOUR_SUPABASE_URL.supabase.co";     // ← CHANGE
-    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";                   // ← CHANGE
+    // ================== SUPABASE KEYS (Shyira izawe) ==================
+    const SUPABASE_URL = "https://geaqmxoqhijotswksiepp.supabase.co";
+    const SUPABASE_ANON = "PASTE_FULL_PUBLISHABLE_KEY_HERE";   // ← SHYIRA KEY YAWE YOSE HANO
 
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // ================== RENDER MENU ==================
     async function showMainMenu() {
-      let html = `
+      document.getElementById('main').innerHTML = `
         <div class="card" onclick="goTo('lessons')">📚 Amasomo y'Ibyapa</div>
         <div class="card" onclick="goTo('quiz')">❓ Quiz (5 ibibazo)</div>
         <div class="card" onclick="goTo('exam')">📝 Mock Exam (15 ibibazo)</div>
-        <div class="card" onclick="goTo('premium')">💎 Premium - Unlimited Access</div>`;
+        <div class="card" onclick="goTo('premium')">💎 Premium</div>
+        ${isAdmin ? `<div class="card" style="background:#22c55e;color:black" onclick="showAdminPanel()">👑 ADMIN PANEL</div>` : ''}
+      `;
+    }
 
-      if (isAdmin) {
-        html += `<div class="card" style="background:#22c55e;color:black" onclick="showAdminPanel()">👑 ADMIN PANEL</div>`;
+    async function goTo(page) {
+      if (page === 'quiz' || page === 'exam') {
+        const limit = page === 'quiz' ? 5 : 15;
+        const { data: questions, error } = await supabase
+          .from('questions')
+          .select('*')
+          .limit(limit);
+
+        if (error || !questions || questions.length === 0) {
+          tg.showAlert("❌ No questions found. Admin should add some first.");
+          return;
+        }
+
+        startRealQuiz(questions);
+      } else if (page === 'premium') {
+        tg.showAlert("💎 Premium: 5000 RWF → Pay to 706405 (Lambert) then send screenshot");
+      } else {
+        tg.showAlert("Coming soon...");
       }
+    }
 
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function startRealQuiz(questions) {
+      currentQuestions = questions;
+      currentIndex = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = currentQuestions[currentIndex];
+      if (!q) return showResults();
+
+      const options = q.options.split('\n').map(opt => opt.trim());
+
+      let html = `<div class="card"><h3>\( {currentIndex + 1}/ \){currentQuestions.length}</h3><p>${q.question}</p>`;
+
+      options.forEach(opt => {
+        html += `<button class="option" onclick="selectAnswer('\( {opt[0]}')"> \){opt}</button>`;
+      });
+
+      html += `</div>`;
       document.getElementById('main').innerHTML = html;
     }
 
-    // ================== REAL QUIZ (From Database) ==================
-    async function startRealQuiz(num = 15) {
-      const { data: questions } = await supabase
-        .from('questions')
-        .select('*')
-        .limit(num);
+    function selectAnswer(chosen) {
+      const q = currentQuestions[currentIndex];
+      if (chosen === q.correct) score++;
 
-      if (!questions || questions.length === 0) {
-        tg.showAlert("No questions yet. Admin should add some.");
-        return;
-      }
-
-      // Simple demo of real quiz (you can expand)
-      let score = 0;
-      tg.showAlert(`✅ ${num} questions loaded from database!\n\nReal quiz starting...`);
-      // Here you can build full quiz UI with options
-    }
-
-    function goTo(page) {
-      if (page === 'quiz' || page === 'exam') {
-        startRealQuiz(page === 'quiz' ? 5 : 15);
-      } else if (page === 'premium') {
-        tg.showAlert("Premium: Pay 5000 RWF to 706405 then send screenshot on WhatsApp");
+      currentIndex++;
+      if (currentIndex < currentQuestions.length) {
+        showQuestion();
       } else {
-        tg.showAlert(`Opening ${page}...`);
+        showResults();
       }
     }
 
-    // ================== ADMIN PANEL (Real) ==================
+    function showResults() {
+      const percentage = Math.round((score / currentQuestions.length) * 100);
+      document.getElementById('main').innerHTML = `
+        <div class="card" style="text-align:center;">
+          <h2>🎯 Results</h2>
+          <h1>\( {score}/ \){currentQuestions.length} (${percentage}%)</h1>
+          <p>${percentage >= 60 ? '✅ Congrats! You would pass the real exam!' : '📚 Keep practicing!'}</p>
+          <button class="primary" onclick="showMainMenu()">Return to Menu</button>
+        </div>`;
+    }
+
     function showAdminPanel() {
       document.getElementById('main').innerHTML = `
-        <h2 style="text-align:center; color:#22c55e;">👑 Admin Panel</h2>
         <div class="card">
           <h3>Add Question</h3>
-          <textarea id="qtext" placeholder="Full Question" rows="3"></textarea>
-          <input type="text" id="options" placeholder="A. opt1\nB. opt2\nC. opt3\nD. opt4">
-          <input type="text" id="correct" placeholder="Correct Answer (A/B/C/D)">
-          <button class="primary" onclick="addQuestion()">Save Question</button>
+          <textarea id="question" placeholder="Full Question" rows="3"></textarea>
+          <textarea id="options" placeholder="A. Option 1\nB. Option 2\nC. Option 3\nD. Option 4" rows="5"></textarea>
+          <input id="correct" placeholder="Correct Answer (A/B/C/D)" maxlength="1">
+          <button class="primary" onclick="addQuestionToDB()">Save Question</button>
         </div>
         <button onclick="showMainMenu()">← Back</button>
       `;
     }
 
-    async function addQuestion() {
-      const question = document.getElementById('qtext').value;
+    async function addQuestionToDB() {
+      const question = document.getElementById('question').value;
       const options = document.getElementById('options').value;
       const correct = document.getElementById('correct').value.toUpperCase();
 
-      if (!question || !correct) {
-        tg.showAlert("Question and correct answer required!");
+      if (!question || !options || !correct) {
+        tg.showAlert("❌ Fill all fields!");
         return;
       }
 
-      const { error } = await supabase
-        .from('questions')
-        .insert([{ question, options, correct, explanation: "Admin added" }]);
-
-      if (error) tg.showAlert("Error: " + error.message);
-      else tg.showAlert("✅ Question added successfully!");
+      const { error } = await supabase.from('questions').insert([{ question, options, correct }]);
+      tg.showAlert(error ? "Error saving" : "✅ Question saved successfully!");
     }
 
-    // Initialize
+    // Start App
     showMainMenu();
-    tg.BackButton.onClick(() => tg.close());
   </script>
 </body>
 </html>
