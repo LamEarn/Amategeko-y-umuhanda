@@ -2,759 +2,97 @@
 <html lang="rw">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>💰 Crypto Exchange - Rwanda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Crypto Exchange</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-      background: linear-gradient(135deg, #0a0e27, #1a1f3a);
-      color: #fff; 
-      min-height: 100vh;
-    }
-    .header { 
-      background: linear-gradient(135deg, #f7931a, #f1c40f);
-      padding: 16px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .container { padding: 16px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
-    
-    /* Balance Card */
-    .balance-card {
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      padding: 20px;
-      border-radius: 20px;
-      margin: 16px 0;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-    .balance-amount {
-      font-size: 36px;
-      font-weight: bold;
-      color: #f1c40f;
-    }
-    .balance-label {
-      color: #a0c4ff;
-      font-size: 14px;
-    }
-    
-    /* Crypto Cards */
-    .crypto-grid {
-      display: grid;
-      gap: 12px;
-      margin: 16px 0;
-    }
-    .crypto-card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.3s;
-      backdrop-filter: blur(10px);
-    }
-    .crypto-card:hover {
-      background: rgba(255,255,255,0.1);
-      transform: translateY(-2px);
-    }
-    .crypto-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .crypto-name {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .crypto-symbol {
-      color: #a0c4ff;
-      font-size: 14px;
-    }
-    .crypto-price {
-      font-size: 20px;
-      font-weight: bold;
-      color: #f1c40f;
-    }
-    .change-positive {
-      color: #00ff88;
-    }
-    .change-negative {
-      color: #ff4444;
-    }
-    
-    /* Buttons */
-    .btn {
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #f7931a, #f1c40f);
-      color: #000;
-    }
-    .btn-secondary {
-      background: #2a3a5c;
-      color: #fff;
-    }
-    .btn-success {
-      background: #00ff88;
-      color: #000;
-    }
-    .btn-danger {
-      background: #ff4444;
-      color: #fff;
-    }
-    .btn-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0;
-    }
-    
-    /* Trade Form */
-    .trade-form {
-      background: rgba(255,255,255,0.05);
-      border-radius: 20px;
-      padding: 20px;
-      margin: 16px 0;
-    }
-    .input-group {
-      margin: 16px 0;
-    }
-    .input-label {
-      color: #a0c4ff;
-      margin-bottom: 8px;
-      display: block;
-    }
-    .input-field {
-      width: 100%;
-      padding: 14px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 16px;
-    }
-    .input-field:focus {
-      outline: none;
-      border-color: #f7931a;
-    }
-    
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1a1f3a;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 8px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .nav-item {
-      text-align: center;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      transition: background 0.2s;
-    }
-    .nav-item:hover {
-      background: rgba(255,255,255,0.1);
-    }
-    .nav-icon {
-      font-size: 24px;
-      margin-bottom: 4px;
-    }
-    .nav-label {
-      font-size: 12px;
-      color: #a0c4ff;
-    }
-    
-    /* Trade History */
-    .trade-item {
-      background: rgba(255,255,255,0.05);
-      padding: 12px;
-      border-radius: 12px;
-      margin: 8px 0;
-    }
-    
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 40px;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: #f7931a;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin: 16px 0;
-    }
-    .tab {
-      flex: 1;
-      padding: 12px;
-      text-align: center;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab.active {
-      background: #f7931a;
-      color: #000;
-      font-weight: bold;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
+    .header { background: linear-gradient(90deg, #1e40af, #3b82f6); padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
+    .card { background: rgba(255,255,255,0.08); margin: 15px; padding: 20px; border-radius: 16px; }
+    button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
+    .primary { background: #22c55e; color: black; }
+    .wallet { font-family: monospace; font-size: 15px; word-break: break-all; }
   </style>
 </head>
 <body>
-  <div class="header">💰 Crypto Exchange</div>
-  <div class="container" id="main">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Tugerageza kwinjira...</p>
-    </div>
-  </div>
-  
-  <div class="bottom-nav" id="bottomNav" style="display: none;">
-    <div class="nav-item" onclick="window.showHome()">
-      <div class="nav-icon">🏠</div>
-      <div class="nav-label">Ahabanza</div>
-    </div>
-    <div class="nav-item" onclick="window.showTrade()">
-      <div class="nav-icon">💱</div>
-      <div class="nav-label">Gucuruza</div>
-    </div>
-    <div class="nav-item" onclick="window.showPortfolio()">
-      <div class="nav-icon">📊</div>
-      <div class="nav-label">Konti</div>
-    </div>
-    <div class="nav-item" onclick="window.showHistory()">
-      <div class="nav-icon">📜</div>
-      <div class="nav-label">Amateka</div>
-    </div>
-  </div>
+  <div class="header">🚀 Smart Crypto Exchange</div>
+  <div class="container" id="main"></div>
 
   <script>
-    (function() {
-      // Telegram
-      const tg = window.Telegram?.WebApp;
-      if (tg) {
-        tg.ready();
-        tg.expand();
-      }
-      
-      // Supabase Config
-      const SUPABASE_URL = "https://igcaqhepqtzogxfbekqs.supabase.co";
-      const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnY2FxaGVwcXR6b2d4ZmJla3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwNDc2MDAsImV4cCI6MjA2MDYyMzYwMH0.ujH2kG3LxQm7PZD8N1WvKqR5vCxYwM8PJ9nF2tB4s6A";
-      
-      let supabase;
-      let currentUser = null;
-      let cryptoPrices = [];
-      let selectedCrypto = null;
-      let tradeType = 'buy';
-      
-      const ADMIN_ID = 8616193014;
-      const userId = tg?.initDataUnsafe?.user?.id || ADMIN_ID;
-      const username = tg?.initDataUnsafe?.user?.username || 'User';
-      const firstName = tg?.initDataUnsafe?.user?.first_name || 'Mugenzi';
-      
-      // Initialize
-      try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-        console.log('✅ Supabase ready');
-      } catch (e) {
-        console.error('❌ Supabase error:', e);
-        showError('Database connection failed');
-        return;
-      }
-      
-      // Get or create user
-      async function initUser() {
-        try {
-          // Reba niba umukoresha ariho
-          let { data: user, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('telegram_id', userId)
-            .single();
-          
-          if (!user) {
-            // Kora umukoresha mushya
-            const { data: newUser, error: createError } = await supabase
-              .from('users')
-              .insert([{
-                telegram_id: userId,
-                username: username,
-                first_name: firstName,
-                balance_usd: 10000
-              }])
-              .select()
-              .single();
-            
-            if (createError) throw createError;
-            currentUser = newUser;
-          } else {
-            currentUser = user;
-          }
-          
-          return true;
-        } catch (e) {
-          console.error('User init error:', e);
-          return false;
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+
+    const ADMIN_ID = 8616193014;
+    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
+    const isAdmin = userId === ADMIN_ID;
+
+    const WALLETS = {
+      "BEP20 (BNB)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263",
+      "TRC20 (Tron)": "TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W",
+      "ERC20 (Ethereum)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263"
+    };
+
+    async function showMainMenu() {
+      document.getElementById('main').innerHTML = `
+        <div class="card" onclick="goTo('buy')">💰 Buy Crypto</div>
+        <div class="card" onclick="goTo('sell')">💸 Sell Crypto</div>
+        <div class="card" onclick="goTo('deposit')">📥 Deposit USDT</div>
+        <div class="card" onclick="goTo('withdraw')">📤 Withdraw</div>
+        <div class="card" onclick="goTo('balance')">💼 My Balance</div>
+        ${isAdmin ? `<div class="card" style="background:#eab308;color:black" onclick="showAdmin()">👑 ADMIN PANEL</div>` : ''}
+      `;
+    }
+
+    function goTo(page) {
+      if (page === 'deposit') {
+        let html = `<div class="card"><h2>📥 Deposit USDT</h2>`;
+        for (let [net, addr] of Object.entries(WALLETS)) {
+          html += `<p><strong>\( {net}</strong><br><span class="wallet"> \){addr}</span></p><hr>`;
         }
-      }
-      
-      // Get crypto prices
-      async function getPrices() {
-        try {
-          const { data, error } = await supabase
-            .from('crypto_prices')
-            .select('*')
-            .order('symbol');
-          
-          if (error) throw error;
-          cryptoPrices = data;
-          return data;
-        } catch (e) {
-          console.error('Prices error:', e);
-          return [];
-        }
-      }
-      
-      // Show error
-      function showError(msg) {
+        html += `<p style="margin-top:15px;">After sending, send screenshot + amount + network to admin.</p>`;
+        html += `<button class="primary" onclick="contactAdmin()">📸 Send Screenshot to Admin</button></div>`;
+        document.getElementById('main').innerHTML = html;
+      } 
+      else if (page === 'withdraw') {
         document.getElementById('main').innerHTML = `
-          <div style="text-align: center; padding: 40px;">
-            <h3>❌ Ikibazo</h3>
-            <p>${msg}</p>
-            <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 20px;">🔄 Ongera Ugerageze</button>
-          </div>
-        `;
+          <div class="card">
+            <h2>📤 Withdrawal</h2>
+            <p>Choose network and send details to admin:</p>
+            <ul>
+              <li>BEP20 / TRC20 / ERC20</li>
+              <li>Amount</li>
+              <li>Your wallet address</li>
+            </ul>
+            <button class="primary" onclick="contactAdmin()">💬 Contact Admin for Withdrawal</button>
+          </div>`;
+      } 
+      else if (page === 'buy' || page === 'sell') {
+        tg.showAlert(`💱 ${page.toUpperCase()} feature is active.\n\nContact admin for instant rate & trade.`);
+      } 
+      else if (page === 'balance') {
+        document.getElementById('main').innerHTML = `<div class="card" style="text-align:center;"><h2>💼 Your Balance</h2><h1>0.00 USDT</h1><p>Deposit to start trading.</p></div>`;
       }
-      
-      // Format price
-      function formatPrice(price) {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(price);
-      }
-      
-      // Format crypto amount
-      function formatCrypto(amount, symbol) {
-        if (symbol === 'USDT') {
-          return amount.toFixed(2);
-        }
-        return amount.toFixed(6);
-      }
-      
-      // Show home
-      window.showHome = async function() {
-        document.getElementById('bottomNav').style.display = 'grid';
-        
-        await initUser();
-        const prices = await getPrices();
-        
-        let html = `
-          <div class="balance-card">
-            <div class="balance-label">Umutungo Wose</div>
-            <div class="balance-amount">${formatPrice(currentUser?.balance_usd || 0)}</div>
-            <div style="display: flex; justify-content: space-between; margin-top: 16px;">
-              <span>₿ ${formatCrypto(currentUser?.balance_btc || 0, 'BTC')} BTC</span>
-              <span>Ξ ${formatCrypto(currentUser?.balance_eth || 0, 'ETH')} ETH</span>
-            </div>
-          </div>
-          
-          <h3 style="margin: 20px 0 12px;">📈 Ibicuruzwa</h3>
-          <div class="crypto-grid">
-        `;
-        
-        prices.forEach(crypto => {
-          const changeClass = crypto.change_24h >= 0 ? 'change-positive' : 'change-negative';
-          const changeSign = crypto.change_24h >= 0 ? '+' : '';
-          
-          html += `
-            <div class="crypto-card" onclick="window.selectCrypto('${crypto.symbol}')">
-              <div class="crypto-row">
-                <div>
-                  <div class="crypto-name">${crypto.name}</div>
-                  <div class="crypto-symbol">${crypto.symbol}</div>
-                </div>
-                <div style="text-align: right;">
-                  <div class="crypto-price">${formatPrice(crypto.price_usd)}</div>
-                  <div class="${changeClass}">${changeSign}${crypto.change_24h}%</div>
-                </div>
-              </div>
-            </div>
-          `;
-        });
-        
-        html += '</div>';
-        
-        // Admin panel
-        const isAdmin = userId === ADMIN_ID;
-        if (isAdmin) {
-          html += `
-            <div style="margin-top: 20px;">
-              <button class="btn btn-secondary" onclick="window.showAdminPanel()">👑 Admin Panel</button>
-            </div>
-          `;
-        }
-        
-        document.getElementById('main').innerHTML = html;
-      };
-      
-      // Select crypto for trade
-      window.selectCrypto = function(symbol) {
-        selectedCrypto = cryptoPrices.find(c => c.symbol === symbol);
-        window.showTrade();
-      };
-      
-      // Show trade page
-      window.showTrade = async function() {
-        if (!selectedCrypto) {
-          selectedCrypto = cryptoPrices[0];
-        }
-        
-        const crypto = selectedCrypto;
-        const maxAmount = tradeType === 'buy' 
-          ? currentUser.balance_usd / crypto.price_usd
-          : currentUser[`balance_${crypto.symbol.toLowerCase()}`] || 0;
-        
-        let html = `
-          <div class="tabs">
-            <div class="tab ${tradeType === 'buy' ? 'active' : ''}" onclick="window.setTradeType('buy')">💰 Gura</div>
-            <div class="tab ${tradeType === 'sell' ? 'active' : ''}" onclick="window.setTradeType('sell')">💸 Gura</div>
-          </div>
-          
-          <div class="trade-form">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-              <span>${crypto.name} (${crypto.symbol})</span>
-              <span class="crypto-price">${formatPrice(crypto.price_usd)}</span>
-            </div>
-            
-            <div class="input-group">
-              <label class="input-label">Ingano ya ${crypto.symbol}</label>
-              <input type="number" id="cryptoAmount" class="input-field" placeholder="0.00" step="0.000001" 
-                     oninput="window.updateTotal()">
-            </div>
-            
-            <div class="input-group">
-              <label class="input-label">Agaciro muri USD</label>
-              <input type="number" id="usdAmount" class="input-field" placeholder="0.00" step="0.01"
-                     oninput="window.updateCrypto()">
-            </div>
-            
-            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin: 16px 0;">
-              <div style="display: flex; justify-content: space-between;">
-                <span>${tradeType === 'buy' ? 'Ushoboye kugura:' : 'Ushoboye kugurisha:'}</span>
-                <span>${formatCrypto(maxAmount, crypto.symbol)} ${crypto.symbol}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                <span>${tradeType === 'buy' ? 'Balance yawe:' : 'Ufite:'}</span>
-                <span>${tradeType === 'buy' 
-                  ? formatPrice(currentUser.balance_usd)
-                  : formatCrypto(currentUser[`balance_${crypto.symbol.toLowerCase()}`] || 0, crypto.symbol) + ' ' + crypto.symbol
-                }</span>
-              </div>
-            </div>
-            
-            <button class="btn ${tradeType === 'buy' ? 'btn-success' : 'btn-danger'}" 
-                    onclick="window.executeTrade()" style="width: 100%;">
-              ${tradeType === 'buy' ? '✅ Gura' : '📤 Gurisha'} ${crypto.symbol}
-            </button>
-          </div>
-          
-          <div style="margin-top: 20px;">
-            <button class="btn btn-secondary" onclick="window.showHome()">← Subira Ahabanza</button>
-          </div>
-        `;
-        
-        document.getElementById('main').innerHTML = html;
-      };
-      
-      // Set trade type
-      window.setTradeType = function(type) {
-        tradeType = type;
-        window.showTrade();
-      };
-      
-      // Update total when crypto amount changes
-      window.updateTotal = function() {
-        const cryptoAmount = parseFloat(document.getElementById('cryptoAmount').value) || 0;
-        const usdAmount = cryptoAmount * selectedCrypto.price_usd;
-        document.getElementById('usdAmount').value = usdAmount.toFixed(2);
-      };
-      
-      // Update crypto when USD amount changes
-      window.updateCrypto = function() {
-        const usdAmount = parseFloat(document.getElementById('usdAmount').value) || 0;
-        const cryptoAmount = usdAmount / selectedCrypto.price_usd;
-        document.getElementById('cryptoAmount').value = cryptoAmount.toFixed(6);
-      };
-      
-      // Execute trade
-      window.executeTrade = async function() {
-        const cryptoAmount = parseFloat(document.getElementById('cryptoAmount').value);
-        const usdAmount = parseFloat(document.getElementById('usdAmount').value);
-        
-        if (!cryptoAmount || cryptoAmount <= 0) {
-          alert('❌ Ingano y\'ubucuruzi sibyo');
-          return;
-        }
-        
-        const crypto = selectedCrypto;
-        const symbol = crypto.symbol;
-        
-        // Check balance
-        if (tradeType === 'buy') {
-          if (usdAmount > currentUser.balance_usd) {
-            alert('❌ Amafaranga ntahagije');
-            return;
-          }
-        } else {
-          const balance = currentUser[`balance_${symbol.toLowerCase()}`] || 0;
-          if (cryptoAmount > balance) {
-            alert(`❌ ${symbol} ntihagije`);
-            return;
-          }
-        }
-        
-        try {
-          // Update balances
-          let newBalances = {};
-          if (tradeType === 'buy') {
-            newBalances = {
-              balance_usd: currentUser.balance_usd - usdAmount,
-              [`balance_${symbol.toLowerCase()}`]: (currentUser[`balance_${symbol.toLowerCase()}`] || 0) + cryptoAmount
-            };
-          } else {
-            newBalances = {
-              balance_usd: currentUser.balance_usd + usdAmount,
-              [`balance_${symbol.toLowerCase()}`]: (currentUser[`balance_${symbol.toLowerCase()}`] || 0) - cryptoAmount
-            };
-          }
-          
-          // Update user
-          const { error: userError } = await supabase
-            .from('users')
-            .update(newBalances)
-            .eq('telegram_id', userId);
-          
-          if (userError) throw userError;
-          
-          // Save trade
-          const { error: tradeError } = await supabase
-            .from('trades')
-            .insert([{
-              user_id: userId,
-              symbol: symbol,
-              type: tradeType,
-              amount: cryptoAmount,
-              price: crypto.price_usd,
-              total: usdAmount
-            }]);
-          
-          if (tradeError) throw tradeError;
-          
-          // Refresh user
-          await initUser();
-          
-          alert(`✅ ${tradeType === 'buy' ? 'Waguze' : 'Wagurishije'} ${formatCrypto(cryptoAmount, symbol)} ${symbol}`);
-          window.showHome();
-        } catch (e) {
-          alert('❌ Byanze: ' + e.message);
-        }
-      };
-      
-      // Show portfolio
-      window.showPortfolio = async function() {
-        let html = `
-          <h3 style="margin-bottom: 20px;">📊 Umutungo Wawe</h3>
-          
-          <div class="balance-card">
-            <div class="balance-label">Balance USD</div>
-            <div class="balance-amount">${formatPrice(currentUser?.balance_usd || 0)}</div>
-          </div>
-          
-          <div class="crypto-grid">
-            <div class="crypto-card">
-              <div class="crypto-row">
-                <span>₿ Bitcoin (BTC)</span>
-                <span>${formatCrypto(currentUser?.balance_btc || 0, 'BTC')} BTC</span>
-              </div>
-            </div>
-            <div class="crypto-card">
-              <div class="crypto-row">
-                <span>Ξ Ethereum (ETH)</span>
-                <span>${formatCrypto(currentUser?.balance_eth || 0, 'ETH')} ETH</span>
-              </div>
-            </div>
-            <div class="crypto-card">
-              <div class="crypto-row">
-                <span>💵 Tether (USDT)</span>
-                <span>${formatCrypto(currentUser?.balance_usdt || 0, 'USDT')} USDT</span>
-              </div>
-            </div>
-          </div>
-          
-          <button class="btn btn-primary" onclick="window.showHome()">← Subira Ahabanza</button>
-        `;
-        
-        document.getElementById('main').innerHTML = html;
-      };
-      
-      // Show trade history
-      window.showHistory = async function() {
-        try {
-          const { data: trades, error } = await supabase
-            .from('trades')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false })
-            .limit(20);
-          
-          if (error) throw error;
-          
-          let html = '<h3 style="margin-bottom: 20px;">📜 Amateka y\'Ubucuruzi</h3>';
-          
-          if (!trades || trades.length === 0) {
-            html += '<p style="text-align: center; color: #a0c4ff;">Nta bucuruzi bwakozwe</p>';
-          } else {
-            trades.forEach(trade => {
-              const date = new Date(trade.created_at).toLocaleString();
-              html += `
-                <div class="trade-item">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: ${trade.type === 'buy' ? '#00ff88' : '#ff4444'}; font-weight: bold;">
-                      ${trade.type === 'buy' ? '✅ Gura' : '📤 Gurisha'}
-                    </span>
-                    <span style="color: #a0c4ff; font-size: 12px;">${date}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                    <span>${formatCrypto(trade.amount, trade.symbol)} ${trade.symbol}</span>
-                    <span>@ ${formatPrice(trade.price)}</span>
-                  </div>
-                  <div style="text-align: right; margin-top: 4px; color: #f1c40f;">
-                    Total: ${formatPrice(trade.total)}
-                  </div>
-                </div>
-              `;
-            });
-          }
-          
-          html += '<button class="btn btn-primary" onclick="window.showHome()" style="margin-top: 20px;">← Subira Ahabanza</button>';
-          
-          document.getElementById('main').innerHTML = html;
-        } catch (e) {
-          alert('Error: ' + e.message);
-        }
-      };
-      
-      // Admin panel
-      window.showAdminPanel = function() {
-        let html = `
+    }
+
+    function contactAdmin() {
+      window.open('https://wa.me/250793031666?text=Smart%20Crypto%20Exchange%20Request', '_blank');
+    }
+
+    function showAdmin() {
+      document.getElementById('main').innerHTML = `
+        <div class="card">
           <h3>👑 Admin Panel</h3>
-          
-          <div class="trade-form">
-            <h4>Hindura Ibicuruzwa</h4>
-            <select id="adminSymbol" class="input-field">
-        `;
-        
-        cryptoPrices.forEach(c => {
-          html += `<option value="${c.symbol}">${c.name} (${c.symbol})</option>`;
-        });
-        
-        html += `
-            </select>
-            <input type="number" id="adminPrice" class="input-field" placeholder="Igiciro gishya" step="0.01">
-            <input type="number" id="adminChange" class="input-field" placeholder="Change 24h (%)" step="0.1">
-            <button class="btn btn-primary" onclick="window.updatePrice()">💾 Hindura Igiciro</button>
-          </div>
-          
-          <button class="btn btn-secondary" onclick="window.showHome()">← Subira Ahabanza</button>
-        `;
-        
-        document.getElementById('main').innerHTML = html;
-      };
-      
-      // Update price (admin)
-      window.updatePrice = async function() {
-        const symbol = document.getElementById('adminSymbol').value;
-        const price = parseFloat(document.getElementById('adminPrice').value);
-        const change = parseFloat(document.getElementById('adminChange').value);
-        
-        if (!price) {
-          alert('Injiza igiciro gishya');
-          return;
-        }
-        
-        try {
-          const updateData = { price_usd: price };
-          if (!isNaN(change)) {
-            updateData.change_24h = change;
-          }
-          
-          const { error } = await supabase
-            .from('crypto_prices')
-            .update(updateData)
-            .eq('symbol', symbol);
-          
-          if (error) throw error;
-          
-          alert('✅ Igiciro cyahinduwe!');
-          await getPrices();
-          window.showHome();
-        } catch (e) {
-          alert('Error: ' + e.message);
-        }
-      };
-      
-      // Make functions global
-      window.showHome = showHome;
-      window.showTrade = showTrade;
-      window.showPortfolio = showPortfolio;
-      window.showHistory = showHistory;
-      window.showAdminPanel = showAdminPanel;
-      window.selectCrypto = selectCrypto;
-      window.setTradeType = setTradeType;
-      window.updateTotal = updateTotal;
-      window.updateCrypto = updateCrypto;
-      window.executeTrade = executeTrade;
-      window.updatePrice = updatePrice;
-      
-      // Start app
-      showHome();
-    })();
+          <p>Approve deposits, process withdrawals, manage rates.</p>
+          <button class="primary" onclick="contactAdmin()">Manage Users & Transactions</button>
+        </div>
+        <button onclick="showMainMenu()">← Back</button>
+      `;
+    }
+
+    // Initialize
+    showMainMenu();
+    tg.BackButton.onClick(() => tg.close());
   </script>
 </body>
 </html>
