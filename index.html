@@ -28,71 +28,298 @@
     const isAdmin = userId === ADMIN_ID;
 
     const WALLETS = {
-      "BEP20 (BNB)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263",
-      "TRC20 (Tron)": "TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W",
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Crypto Exchange Rwanda</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a1428, #1e3a8a);
+      color: white;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(90deg, #1e40af, #3b82f6);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      color: black;
+      font-weight: 700;
+    }
+    .wallet-box {
+      font-family: monospace;
+      background: #1e2937;
+      border: 2px dashed #64748b;
+    }
+    .nav-active {
+      color: #22c55e;
+      border-bottom: 3px solid #22c55e;
+    }
+  </style>
+</head>
+<body class="pb-20">
+  <!-- HEADER -->
+  <div class="header text-white py-5 px-4 text-center shadow-xl">
+    <h1 class="text-2xl font-bold flex items-center justify-center gap-3">
+      <span class="text-3xl">🚀</span> SMART CRYPTO EXCHANGE
+    </h1>
+    <p class="text-sm opacity-90 mt-1">Rwanda's Most Trusted Crypto Platform</p>
+  </div>
+
+  <div id="main" class="p-4 max-w-lg mx-auto"></div>
+
+  <!-- BOTTOM NAV -->
+  <div class="fixed bottom-0 left-0 right-0 bg-[#0a1428] border-t border-gray-700 py-2 px-4">
+    <div class="flex justify-around text-xs">
+      <div onclick="navigateTo('home')" class="flex flex-col items-center cursor-pointer nav-active" id="nav-home">
+        <i class="fas fa-home text-xl"></i>
+        <span>Home</span>
+      </div>
+      <div onclick="navigateTo('buy')" class="flex flex-col items-center cursor-pointer" id="nav-buy">
+        <i class="fas fa-arrow-up text-xl"></i>
+        <span>Buy</span>
+      </div>
+      <div onclick="navigateTo('sell')" class="flex flex-col items-center cursor-pointer" id="nav-sell">
+        <i class="fas fa-arrow-down text-xl"></i>
+        <span>Sell</span>
+      </div>
+      <div onclick="navigateTo('deposit')" class="flex flex-col items-center cursor-pointer" id="nav-deposit">
+        <i class="fas fa-download text-xl"></i>
+        <span>Deposit</span>
+      </div>
+      <div onclick="navigateTo('withdraw')" class="flex flex-col items-center cursor-pointer" id="nav-withdraw">
+        <i class="fas fa-upload text-xl"></i>
+        <span>Withdraw</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+
+    // ================== CREDENTIALS ==================
+    const ADMIN_ID = 8616193014;
+    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
+    const isAdmin = userId === ADMIN_ID;
+
+    const WHATSAPP = "https://wa.me/250793031666";
+    const BINANCE_ID = "1217578859";
+
+    const WALLETS = {
+      "BEP20 (BNB Smart Chain)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263",
+      "TRC20 (Tron Network)": "TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W",
       "ERC20 (Ethereum)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263"
     };
 
-    async function showMainMenu() {
-      document.getElementById('main').innerHTML = `
-        <div class="card" onclick="goTo('buy')">💰 Buy Crypto</div>
-        <div class="card" onclick="goTo('sell')">💸 Sell Crypto</div>
-        <div class="card" onclick="goTo('deposit')">📥 Deposit USDT</div>
-        <div class="card" onclick="goTo('withdraw')">📤 Withdraw</div>
-        <div class="card" onclick="goTo('balance')">💼 My Balance</div>
-        ${isAdmin ? `<div class="card" style="background:#eab308;color:black" onclick="showAdmin()">👑 ADMIN PANEL</div>` : ''}
-      `;
+    // Default Prices
+    let buyPrice = parseFloat(localStorage.getItem('buyPrice')) || 1500;
+    let sellPrice = parseFloat(localStorage.getItem('sellPrice')) || 1480;
+
+    function savePrices() {
+      localStorage.setItem('buyPrice', buyPrice);
+      localStorage.setItem('sellPrice', sellPrice);
     }
 
-    function goTo(page) {
-      if (page === 'deposit') {
-        let html = `<div class="card"><h2>📥 Deposit USDT</h2>`;
-        for (let [net, addr] of Object.entries(WALLETS)) {
-          html += `<p><strong>\( {net}</strong><br><span class="wallet"> \){addr}</span></p><hr>`;
-        }
-        html += `<p style="margin-top:15px;">After sending, send screenshot + amount + network to admin.</p>`;
-        html += `<button class="primary" onclick="contactAdmin()">📸 Send Screenshot to Admin</button></div>`;
-        document.getElementById('main').innerHTML = html;
+    // ================== NAVIGATION ==================
+    function navigateTo(page) {
+      document.querySelectorAll('.nav-active').forEach(el => el.classList.remove('nav-active'));
+      document.getElementById(`nav-${page}`).classList.add('nav-active');
+      renderPage(page);
+    }
+
+    function renderPage(page) {
+      const main = document.getElementById('main');
+      let html = '';
+
+      if (page === 'home') {
+        html = `
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-green-400">Welcome Back!</h2>
+            <p class="text-gray-400">Fast & Secure Crypto Trading in Rwanda</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div onclick="navigateTo('buy')" class="card p-6 text-center cursor-pointer">
+              <div class="text-4xl mb-3">💰</div>
+              <h3 class="font-semibold text-lg">Buy Crypto</h3>
+              <p class="text-green-400 text-sm">1 USDT = ${buyPrice} RWF</p>
+            </div>
+            <div onclick="navigateTo('sell')" class="card p-6 text-center cursor-pointer">
+              <div class="text-4xl mb-3">💸</div>
+              <h3 class="font-semibold text-lg">Sell Crypto</h3>
+              <p class="text-green-400 text-sm">1 USDT = ${sellPrice} RWF</p>
+            </div>
+          </div>
+
+          <div onclick="navigateTo('deposit')" class="card p-6 mt-4 cursor-pointer">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">📥</div>
+              <div>
+                <h3 class="font-semibold">Deposit USDT</h3>
+                <p class="text-sm text-gray-400">Instant deposit via Binance or Wallet</p>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="navigateTo('withdraw')" class="card p-6 mt-4 cursor-pointer">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">📤</div>
+              <div>
+                <h3 class="font-semibold">Withdraw Funds</h3>
+                <p class="text-sm text-gray-400">USDT or MoMo</p>
+              </div>
+            </div>
+          </div>
+
+          ${isAdmin ? `
+          <div onclick="showAdminPanel()" class="card p-6 mt-4 cursor-pointer border border-yellow-500">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">👑</div>
+              <div>
+                <h3 class="font-semibold text-yellow-400">ADMIN PANEL</h3>
+                <p class="text-sm">Manage Prices & Users</p>
+              </div>
+            </div>
+          </div>` : ''}
+        `;
       } 
-      else if (page === 'withdraw') {
-        document.getElementById('main').innerHTML = `
+      else if (page === 'buy') {
+        html = `
           <div class="card">
-            <h2>📤 Withdrawal</h2>
-            <p>Choose network and send details to admin:</p>
-            <ul>
-              <li>BEP20 / TRC20 / ERC20</li>
-              <li>Amount</li>
-              <li>Your wallet address</li>
-            </ul>
-            <button class="primary" onclick="contactAdmin()">💬 Contact Admin for Withdrawal</button>
+            <h2 class="text-2xl font-bold mb-4">💰 Buy USDT</h2>
+            <div class="bg-gray-900 p-5 rounded-2xl text-center mb-6">
+              <p class="text-sm text-gray-400">Current Buy Price</p>
+              <p class="text-4xl font-bold text-green-400">${buyPrice} RWF</p>
+              <p class="text-sm text-gray-400">per 1 USDT</p>
+            </div>
+            <div class="space-y-4">
+              <button onclick="contactAdmin('buy')" class="btn-primary py-5 text-lg">Proceed to Buy</button>
+              <p class="text-center text-sm text-gray-400">Send money via MoMo or Binance then send proof to admin</p>
+            </div>
           </div>`;
       } 
-      else if (page === 'buy' || page === 'sell') {
-        tg.showAlert(`💱 ${page.toUpperCase()} feature is active.\n\nContact admin for instant rate & trade.`);
+      else if (page === 'sell') {
+        html = `
+          <div class="card">
+            <h2 class="text-2xl font-bold mb-4">💸 Sell USDT</h2>
+            <div class="bg-gray-900 p-5 rounded-2xl text-center mb-6">
+              <p class="text-sm text-gray-400">Current Sell Price</p>
+              <p class="text-4xl font-bold text-green-400">${sellPrice} RWF</p>
+              <p class="text-sm text-gray-400">per 1 USDT</p>
+            </div>
+            <button onclick="contactAdmin('sell')" class="btn-primary py-5 text-lg">Proceed to Sell</button>
+          </div>`;
+      } 
+      else if (page === 'deposit') {
+        html = `<div class="card"><h2 class="text-xl font-bold mb-6">📥 Deposit USDT</h2>`;
+        for (let [network, address] of Object.entries(WALLETS)) {
+          html += `
+            <div class="wallet-box p-4 mb-4 rounded-xl">
+              <p class="text-sm text-gray-400">${network}</p>
+              <p class="wallet text-green-400">${address}</p>
+              <button onclick="copyToClipboard('${address}')" class="text-xs bg-gray-700 px-4 py-1 rounded mt-2">Copy Address</button>
+            </div>`;
+        }
+        html += `<button onclick="contactAdmin('deposit')" class="btn-primary mt-6">Send Proof to Admin</button></div>`;
+      } 
+      else if (page === 'withdraw') {
+        html = `
+          <div class="card">
+            <h2 class="text-2xl font-bold mb-6">📤 Withdraw</h2>
+            <input type="number" id="amount" placeholder="Amount in USDT" class="w-full bg-gray-900 p-4 rounded-xl mb-4">
+            <select id="method" class="w-full bg-gray-900 p-4 rounded-xl mb-6">
+              <option value="binance">Binance ID</option>
+              <option value="wallet">Crypto Wallet</option>
+            </select>
+            <button onclick="submitWithdraw()" class="btn-primary py-5">Submit Withdrawal Request</button>
+          </div>`;
       } 
       else if (page === 'balance') {
-        document.getElementById('main').innerHTML = `<div class="card" style="text-align:center;"><h2>💼 Your Balance</h2><h1>0.00 USDT</h1><p>Deposit to start trading.</p></div>`;
+        html = `
+          <div class="card text-center">
+            <h2 class="text-3xl font-bold mb-2">0.00 USDT</h2>
+            <p class="text-gray-400">Current Balance</p>
+            <div class="mt-10 text-sm text-gray-500">Deposit to start trading</div>
+          </div>`;
       }
+
+      main.innerHTML = html;
     }
 
-    function contactAdmin() {
-      window.open('https://wa.me/250793031666?text=Smart%20Crypto%20Exchange%20Request', '_blank');
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        tg.showAlert("✅ Address copied!");
+      });
     }
 
-    function showAdmin() {
+    function contactAdmin(type) {
+      let msg = `Smart Crypto Exchange Request - ${type.toUpperCase()}`;
+      window.open(`\( {WHATSAPP}?text= \){encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function submitWithdraw() {
+      const amount = document.getElementById('amount').value;
+      if (!amount) return tg.showAlert("Enter amount!");
+      tg.showAlert("✅ Withdrawal request submitted!\nAdmin will contact you shortly.");
+      setTimeout(() => navigateTo('home'), 1500);
+    }
+
+    function showAdminPanel() {
       document.getElementById('main').innerHTML = `
         <div class="card">
-          <h3>👑 Admin Panel</h3>
-          <p>Approve deposits, process withdrawals, manage rates.</p>
-          <button class="primary" onclick="contactAdmin()">Manage Users & Transactions</button>
-        </div>
-        <button onclick="showMainMenu()">← Back</button>
-      `;
+          <h2 class="text-2xl font-bold mb-6 text-yellow-400">👑 ADMIN PANEL</h2>
+          
+          <div class="mb-6">
+            <label class="block text-sm mb-2">Buy Price (RWF per USDT)</label>
+            <input type="number" id="buyInput" value="${buyPrice}" class="w-full bg-gray-900 p-4 rounded-xl">
+          </div>
+          
+          <div class="mb-8">
+            <label class="block text-sm mb-2">Sell Price (RWF per USDT)</label>
+            <input type="number" id="sellInput" value="${sellPrice}" class="w-full bg-gray-900 p-4 rounded-xl">
+          </div>
+          
+          <button onclick="saveAdminPrices()" class="btn-primary py-5 text-lg">Save Prices</button>
+          <button onclick="navigateTo('home')" class="mt-4 text-gray-400">← Back to Menu</button>
+        </div>`;
+    }
+
+    function saveAdminPrices() {
+      buyPrice = parseFloat(document.getElementById('buyInput').value) || 1500;
+      sellPrice = parseFloat(document.getElementById('sellInput').value) || 1480;
+      savePrices();
+      tg.showAlert("✅ Prices updated successfully!");
+      navigateTo('home');
     }
 
     // Initialize
-    showMainMenu();
-    tg.BackButton.onClick(() => tg.close());
+    function init() {
+      navigateTo('home');
+      tg.BackButton.onClick(() => tg.close());
+    }
+
+    window.onload = init;
   </script>
 </body>
 </html>
