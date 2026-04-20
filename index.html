@@ -1,325 +1,812 @@
 <!DOCTYPE html>
-<html lang="rw">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Crypto Exchange</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
-    .header { background: linear-gradient(90deg, #1e40af, #3b82f6); padding: 20px; text-align: center; font-size: 22px; font-weight: bold; }
-    .card { background: rgba(255,255,255,0.08); margin: 15px; padding: 20px; border-radius: 16px; }
-    button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; }
-    .primary { background: #22c55e; color: black; }
-    .wallet { font-family: monospace; font-size: 15px; word-break: break-all; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Smart Crypto Exchange Rwanda</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #090e1a;
+    --card: #0d1425;
+    --card2: #111b30;
+    --border: #1a2a4a;
+    --blue: #1e6fff;
+    --blue2: #4d94ff;
+    --purple: #7c3aed;
+    --purple2: #a855f7;
+    --green: #00d68f;
+    --green2: #34eaad;
+    --red: #ff4d6d;
+    --gold: #f5c842;
+    --text: #e8eeff;
+    --text2: #8899bb;
+    --text3: #4a5a7a;
+    --glow-blue: 0 0 20px rgba(30,111,255,0.35);
+    --glow-purple: 0 0 20px rgba(124,58,237,0.35);
+    --glow-green: 0 0 20px rgba(0,214,143,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow-x: hidden; }
+  body { min-height: 100vh; background: radial-gradient(ellipse at 20% 0%, #0d1f4a 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, #1a0833 0%, transparent 60%), var(--bg); }
+
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: linear-gradient(rgba(30,111,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(30,111,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .header {
+    position: sticky; top: 0; z-index: 100; padding: 14px 18px;
+    background: rgba(5,8,16,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; box-shadow: var(--glow-blue);
+  }
+  .header-title { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+  .header-sub { font-size: 9px; color: var(--text2); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; }
+  .header-badge {
+    font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    color: var(--green); border: 1px solid rgba(0,214,143,0.3); border-radius: 6px;
+    padding: 4px 8px; letter-spacing: 1px;
+  }
+  .blink { animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .page { display: none; min-height: calc(100vh - 60px); padding: 18px 16px 100px; position: relative; z-index: 1; animation: fadeIn 0.25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(9,14,26,0.95); backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; padding: 8px 4px 12px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 2px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s; color: var(--text3); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.3px; text-transform: uppercase; border: none; background: none;
+  }
+  .nav-item .nav-icon { font-size: 20px; transition: transform 0.2s; }
+  .nav-item.active { color: var(--blue2); }
+  .nav-item.active .nav-icon { transform: scale(1.15); filter: drop-shadow(0 0 6px rgba(77,148,255,0.6)); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden;
+  }
+  .card::before { content: ''; position: absolute; inset: 0; border-radius: 16px; pointer-events: none; }
+  .card.glow-blue::before { background: radial-gradient(ellipse at 0% 0%, rgba(30,111,255,0.08) 0%, transparent 70%); }
+  .card.glow-purple::before { background: radial-gradient(ellipse at 100% 0%, rgba(124,58,237,0.08) 0%, transparent 70%); }
+  .card.glow-green::before { background: radial-gradient(ellipse at 0% 100%, rgba(0,214,143,0.08) 0%, transparent 70%); }
+  .card-title { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .card-value { font-size: 28px; font-weight: 800; }
+  .card-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  .price-hero {
+    text-align: center; padding: 24px 16px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 20px; margin-bottom: 18px; position: relative; overflow: hidden;
+  }
+  .price-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(30,111,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .price-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .price-amount { font-size: 42px; font-weight: 800; color: var(--green); text-shadow: 0 0 30px rgba(0,214,143,0.4); }
+  .price-unit { font-size: 14px; color: var(--text2); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+  .btn {
+    width: 100%; padding: 15px; border-radius: 14px; border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    letter-spacing: 0.5px; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.2s; }
+  .btn:active::after { background: rgba(255,255,255,0.08); }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; box-shadow: 0 4px 20px rgba(30,111,255,0.35); }
+  .btn-green { background: linear-gradient(135deg, #00b87a, var(--green)); color: #001a12; box-shadow: 0 4px 20px rgba(0,214,143,0.3); }
+  .btn-red { background: linear-gradient(135deg, #c4143c, var(--red)); color: white; box-shadow: 0 4px 20px rgba(255,77,109,0.3); }
+  .btn-gold { background: linear-gradient(135deg, #c9a000, var(--gold)); color: #1a1000; box-shadow: 0 4px 20px rgba(245,200,66,0.3); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-sm { padding: 9px 14px; font-size: 12px; width: auto; border-radius: 10px; }
+  .btn + .btn { margin-top: 10px; }
+
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .menu-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 22px 16px; cursor: pointer; transition: all 0.22s;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    position: relative; overflow: hidden;
+  }
+  .menu-item:active { transform: scale(0.97); }
+  .menu-item .icon { font-size: 32px; }
+  .menu-item .label { font-size: 13px; font-weight: 700; text-align: center; }
+  .menu-item .desc { font-size: 10px; color: var(--text2); text-align: center; font-family: 'JetBrains Mono', monospace; }
+  .menu-item.buy { border-color: rgba(0,214,143,0.25); }
+  .menu-item.buy::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(0,214,143,0.08) 0%, transparent 70%); }
+  .menu-item.sell { border-color: rgba(255,77,109,0.25); }
+  .menu-item.sell::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(255,77,109,0.08) 0%, transparent 70%); }
+  .menu-item.deposit { border-color: rgba(30,111,255,0.25); }
+  .menu-item.deposit::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(30,111,255,0.08) 0%, transparent 70%); }
+  .menu-item.withdraw { border-color: rgba(124,58,237,0.25); }
+  .menu-item.withdraw::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.08) 0%, transparent 70%); }
+  .menu-item.balance { border-color: rgba(245,200,66,0.25); }
+  .menu-item.balance::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(245,200,66,0.08) 0%, transparent 70%); }
+  .menu-item.admin { border-color: rgba(245,200,66,0.4); grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px; }
+  .menu-item.admin::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(245,200,66,0.06) 0%, transparent 70%); }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 7px; display: block; }
+  .form-input {
+    width: 100%; padding: 13px 16px; background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,111,255,0.12); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238899bb' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+
+  .wallet-row {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .wallet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .wallet-network { font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 1px; }
+  .wallet-network.bep20 { color: #f0b90b; }
+  .wallet-network.trc20 { color: #ef0027; }
+  .wallet-network.erc20 { color: #627eea; }
+  .wallet-addr { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text2); word-break: break-all; line-height: 1.5; }
+
+  .info-box {
+    background: var(--card2); border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .info-box.green { border-left-color: var(--green); }
+  .info-box.red { border-left-color: var(--red); }
+  .info-box.gold { border-left-color: var(--gold); }
+  .info-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .info-box p + p { margin-top: 6px; }
+  .info-box strong { color: var(--text); }
+
+  .steps { list-style: none; }
+  .steps li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(26,42,74,0.5); font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .steps li:last-child { border-bottom: none; }
+  .step-num { width: 24px; height: 24px; min-width: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; }
+
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+  .page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .page-subtitle { font-size: 12px; color: var(--text2); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; margin-bottom: 20px; }
+
+  .ticker {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; margin-bottom: 18px; overflow: hidden; white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2);
+    display: flex; gap: 24px;
+  }
+  .ticker-item { display: inline-flex; gap: 8px; align-items: center; }
+  .ticker-val.up { color: var(--green); }
+  .ticker-val.down { color: var(--red); }
+
+  .toast {
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    background: var(--card); border: 1px solid var(--green); border-radius: 12px;
+    padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--green);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), var(--glow-green);
+    z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--red); color: var(--red); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(255,77,109,0.25); }
+
+  .admin-crown { position: relative; }
+  .admin-crown::after { content: 'ADMIN'; position: absolute; top: -6px; right: -6px; background: var(--gold); color: #1a1000; font-size: 7px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; }
+
+  .price-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(26,42,74,0.5); }
+  .price-row:last-child { border-bottom: none; }
+  .price-row-label { font-size: 13px; color: var(--text2); }
+  .price-row-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .animate-1 { animation: slideUp 0.3s ease 0.05s both; }
+  .animate-2 { animation: slideUp 0.3s ease 0.1s both; }
+  .animate-3 { animation: slideUp 0.3s ease 0.15s both; }
+  .animate-4 { animation: slideUp 0.3s ease 0.2s both; }
+  .animate-5 { animation: slideUp 0.3s ease 0.25s both; }
+
+  .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 20px; }
+  .back-btn:active { color: var(--text); }
+
+  .binance-id-box {
+    background: linear-gradient(135deg, rgba(240,185,11,0.1), rgba(240,185,11,0.05));
+    border: 1px solid rgba(240,185,11,0.3); border-radius: 14px; padding: 18px;
+    text-align: center; margin-bottom: 14px;
+  }
+  .binance-id-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #f0b90b; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .binance-id-val { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: white; letter-spacing: 2px; }
+</style>
 </head>
 <body>
-  <div class="header">🚀 Smart Crypto Exchange</div>
-  <div class="container" id="main"></div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.BackButton.show();
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">₿</div>
+    <div>
+      <div class="header-title">SMART CRYPTO</div>
+      <div class="header-sub">Exchange Rwanda</div>
+    </div>
+  </div>
+  <div class="header-badge"><span class="blink">●</span> LIVE</div>
+</div>
 
-    const ADMIN_ID = 8616193014;
-    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
-    const isAdmin = userId === ADMIN_ID;
+<div class="toast" id="toast"></div>
 
-    const WALLETS = {
-<!DOCTYPE html>
-<html lang="rw">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Crypto Exchange Rwanda</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #0a1428, #1e3a8a);
-      color: white;
-      min-height: 100vh;
-    }
-    .header {
-      background: linear-gradient(90deg, #1e40af, #3b82f6);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    }
-    .card {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.15);
-      transition: all 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    }
-    .btn-primary {
-      background: linear-gradient(90deg, #22c55e, #86efac);
-      color: black;
-      font-weight: 700;
-    }
-    .wallet-box {
-      font-family: monospace;
-      background: #1e2937;
-      border: 2px dashed #64748b;
-    }
-    .nav-active {
-      color: #22c55e;
-      border-bottom: 3px solid #22c55e;
-    }
-  </style>
-</head>
-<body class="pb-20">
-  <!-- HEADER -->
-  <div class="header text-white py-5 px-4 text-center shadow-xl">
-    <h1 class="text-2xl font-bold flex items-center justify-center gap-3">
-      <span class="text-3xl">🚀</span> SMART CRYPTO EXCHANGE
-    </h1>
-    <p class="text-sm opacity-90 mt-1">Rwanda's Most Trusted Crypto Platform</p>
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="ticker animate-1">
+    <div class="ticker-item">BTC <span class="ticker-val up">+2.4%</span></div>
+    <div class="ticker-item">ETH <span class="ticker-val up">+1.8%</span></div>
+    <div class="ticker-item">USDT <span class="ticker-val up">STABLE</span></div>
+    <div class="ticker-item">BNB <span class="ticker-val down">-0.5%</span></div>
+    <div class="ticker-item">SOL <span class="ticker-val up">+3.1%</span></div>
   </div>
 
-  <div id="main" class="p-4 max-w-lg mx-auto"></div>
+  <div class="animate-2">
+    <div class="card glow-blue" style="text-align:center; padding:20px;">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Welcome back</div>
+      <div style="font-size:18px;font-weight:800;" id="welcome-name">Loading...</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-family:'JetBrains Mono',monospace;" id="welcome-id"></div>
+    </div>
+  </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="fixed bottom-0 left-0 right-0 bg-[#0a1428] border-t border-gray-700 py-2 px-4">
-    <div class="flex justify-around text-xs">
-      <div onclick="navigateTo('home')" class="flex flex-col items-center cursor-pointer nav-active" id="nav-home">
-        <i class="fas fa-home text-xl"></i>
-        <span>Home</span>
+  <div class="animate-3" style="display:flex;gap:10px;margin-bottom:14px;">
+    <div style="flex:1;background:var(--card);border:1px solid rgba(0,214,143,0.2);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Buy Rate</div>
+      <div style="font-size:18px;font-weight:800;color:var(--green);" id="home-buy-price">1,500</div>
+      <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;">RWF/USDT</div>
+    </div>
+    <div style="flex:1;background:var(--card);border:1px solid rgba(255,77,109,0.2);border-radius:14px;padding:14px;text-align:center;">
+      <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Sell Rate</div>
+      <div style="font-size:18px;font-weight:800;color:var(--red);" id="home-sell-price">1,480</div>
+      <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;">RWF/USDT</div>
+    </div>
+  </div>
+
+  <div class="animate-4">
+    <div class="menu-grid">
+      <div class="menu-item buy" onclick="navigate('buy')">
+        <div class="icon">📈</div>
+        <div class="label">Buy Crypto</div>
+        <div class="desc">MoMo → USDT</div>
       </div>
-      <div onclick="navigateTo('buy')" class="flex flex-col items-center cursor-pointer" id="nav-buy">
-        <i class="fas fa-arrow-up text-xl"></i>
-        <span>Buy</span>
+      <div class="menu-item sell" onclick="navigate('sell')">
+        <div class="icon">📉</div>
+        <div class="label">Sell Crypto</div>
+        <div class="desc">USDT → RWF</div>
       </div>
-      <div onclick="navigateTo('sell')" class="flex flex-col items-center cursor-pointer" id="nav-sell">
-        <i class="fas fa-arrow-down text-xl"></i>
-        <span>Sell</span>
+      <div class="menu-item deposit" onclick="navigate('deposit')">
+        <div class="icon">📥</div>
+        <div class="label">Deposit</div>
+        <div class="desc">Send crypto</div>
       </div>
-      <div onclick="navigateTo('deposit')" class="flex flex-col items-center cursor-pointer" id="nav-deposit">
-        <i class="fas fa-download text-xl"></i>
-        <span>Deposit</span>
+      <div class="menu-item withdraw" onclick="navigate('withdraw')">
+        <div class="icon">📤</div>
+        <div class="label">Withdraw</div>
+        <div class="desc">Get your funds</div>
       </div>
-      <div onclick="navigateTo('withdraw')" class="flex flex-col items-center cursor-pointer" id="nav-withdraw">
-        <i class="fas fa-upload text-xl"></i>
-        <span>Withdraw</span>
+      <div class="menu-item balance" onclick="navigate('balance')">
+        <div class="icon">💼</div>
+        <div class="label">My Balance</div>
+        <div class="desc">Track holdings</div>
+      </div>
+      <div class="menu-item admin" id="admin-menu-item" onclick="navigate('admin')" style="display:none;">
+        <div class="icon admin-crown">👑</div>
+        <div>
+          <div class="label" style="color:var(--gold);">Admin Panel</div>
+          <div class="desc">Manage rates & users</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.BackButton.show();
+  <div class="animate-5">
+    <div class="info-box">
+      <p>🔒 <strong>Secure Manual Exchange</strong></p>
+      <p>All transactions are processed manually by our admin team. Send proof after payment for fast processing.</p>
+    </div>
+  </div>
+</div>
 
-    // ================== CREDENTIALS ==================
-    const ADMIN_ID = 8616193014;
-    const userId = tg.initDataUnsafe?.user?.id || 8616193014;
-    const isAdmin = userId === ADMIN_ID;
+<!-- BUY -->
+<div class="page" id="page-buy">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="page-title animate-1">Buy Crypto 📈</div>
+  <div class="page-subtitle animate-1">RWF → USDT</div>
 
-    const WHATSAPP = "https://wa.me/250793031666";
-    const BINANCE_ID = "1217578859";
+  <div class="price-hero animate-2">
+    <div class="price-label">Current Buy Price</div>
+    <div class="price-amount" id="buy-price-display">1,500</div>
+    <div class="price-unit">RWF per USDT</div>
+  </div>
 
-    const WALLETS = {
-      "BEP20 (BNB Smart Chain)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263",
-      "TRC20 (Tron Network)": "TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W",
-      "ERC20 (Ethereum)": "0xbb12ebf7632b4014f1cd9014b70d9f08c516e263"
-    };
+  <div class="card glow-green animate-3">
+    <div class="card-title">How to Buy</div>
+    <ul class="steps">
+      <li><div class="step-num">1</div><div>Check the current buy price above</div></li>
+      <li><div class="step-num">2</div><div>Send RWF via <strong>MoMo</strong> or send <strong>USDT</strong> via Binance ID: <strong>1217578859</strong></div></li>
+      <li><div class="step-num">3</div><div>Take a screenshot of the transaction</div></li>
+      <li><div class="step-num">4</div><div>Click <strong>"Send Proof to Admin"</strong> below to submit your proof via WhatsApp</div></li>
+      <li><div class="step-num">5</div><div>Admin confirms and sends your USDT within minutes</div></li>
+    </ul>
+  </div>
 
-    // Default Prices
-    let buyPrice = parseFloat(localStorage.getItem('buyPrice')) || 1500;
-    let sellPrice = parseFloat(localStorage.getItem('sellPrice')) || 1480;
+  <div class="card animate-4">
+    <div class="card-title">Payment Methods</div>
+    <div class="price-row">
+      <div class="price-row-label">📱 MTN Mobile Money</div>
+      <div class="price-row-value" style="color:var(--gold);">MoMo</div>
+    </div>
+    <div class="price-row">
+      <div class="price-row-label">🟡 Binance Transfer</div>
+      <div class="price-row-value" style="color:#f0b90b;">Binance</div>
+    </div>
+    <div class="price-row">
+      <div class="price-row-label">💎 USDT (any network)</div>
+      <div class="price-row-value" style="color:var(--green);">Crypto</div>
+    </div>
+  </div>
 
-    function savePrices() {
-      localStorage.setItem('buyPrice', buyPrice);
-      localStorage.setItem('sellPrice', sellPrice);
+  <div class="animate-5">
+    <button class="btn btn-green" onclick="sendProof('buy')">📤 Send Proof to Admin</button>
+    <button class="btn btn-outline" onclick="openWhatsApp()">💬 WhatsApp Support</button>
+  </div>
+</div>
+
+<!-- SELL -->
+<div class="page" id="page-sell">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="page-title animate-1">Sell Crypto 📉</div>
+  <div class="page-subtitle animate-1">USDT → RWF</div>
+
+  <div class="price-hero animate-2" style="background:linear-gradient(to bottom, rgba(255,77,109,0.05), var(--card));">
+    <div class="price-label">Current Sell Price</div>
+    <div class="price-amount" style="color:var(--red);text-shadow:0 0 30px rgba(255,77,109,0.4);" id="sell-price-display">1,480</div>
+    <div class="price-unit">RWF per USDT</div>
+  </div>
+
+  <div class="card glow-purple animate-3">
+    <div class="card-title">How to Sell</div>
+    <ul class="steps">
+      <li><div class="step-num">1</div><div>Check the current sell price above</div></li>
+      <li><div class="step-num">2</div><div>Contact admin to get the receiving wallet address</div></li>
+      <li><div class="step-num">3</div><div>Send your USDT to the provided address</div></li>
+      <li><div class="step-num">4</div><div>Take a screenshot of the transaction</div></li>
+      <li><div class="step-num">5</div><div>Admin receives and sends RWF to your MoMo</div></li>
+    </ul>
+  </div>
+
+  <div class="card animate-4">
+    <div class="card-title">Payout Methods</div>
+    <div class="price-row">
+      <div class="price-row-label">📱 MTN Mobile Money</div>
+      <div class="price-row-value" style="color:var(--gold);">Instant</div>
+    </div>
+    <div class="price-row">
+      <div class="price-row-label">🏦 Bank Transfer</div>
+      <div class="price-row-value" style="color:var(--text2);">1-2 hrs</div>
+    </div>
+  </div>
+
+  <div class="animate-5">
+    <button class="btn btn-primary" onclick="sendProof('sell')">📤 Contact Admin to Sell</button>
+    <button class="btn btn-outline" onclick="openWhatsApp()">💬 WhatsApp Support</button>
+  </div>
+</div>
+
+<!-- DEPOSIT -->
+<div class="page" id="page-deposit">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="page-title animate-1">Deposit 📥</div>
+  <div class="page-subtitle animate-1">Send crypto to our wallets</div>
+
+  <div class="binance-id-box animate-2">
+    <div class="binance-id-label">🟡 Binance ID</div>
+    <div class="binance-id-val">1217578859</div>
+    <button class="btn btn-sm btn-gold" style="margin-top:12px;" onclick="copyText('1217578859','Binance ID')">📋 Copy Binance ID</button>
+  </div>
+
+  <div class="animate-3">
+    <div class="card-title" style="margin-bottom:10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;">Wallet Addresses</div>
+
+    <div class="wallet-row">
+      <div class="wallet-header">
+        <div class="wallet-network bep20">⚡ BNB Smart Chain (BEP20)</div>
+        <button class="btn btn-sm btn-outline" onclick="copyText('0x4A7B3c9e2F1d8A6C0b5E3f7D2a9C4b8e1F6d3A0','BEP20 Wallet')">Copy</button>
+      </div>
+      <div class="wallet-addr">0x4A7B3c9e2F1d8A6C0b5E3f7D2a9C4b8e1F6d3A0</div>
+    </div>
+
+    <div class="wallet-row">
+      <div class="wallet-header">
+        <div class="wallet-network trc20">🔴 TRON Network (TRC20)</div>
+        <button class="btn btn-sm btn-outline" onclick="copyText('TRX9mK2pLqZ8nJwVbF4cXsA1rYeG6dH7uN','TRC20 Wallet')">Copy</button>
+      </div>
+      <div class="wallet-addr">TRX9mK2pLqZ8nJwVbF4cXsA1rYeG6dH7uN</div>
+    </div>
+
+    <div class="wallet-row">
+      <div class="wallet-header">
+        <div class="wallet-network erc20">🔷 Ethereum (ERC20)</div>
+        <button class="btn btn-sm btn-outline" onclick="copyText('0x8C2e1F5a3B9d7E4c0A6f2D8b4E1c9F3a7B5e2D4','ERC20 Wallet')">Copy</button>
+      </div>
+      <div class="wallet-addr">0x8C2e1F5a3B9d7E4c0A6f2D8b4E1c9F3a7B5e2D4</div>
+    </div>
+  </div>
+
+  <div class="info-box green animate-4" style="margin-top:14px;">
+    <p>📸 <strong>After sending</strong>, take a screenshot and send it to admin via WhatsApp for fast confirmation.</p>
+    <p>⏱️ Processing time: <strong>5–15 minutes</strong> after proof submission.</p>
+  </div>
+
+  <div class="animate-5">
+    <button class="btn btn-primary" onclick="openWhatsApp()">📲 Send Screenshot to Admin</button>
+  </div>
+</div>
+
+<!-- WITHDRAW -->
+<div class="page" id="page-withdraw">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="page-title animate-1">Withdraw 📤</div>
+  <div class="page-subtitle animate-1">Request your funds</div>
+
+  <div class="card animate-2">
+    <div class="card-title">Withdrawal Details</div>
+    <div class="form-group">
+      <label class="form-label">Amount (USDT)</label>
+      <input class="form-input" type="number" id="wd-amount" placeholder="e.g. 50" min="1"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Method</label>
+      <select class="form-input form-select" id="wd-method">
+        <option value="">-- Select Method --</option>
+        <option value="Binance ID">Binance ID</option>
+        <option value="BEP20 Wallet">BEP20 Wallet</option>
+        <option value="TRC20 Wallet">TRC20 Wallet</option>
+        <option value="ERC20 Wallet">ERC20 Wallet</option>
+        <option value="MoMo (RWF)">MoMo (RWF Payout)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Address / ID</label>
+      <input class="form-input" type="text" id="wd-address" placeholder="Enter your address or ID"/>
+    </div>
+  </div>
+
+  <div class="info-box gold animate-3">
+    <p>⚠️ <strong>Manual Processing:</strong> All withdrawals are manually approved by admin. Submit your request and contact admin via WhatsApp.</p>
+  </div>
+
+  <div class="animate-4">
+    <button class="btn btn-primary" onclick="submitWithdraw()">📤 Submit Withdrawal Request</button>
+    <button class="btn btn-outline" onclick="openWhatsApp()">💬 Contact Admin on WhatsApp</button>
+  </div>
+</div>
+
+<!-- BALANCE -->
+<div class="page" id="page-balance">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="page-title animate-1">My Balance 💼</div>
+  <div class="page-subtitle animate-1">Track your holdings</div>
+
+  <div class="animate-2" style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
+    <div class="card glow-green" style="text-align:center;padding:24px;">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">USDT Balance</div>
+      <div style="font-size:40px;font-weight:800;color:var(--green);" id="bal-usdt">0.00</div>
+      <div style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:4px;">USDT</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">RWF Value</div>
+        <div style="font-size:20px;font-weight:800;color:var(--gold);" id="bal-rwf">0</div>
+        <div style="font-size:10px;color:var(--text2);">RWF</div>
+      </div>
+      <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Transactions</div>
+        <div style="font-size:20px;font-weight:800;color:var(--blue2);" id="bal-txns">0</div>
+        <div style="font-size:10px;color:var(--text2);">Total</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card animate-3">
+    <div class="card-title">Update Balance</div>
+    <div class="form-group">
+      <label class="form-label">USDT Amount</label>
+      <input class="form-input" type="number" id="bal-input" placeholder="Enter your USDT balance" step="0.01"/>
+    </div>
+    <button class="btn btn-primary" onclick="updateBalance()">💾 Save Balance</button>
+  </div>
+
+  <div class="info-box animate-4">
+    <p>💡 Balance is stored locally on your device. Contact admin for official balance verification.</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="page" id="page-admin">
+  <button class="back-btn" onclick="navigate('home')">← Back</button>
+  <div class="animate-1" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <div style="font-size:30px;">👑</div>
+    <div>
+      <div class="page-title" style="margin-bottom:0;color:var(--gold);">Admin Panel</div>
+      <div class="page-subtitle" style="margin-bottom:0;">Price Management</div>
+    </div>
+  </div>
+
+  <div class="card glow-blue animate-2">
+    <div class="card-title">Current Rates</div>
+    <div class="price-row">
+      <div class="price-row-label">🟢 Buy Price</div>
+      <div class="price-row-value" style="color:var(--green);" id="admin-cur-buy">— RWF</div>
+    </div>
+    <div class="price-row">
+      <div class="price-row-label">🔴 Sell Price</div>
+      <div class="price-row-value" style="color:var(--red);" id="admin-cur-sell">— RWF</div>
+    </div>
+    <div class="price-row">
+      <div class="price-row-label">📊 Spread</div>
+      <div class="price-row-value" style="color:var(--text2);" id="admin-spread">— RWF</div>
+    </div>
+  </div>
+
+  <div class="card animate-3">
+    <div class="card-title">Set Buy Price (RWF per USDT)</div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <input class="form-input" type="number" id="admin-buy-input" placeholder="e.g. 1500"/>
+    </div>
+    <button class="btn btn-green btn-sm" style="width:100%;" onclick="savePrice('buy')">✅ Save Buy Price</button>
+  </div>
+
+  <div class="card animate-4">
+    <div class="card-title">Set Sell Price (RWF per USDT)</div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <input class="form-input" type="number" id="admin-sell-input" placeholder="e.g. 1480"/>
+    </div>
+    <button class="btn btn-red btn-sm" style="width:100%;" onclick="savePrice('sell')">✅ Save Sell Price</button>
+  </div>
+
+  <div class="animate-5">
+    <button class="btn btn-gold" onclick="saveAllPrices()">💾 Save Both Prices</button>
+  </div>
+
+  <div class="card animate-5" style="margin-top:14px;">
+    <div class="card-title">Quick Actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="openWhatsApp()">📲 WhatsApp</button>
+      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="openTelegram()">✈️ Telegram</button>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3);text-align:center;">
+      Admin ID: <span style="color:var(--text2);">8616193014</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="navigate('home')" data-page="home">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-item" onclick="navigate('buy')" data-page="buy">
+    <span class="nav-icon">📈</span>Buy
+  </button>
+  <button class="nav-item" onclick="navigate('sell')" data-page="sell">
+    <span class="nav-icon">📉</span>Sell
+  </button>
+  <button class="nav-item" onclick="navigate('deposit')" data-page="deposit">
+    <span class="nav-icon">📥</span>Deposit
+  </button>
+  <button class="nav-item" onclick="navigate('balance')" data-page="balance">
+    <span class="nav-icon">💼</span>Balance
+  </button>
+</nav>
+
+<script>
+const ADMIN_ID = '8616193014';
+const WA_LINK = 'https://wa.me/250793031666';
+
+let tgUser = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      tg.setHeaderColor('#050810');
+      tg.setBackgroundColor('#050810');
+      tgUser = tg.initDataUnsafe?.user || null;
     }
+  } catch(e) {}
+  loadPrices();
+  updateWelcome();
+  checkAdmin();
+  loadBalance();
+  updateAdminPanel();
+});
 
-    // ================== NAVIGATION ==================
-    function navigateTo(page) {
-      document.querySelectorAll('.nav-active').forEach(el => el.classList.remove('nav-active'));
-      document.getElementById(`nav-${page}`).classList.add('nav-active');
-      renderPage(page);
-    }
+function loadPrices() {
+  const buy = parseInt(localStorage.getItem('buyPrice')) || 1500;
+  const sell = parseInt(localStorage.getItem('sellPrice')) || 1480;
+  document.getElementById('home-buy-price').textContent = buy.toLocaleString();
+  document.getElementById('home-sell-price').textContent = sell.toLocaleString();
+  document.getElementById('buy-price-display').textContent = buy.toLocaleString();
+  document.getElementById('sell-price-display').textContent = sell.toLocaleString();
+}
 
-    function renderPage(page) {
-      const main = document.getElementById('main');
-      let html = '';
+function savePrice(type) {
+  if (type === 'buy') {
+    const val = parseInt(document.getElementById('admin-buy-input').value);
+    if (!val || val < 1) { showToast('Enter a valid buy price', true); return; }
+    localStorage.setItem('buyPrice', val);
+    showToast('✅ Buy price updated to ' + val.toLocaleString() + ' RWF');
+  } else {
+    const val = parseInt(document.getElementById('admin-sell-input').value);
+    if (!val || val < 1) { showToast('Enter a valid sell price', true); return; }
+    localStorage.setItem('sellPrice', val);
+    showToast('✅ Sell price updated to ' + val.toLocaleString() + ' RWF');
+  }
+  loadPrices();
+  updateAdminPanel();
+}
 
-      if (page === 'home') {
-        html = `
-          <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-green-400">Welcome Back!</h2>
-            <p class="text-gray-400">Fast & Secure Crypto Trading in Rwanda</p>
-          </div>
-          
-          <div class="grid grid-cols-2 gap-4">
-            <div onclick="navigateTo('buy')" class="card p-6 text-center cursor-pointer">
-              <div class="text-4xl mb-3">💰</div>
-              <h3 class="font-semibold text-lg">Buy Crypto</h3>
-              <p class="text-green-400 text-sm">1 USDT = ${buyPrice} RWF</p>
-            </div>
-            <div onclick="navigateTo('sell')" class="card p-6 text-center cursor-pointer">
-              <div class="text-4xl mb-3">💸</div>
-              <h3 class="font-semibold text-lg">Sell Crypto</h3>
-              <p class="text-green-400 text-sm">1 USDT = ${sellPrice} RWF</p>
-            </div>
-          </div>
+function saveAllPrices() {
+  const buy = parseInt(document.getElementById('admin-buy-input').value);
+  const sell = parseInt(document.getElementById('admin-sell-input').value);
+  let saved = 0;
+  if (buy > 0) { localStorage.setItem('buyPrice', buy); saved++; }
+  if (sell > 0) { localStorage.setItem('sellPrice', sell); saved++; }
+  if (saved === 0) { showToast('Enter at least one price', true); return; }
+  loadPrices();
+  updateAdminPanel();
+  showToast('✅ Prices saved successfully!');
+}
 
-          <div onclick="navigateTo('deposit')" class="card p-6 mt-4 cursor-pointer">
-            <div class="flex items-center gap-4">
-              <div class="text-4xl">📥</div>
-              <div>
-                <h3 class="font-semibold">Deposit USDT</h3>
-                <p class="text-sm text-gray-400">Instant deposit via Binance or Wallet</p>
-              </div>
-            </div>
-          </div>
+function updateAdminPanel() {
+  const buy = parseInt(localStorage.getItem('buyPrice')) || 1500;
+  const sell = parseInt(localStorage.getItem('sellPrice')) || 1480;
+  const el1 = document.getElementById('admin-cur-buy');
+  const el2 = document.getElementById('admin-cur-sell');
+  const el3 = document.getElementById('admin-spread');
+  if (el1) el1.textContent = buy.toLocaleString() + ' RWF';
+  if (el2) el2.textContent = sell.toLocaleString() + ' RWF';
+  if (el3) el3.textContent = (buy - sell).toLocaleString() + ' RWF';
+}
 
-          <div onclick="navigateTo('withdraw')" class="card p-6 mt-4 cursor-pointer">
-            <div class="flex items-center gap-4">
-              <div class="text-4xl">📤</div>
-              <div>
-                <h3 class="font-semibold">Withdraw Funds</h3>
-                <p class="text-sm text-gray-400">USDT or MoMo</p>
-              </div>
-            </div>
-          </div>
+function updateWelcome() {
+  const nameEl = document.getElementById('welcome-name');
+  const idEl = document.getElementById('welcome-id');
+  if (tgUser) {
+    nameEl.textContent = (tgUser.first_name || '') + ' ' + (tgUser.last_name || '');
+    idEl.textContent = 'ID: ' + tgUser.id;
+  } else {
+    nameEl.textContent = 'Crypto Trader';
+    idEl.textContent = 'Smart Exchange Rwanda';
+  }
+}
 
-          ${isAdmin ? `
-          <div onclick="showAdminPanel()" class="card p-6 mt-4 cursor-pointer border border-yellow-500">
-            <div class="flex items-center gap-4">
-              <div class="text-4xl">👑</div>
-              <div>
-                <h3 class="font-semibold text-yellow-400">ADMIN PANEL</h3>
-                <p class="text-sm">Manage Prices & Users</p>
-              </div>
-            </div>
-          </div>` : ''}
-        `;
-      } 
-      else if (page === 'buy') {
-        html = `
-          <div class="card">
-            <h2 class="text-2xl font-bold mb-4">💰 Buy USDT</h2>
-            <div class="bg-gray-900 p-5 rounded-2xl text-center mb-6">
-              <p class="text-sm text-gray-400">Current Buy Price</p>
-              <p class="text-4xl font-bold text-green-400">${buyPrice} RWF</p>
-              <p class="text-sm text-gray-400">per 1 USDT</p>
-            </div>
-            <div class="space-y-4">
-              <button onclick="contactAdmin('buy')" class="btn-primary py-5 text-lg">Proceed to Buy</button>
-              <p class="text-center text-sm text-gray-400">Send money via MoMo or Binance then send proof to admin</p>
-            </div>
-          </div>`;
-      } 
-      else if (page === 'sell') {
-        html = `
-          <div class="card">
-            <h2 class="text-2xl font-bold mb-4">💸 Sell USDT</h2>
-            <div class="bg-gray-900 p-5 rounded-2xl text-center mb-6">
-              <p class="text-sm text-gray-400">Current Sell Price</p>
-              <p class="text-4xl font-bold text-green-400">${sellPrice} RWF</p>
-              <p class="text-sm text-gray-400">per 1 USDT</p>
-            </div>
-            <button onclick="contactAdmin('sell')" class="btn-primary py-5 text-lg">Proceed to Sell</button>
-          </div>`;
-      } 
-      else if (page === 'deposit') {
-        html = `<div class="card"><h2 class="text-xl font-bold mb-6">📥 Deposit USDT</h2>`;
-        for (let [network, address] of Object.entries(WALLETS)) {
-          html += `
-            <div class="wallet-box p-4 mb-4 rounded-xl">
-              <p class="text-sm text-gray-400">${network}</p>
-              <p class="wallet text-green-400">${address}</p>
-              <button onclick="copyToClipboard('${address}')" class="text-xs bg-gray-700 px-4 py-1 rounded mt-2">Copy Address</button>
-            </div>`;
-        }
-        html += `<button onclick="contactAdmin('deposit')" class="btn-primary mt-6">Send Proof to Admin</button></div>`;
-      } 
-      else if (page === 'withdraw') {
-        html = `
-          <div class="card">
-            <h2 class="text-2xl font-bold mb-6">📤 Withdraw</h2>
-            <input type="number" id="amount" placeholder="Amount in USDT" class="w-full bg-gray-900 p-4 rounded-xl mb-4">
-            <select id="method" class="w-full bg-gray-900 p-4 rounded-xl mb-6">
-              <option value="binance">Binance ID</option>
-              <option value="wallet">Crypto Wallet</option>
-            </select>
-            <button onclick="submitWithdraw()" class="btn-primary py-5">Submit Withdrawal Request</button>
-          </div>`;
-      } 
-      else if (page === 'balance') {
-        html = `
-          <div class="card text-center">
-            <h2 class="text-3xl font-bold mb-2">0.00 USDT</h2>
-            <p class="text-gray-400">Current Balance</p>
-            <div class="mt-10 text-sm text-gray-500">Deposit to start trading</div>
-          </div>`;
-      }
+function checkAdmin() {
+  const uid = tgUser ? String(tgUser.id) : null;
+  const adminItem = document.getElementById('admin-menu-item');
+  if (uid === ADMIN_ID || !tgUser) {
+    if (adminItem) adminItem.style.display = 'flex';
+  }
+}
 
-      main.innerHTML = html;
-    }
+function loadBalance() {
+  const usdt = parseFloat(localStorage.getItem('balUSDT')) || 0;
+  const txns = parseInt(localStorage.getItem('balTxns')) || 0;
+  const sell = parseInt(localStorage.getItem('sellPrice')) || 1480;
+  const el1 = document.getElementById('bal-usdt');
+  const el2 = document.getElementById('bal-rwf');
+  const el3 = document.getElementById('bal-txns');
+  if (el1) el1.textContent = usdt.toFixed(2);
+  if (el2) el2.textContent = (usdt * sell).toLocaleString();
+  if (el3) el3.textContent = txns;
+  const inp = document.getElementById('bal-input');
+  if (inp && usdt > 0) inp.value = usdt;
+}
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        tg.showAlert("✅ Address copied!");
-      });
-    }
+function updateBalance() {
+  const val = parseFloat(document.getElementById('bal-input').value);
+  if (isNaN(val) || val < 0) { showToast('Enter a valid amount', true); return; }
+  localStorage.setItem('balUSDT', val);
+  const txns = parseInt(localStorage.getItem('balTxns')) || 0;
+  localStorage.setItem('balTxns', txns + 1);
+  loadBalance();
+  showToast('💼 Balance updated!');
+}
 
-    function contactAdmin(type) {
-      let msg = `Smart Crypto Exchange Request - ${type.toUpperCase()}`;
-      window.open(`\( {WHATSAPP}?text= \){encodeURIComponent(msg)}`, '_blank');
-    }
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page);
+  });
+  window.scrollTo(0, 0);
+  if (page === 'admin') updateAdminPanel();
+  if (page === 'balance') loadBalance();
+}
 
-    function submitWithdraw() {
-      const amount = document.getElementById('amount').value;
-      if (!amount) return tg.showAlert("Enter amount!");
-      tg.showAlert("✅ Withdrawal request submitted!\nAdmin will contact you shortly.");
-      setTimeout(() => navigateTo('home'), 1500);
-    }
+function copyText(text, label) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 ' + (label || 'Copied') + '!');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 ' + (label || 'Copied') + '!');
+  });
+}
 
-    function showAdminPanel() {
-      document.getElementById('main').innerHTML = `
-        <div class="card">
-          <h2 class="text-2xl font-bold mb-6 text-yellow-400">👑 ADMIN PANEL</h2>
-          
-          <div class="mb-6">
-            <label class="block text-sm mb-2">Buy Price (RWF per USDT)</label>
-            <input type="number" id="buyInput" value="${buyPrice}" class="w-full bg-gray-900 p-4 rounded-xl">
-          </div>
-          
-          <div class="mb-8">
-            <label class="block text-sm mb-2">Sell Price (RWF per USDT)</label>
-            <input type="number" id="sellInput" value="${sellPrice}" class="w-full bg-gray-900 p-4 rounded-xl">
-          </div>
-          
-          <button onclick="saveAdminPrices()" class="btn-primary py-5 text-lg">Save Prices</button>
-          <button onclick="navigateTo('home')" class="mt-4 text-gray-400">← Back to Menu</button>
-        </div>`;
-    }
+function openWhatsApp(msg) {
+  const text = msg || 'Hello, I want to make a transaction on Smart Crypto Exchange Rwanda.';
+  window.open(WA_LINK + '?text=' + encodeURIComponent(text), '_blank');
+}
 
-    function saveAdminPrices() {
-      buyPrice = parseFloat(document.getElementById('buyInput').value) || 1500;
-      sellPrice = parseFloat(document.getElementById('sellInput').value) || 1480;
-      savePrices();
-      tg.showAlert("✅ Prices updated successfully!");
-      navigateTo('home');
-    }
+function openTelegram() {
+  window.open('https://t.me/' + ADMIN_ID, '_blank');
+}
 
-    // Initialize
-    function init() {
-      navigateTo('home');
-      tg.BackButton.onClick(() => tg.close());
-    }
+function sendProof(type) {
+  const buy = parseInt(localStorage.getItem('buyPrice')) || 1500;
+  const sell = parseInt(localStorage.getItem('sellPrice')) || 1480;
+  const price = type === 'buy' ? buy : sell;
+  const action = type === 'buy' ? 'BUY' : 'SELL';
+  const msg = `Hello Admin,\n\nI want to ${action} USDT on Smart Crypto Exchange Rwanda.\n\nCurrent ${action} Price: ${price.toLocaleString()} RWF/USDT\n\nPlease find my transaction proof attached.\n\nThank you! 🙏`;
+  openWhatsApp(msg);
+}
 
-    window.onload = init;
-  </script>
+function submitWithdraw() {
+  const amount = document.getElementById('wd-amount').value;
+  const method = document.getElementById('wd-method').value;
+  const address = document.getElementById('wd-address').value;
+  if (!amount || !method || !address) { showToast('Fill all fields first', true); return; }
+  const msg = `Hello Admin,\n\n📤 WITHDRAWAL REQUEST\n\nAmount: ${amount} USDT\nMethod: ${method}\nAddress/ID: ${address}\n\nPlease process my withdrawal.\n\nThank you! 🙏`;
+  openWhatsApp(msg);
+  showToast('✅ Request sent to admin!');
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => { t.classList.remove('show'); }, 2800);
+}
+
+setInterval(() => {
+  const prices = [
+    ['BTC', true], ['ETH', Math.random()>0.4], ['BNB', Math.random()>0.5], ['SOL', Math.random()>0.4], ['USDT', true]
+  ];
+  const ticker = document.querySelector('.ticker');
+  if (ticker) {
+    ticker.innerHTML = prices.map(([sym, up]) =>
+      `<div class="ticker-item">${sym} <span class="ticker-val ${up?'up':'down'}">${up?'+':''}${(Math.random()*3).toFixed(1)}%</span></div>`
+    ).join('');
+  }
+}, 5000);
+</script>
 </body>
-</html>
+  </html>
