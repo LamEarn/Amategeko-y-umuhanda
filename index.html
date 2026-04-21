@@ -3,1057 +3,562 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Smart Crypto Exchange Rwanda</title>
+<title>Crypto Exchange Rwanda | Smart USDT</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #050810;
-    --card: #0d1425;
-    --card2: #111b30;
-    --border: #1a2a4a;
-    --blue: #1e6fff;
-    --blue2: #4d94ff;
-    --purple: #7c3aed;
-    --green: #00d68f;
-    --red: #ff4d6d;
-    --gold: #f5c842;
-    --text: #e8eeff;
-    --text2: #8899bb;
-    --text3: #4a5a7a;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow-x: hidden; }
+
   body {
-    min-height: 100vh;
-    background: radial-gradient(ellipse at 20% 0%, #0d1f4a 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 100%, #1a0833 0%, transparent 60%), var(--bg);
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    overflow-x: hidden;
+    position: relative;
   }
+
+  /* subtle Rwanda money background overlay */
   body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image: linear-gradient(rgba(30,111,255,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(30,111,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" opacity="0.03"><path fill="none" d="M0 0h800v600H0z"/><text x="20" y="40" font-size="18" fill="%231e293b">₣</text><text x="140" y="120" font-size="22" fill="%231e293b">₣</text><text x="300" y="70" font-size="16" fill="%231e293b">₣</text><text x="500" y="190" font-size="28" fill="%231e293b">₣</text><text x="620" y="80" font-size="20" fill="%231e293b">₣</text><text x="70" y="300" font-size="24" fill="%231e293b">₣</text><text x="400" y="400" font-size="30" fill="%231e293b">₣</text><text x="680" y="500" font-size="26" fill="%231e293b">₣</text><text x="200" y="550" font-size="18" fill="%231e293b">₣</text></svg>');
+    background-repeat: repeat;
+    pointer-events: none;
+    z-index: 0;
   }
 
-  /* HEADER */
-  .header {
-    position: sticky; top: 0; z-index: 100; padding: 12px 16px;
-    background: rgba(5,8,16,0.92); backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
+  /* main container */
+  .app-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #ffffff;
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
   }
-  .header-brand { display: flex; align-items: center; gap: 10px; }
-  .header-logo {
-    width: 38px; height: 38px; border-radius: 11px;
-    background: linear-gradient(135deg, var(--blue), var(--purple));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; box-shadow: 0 0 18px rgba(30,111,255,0.4);
-  }
-  .header-title { font-size: 13px; font-weight: 800; letter-spacing: 0.4px; line-height: 1.2; }
-  .header-sub { font-size: 9px; color: var(--text2); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; }
-  .header-badge {
-    font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
-    color: var(--green); border: 1px solid rgba(0,214,143,0.3); border-radius: 6px;
-    padding: 4px 8px; letter-spacing: 1px;
-  }
-  .blink { animation: blink 1.5s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* PAGES */
-  .page { display: none; min-height: calc(100vh - 62px); padding: 16px 14px 90px; position: relative; z-index: 1; animation: fadeIn 0.22s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+  /* fixed back button top-left */
+  .global-back {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    background: white;
+    border-radius: 40px;
+    padding: 8px 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    background: rgba(255,255,255,0.95);
+  }
+  .global-back:hover {
+    background: white;
+    transform: scale(0.97);
+  }
 
-  /* BOTTOM NAV */
+  /* pages */
+  .page {
+    display: none;
+    padding: 20px 16px 90px 16px;
+    animation: fadeIn 0.25s ease;
+  }
+  .page.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* cards */
+  .card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.02);
+    border: 1px solid #eef2f6;
+    transition: all 0.2s;
+  }
+  .soft-shadow {
+    box-shadow: 0 8px 20px -6px rgba(0,0,0,0.05);
+  }
+
+  /* grid menu (max 9 items, 3 cols) */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0 12px;
+  }
+  .menu-item {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 14px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .menu-item:active { transform: scale(0.96); background: #f8fafc; }
+  .menu-icon { margin-bottom: 6px; display: inline-block; color: #1e293b; }
+  .menu-label { font-size: 12px; font-weight: 600; color: #0f172a; }
+
+  /* price hero */
+  .price-hero {
+    background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+    border-radius: 28px;
+    padding: 24px 20px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+  }
+  .price-badge {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #475569;
+  }
+  .price-number {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 8px 0;
+  }
+  .price-sub {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  /* buttons */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 60px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #0f172a;
+    color: white;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary {
+    background: #0f172a;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.1);
+  }
+  .btn-primary:active { transform: scale(0.97); background: #1e293b; }
+  .btn-success { background: #10b981; }
+  .btn-danger { background: #ef4444; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+  }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .btn-row .btn { margin: 0; }
+
+  /* form */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: #1e293b;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    background: #ffffff;
+    transition: 0.2s;
+  }
+  .form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(15,23,42,0.05);
+  }
+
+  /* bottom nav */
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: rgba(9,14,26,0.97); backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex; padding: 7px 2px 10px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #eef2f6;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 12px 14px;
+    z-index: 99;
   }
   .nav-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
-    padding: 5px 2px; border-radius: 10px; cursor: pointer;
-    transition: all 0.2s; color: var(--text3); font-size: 8.5px; font-weight: 700;
-    letter-spacing: 0.2px; text-transform: uppercase; border: none; background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: 0.2s;
+    cursor: pointer;
   }
-  .nav-item .nav-icon { font-size: 18px; transition: transform 0.2s; }
-  .nav-item.active { color: var(--blue2); }
-  .nav-item.active .nav-icon { transform: scale(1.18); filter: drop-shadow(0 0 6px rgba(77,148,255,0.7)); }
+  .nav-item.active { color: #0f172a; }
+  .nav-item i { width: 22px; height: 22px; }
 
-  /* CARDS */
-  .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 16px; margin-bottom: 12px; position: relative; overflow: hidden;
+  /* wallet & info */
+  .wallet-card {
+    background: #f8fafc;
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid #eef2f6;
   }
-  .card.glow-blue::before { content:''; position:absolute; inset:0; border-radius:16px; background: radial-gradient(ellipse at 0% 0%, rgba(30,111,255,0.09) 0%, transparent 70%); pointer-events:none; }
-  .card.glow-green::before { content:''; position:absolute; inset:0; border-radius:16px; background: radial-gradient(ellipse at 0% 100%, rgba(0,214,143,0.09) 0%, transparent 70%); pointer-events:none; }
-  .card.glow-purple::before { content:''; position:absolute; inset:0; border-radius:16px; background: radial-gradient(ellipse at 100% 0%, rgba(124,58,237,0.09) 0%, transparent 70%); pointer-events:none; }
-  .card-title { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
-
-  /* PRICE HERO */
-  .price-hero {
-    text-align: center; padding: 22px 14px; background: var(--card);
-    border: 1px solid var(--border); border-radius: 20px; margin-bottom: 14px;
-    position: relative; overflow: hidden;
+  .wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
   }
-  .price-hero::after { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(30,111,255,0.13) 0%, transparent 70%); pointer-events:none; }
-  .price-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-  .price-amount { font-size: 40px; font-weight: 800; color: var(--green); text-shadow: 0 0 28px rgba(0,214,143,0.45); }
-  .price-unit { font-size: 13px; color: var(--text2); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
-
-  /* BUTTONS */
-  .btn {
-    width: 100%; padding: 14px; border-radius: 13px; border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
-    letter-spacing: 0.4px; transition: all 0.18s; position: relative; overflow: hidden;
+  .copy-btn {
+    background: #eef2ff;
+    border: none;
+    border-radius: 30px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
   }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; box-shadow: 0 4px 18px rgba(30,111,255,0.35); }
-  .btn-green { background: linear-gradient(135deg, #00b87a, var(--green)); color: #001a12; box-shadow: 0 4px 18px rgba(0,214,143,0.3); }
-  .btn-red { background: linear-gradient(135deg, #c4143c, var(--red)); color: white; box-shadow: 0 4px 18px rgba(255,77,109,0.3); }
-  .btn-gold { background: linear-gradient(135deg, #c9a000, var(--gold)); color: #1a1000; box-shadow: 0 4px 18px rgba(245,200,66,0.3); }
-  .btn-wa { background: linear-gradient(135deg, #128c3e, #25d366); color: white; box-shadow: 0 4px 18px rgba(37,211,102,0.3); }
-  .btn-tg { background: linear-gradient(135deg, #006fa6, #229ed9); color: white; box-shadow: 0 4px 18px rgba(34,158,217,0.3); }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  .btn-sm { padding: 9px 13px; font-size: 12px; width: auto; border-radius: 10px; }
-  .btn + .btn { margin-top: 9px; }
-  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-  .btn-row .btn { margin-top: 0; }
-
-  /* MENU GRID */
-  .menu-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .menu-item {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 16px 8px 14px; cursor: pointer; transition: all 0.2s;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    position: relative; overflow: hidden;
+  .rate-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 18px;
+    text-align: center;
+    border: 1px solid #eef2f6;
   }
-  .menu-item:active { transform: scale(0.96); }
-  .menu-item .m-icon { font-size: 26px; line-height: 1; }
-  .menu-item .m-label { font-size: 11px; font-weight: 700; text-align: center; line-height: 1.3; }
-  .menu-item.c-buy   { border-color: rgba(0,214,143,0.28); }
-  .menu-item.c-buy::before   { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(0,214,143,0.09) 0%, transparent 70%); }
-  .menu-item.c-sell  { border-color: rgba(255,77,109,0.28); }
-  .menu-item.c-sell::before  { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(255,77,109,0.09) 0%, transparent 70%); }
-  .menu-item.c-rates { border-color: rgba(245,200,66,0.28); }
-  .menu-item.c-rates::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(245,200,66,0.09) 0%, transparent 70%); }
-  .menu-item.c-support { border-color: rgba(34,158,217,0.28); }
-  .menu-item.c-support::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(34,158,217,0.09) 0%, transparent 70%); }
-  .menu-item.c-admin  { border-color: rgba(124,58,237,0.28); }
-  .menu-item.c-admin::before  { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.09) 0%, transparent 70%); }
-  .menu-item.c-how   { border-color: rgba(30,111,255,0.28); }
-  .menu-item.c-how::before   { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(30,111,255,0.09) 0%, transparent 70%); }
-  .menu-item.c-sec   { border-color: rgba(0,214,143,0.18); }
-  .menu-item.c-about { border-color: rgba(245,200,66,0.18); }
-  .menu-item.c-tg    { border-color: rgba(34,158,217,0.28); }
-  .menu-item.c-faq   { border-color: rgba(255,77,109,0.18); }
-
-  /* FORM */
-  .form-group { margin-bottom: 12px; }
-  .form-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; }
-  .form-input {
-    width: 100%; padding: 12px 14px; background: var(--card2); border: 1px solid var(--border);
-    border-radius: 11px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,111,255,0.13); }
-
-  /* INFO BOX */
-  .info-box { background: var(--card2); border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 13px 14px; margin-bottom: 12px; }
-  .info-box.green { border-left-color: var(--green); }
-  .info-box.gold  { border-left-color: var(--gold); }
-  .info-box.red   { border-left-color: var(--red); }
-  .info-box.tg    { border-left-color: #229ed9; }
-  .info-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
-  .info-box p + p { margin-top: 5px; }
-  .info-box strong { color: var(--text); }
-
-  /* STEPS */
-  .steps { list-style: none; }
-  .steps li { display: flex; gap: 11px; padding: 9px 0; border-bottom: 1px solid rgba(26,42,74,0.5); font-size: 13px; color: var(--text2); line-height: 1.5; align-items: flex-start; }
-  .steps li:last-child { border-bottom: none; }
-  .step-num { width: 23px; height: 23px; min-width: 23px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: white; margin-top: 1px; }
-
-  /* DIVIDER */
-  .divider { height: 1px; background: var(--border); margin: 14px 0; }
-
-  /* PAGE TITLE */
-  .page-title { font-size: 21px; font-weight: 800; margin-bottom: 3px; }
-  .page-subtitle { font-size: 11px; color: var(--text2); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; margin-bottom: 18px; }
-
-  /* BACK BTN */
-  .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 18px; font-weight: 600; }
-
-  /* TICKER */
-  .ticker { background: var(--card2); border: 1px solid var(--border); border-radius: 11px; padding: 9px 13px; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); display: flex; gap: 20px; overflow: hidden; white-space: nowrap; }
-  .ticker-item { display: inline-flex; gap: 7px; align-items: center; }
-  .ticker-val.up { color: var(--green); }
-  .ticker-val.down { color: var(--red); }
-
-  /* TOAST */
   .toast {
-    position: fixed; top: 68px; left: 50%; transform: translateX(-50%) translateY(-16px);
-    background: var(--card); border: 1px solid var(--green); border-radius: 11px;
-    padding: 11px 18px; font-size: 13px; font-weight: 600; color: var(--green);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.4); z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.28s; white-space: nowrap;
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 200;
+    opacity: 0;
+    transition: 0.2s;
+    pointer-events: none;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { border-color: var(--red); color: var(--red); }
+  .toast.show { opacity: 1; bottom: 90px; }
 
-  /* WALLET ROW */
-  .wallet-row { background: var(--card2); border: 1px solid var(--border); border-radius: 13px; padding: 13px 14px; margin-bottom: 9px; }
-  .wallet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
-  .wallet-network { font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 1px; }
-  .wallet-network.bep20 { color: #f0b90b; }
-  .wallet-network.trc20 { color: #ef0027; }
-  .wallet-network.erc20 { color: #627eea; }
-  .wallet-addr { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text2); word-break: break-all; line-height: 1.5; }
-
-  /* PRICE ROW */
-  .price-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(26,42,74,0.5); }
-  .price-row:last-child { border-bottom: none; }
-  .price-row-label { font-size: 13px; color: var(--text2); }
-  .price-row-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; }
-
-  /* PROMO BANNER */
-  .promo-banner {
-    background: linear-gradient(135deg, rgba(34,158,217,0.12), rgba(30,111,255,0.08));
-    border: 1px solid rgba(34,158,217,0.35); border-radius: 16px;
-    padding: 15px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 13px;
-    cursor: pointer; transition: all 0.2s;
+  /* admin badge */
+  .admin-badge {
+    background: #fef9c3;
+    color: #854d0e;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 30px;
+    font-weight: 700;
   }
-  .promo-banner:active { transform: scale(0.98); }
-  .promo-icon { font-size: 28px; flex-shrink: 0; }
-  .promo-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
-  .promo-text strong { color: #229ed9; font-size: 13px; display: block; margin-bottom: 2px; }
 
-  /* CONTACT CARD */
-  .contact-card {
-    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
-    padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;
-    cursor: pointer; transition: all 0.2s;
+  hr {
+    margin: 16px 0;
+    border-color: #eef2f6;
   }
-  .contact-card:active { transform: scale(0.98); }
-  .contact-icon { font-size: 26px; flex-shrink: 0; }
-  .contact-info { flex: 1; }
-  .contact-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-  .contact-val { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text2); }
-  .contact-arrow { font-size: 16px; color: var(--text3); }
-
-  /* RATE CARDS */
-  .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .rate-card { border-radius: 16px; padding: 18px 14px; text-align: center; }
-  .rate-card.buy-card { background: linear-gradient(135deg, rgba(0,214,143,0.12), rgba(0,214,143,0.05)); border: 1px solid rgba(0,214,143,0.3); }
-  .rate-card.sell-card { background: linear-gradient(135deg, rgba(255,77,109,0.12), rgba(255,77,109,0.05)); border: 1px solid rgba(255,77,109,0.3); }
-  .rate-tag { font-size: 9px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; }
-  .rate-val { font-size: 26px; font-weight: 800; margin-bottom: 2px; }
-  .rate-unit { font-size: 10px; color: var(--text2); font-family: 'JetBrains Mono', monospace; }
-
-  /* ANIMATE */
-  @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-  .a1 { animation: slideUp 0.28s ease 0.04s both; }
-  .a2 { animation: slideUp 0.28s ease 0.09s both; }
-  .a3 { animation: slideUp 0.28s ease 0.14s both; }
-  .a4 { animation: slideUp 0.28s ease 0.19s both; }
-  .a5 { animation: slideUp 0.28s ease 0.24s both; }
-
-  /* ADMIN BADGE */
-  .admin-crown { position: relative; }
-  .admin-crown::after { content: 'ADMIN'; position: absolute; top: -5px; right: -5px; background: var(--gold); color: #1a1000; font-size: 6px; font-weight: 800; padding: 2px 4px; border-radius: 4px; letter-spacing: 0.5px; }
-
-  /* FAQ ITEM */
-  .faq-item { background: var(--card2); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 9px; overflow: hidden; }
-  .faq-q { padding: 13px 15px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-  .faq-q .faq-arrow { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
-  .faq-a { padding: 0 15px 13px; font-size: 12px; color: var(--text2); line-height: 1.6; display: none; }
-  .faq-item.open .faq-a { display: block; }
-  .faq-item.open .faq-arrow { transform: rotate(180deg); }
-
-  /* SECURITY ITEM */
-  .sec-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(26,42,74,0.5); align-items: flex-start; }
-  .sec-item:last-child { border-bottom: none; }
-  .sec-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-  .sec-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
-  .sec-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
-
-  ::-webkit-scrollbar { width: 3px; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="header">
-  <div class="header-brand">
-    <div class="header-logo">₿</div>
-    <div>
-      <div class="header-title">SMART CRYPTO</div>
-      <div class="header-sub">Exchange Rwanda</div>
-    </div>
-  </div>
-  <div class="header-badge"><span class="blink">●</span> LIVE</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- ══════ HOME ══════ -->
-<div class="page active" id="page-home">
-  <div class="ticker a1" id="ticker">
-    <div class="ticker-item">BTC <span class="ticker-val up">+2.4%</span></div>
-    <div class="ticker-item">ETH <span class="ticker-val up">+1.8%</span></div>
-    <div class="ticker-item">USDT <span class="ticker-val up">STABLE</span></div>
-    <div class="ticker-item">BNB <span class="ticker-val down">-0.5%</span></div>
-    <div class="ticker-item">SOL <span class="ticker-val up">+3.1%</span></div>
+<div class="app-container" id="app">
+  <div class="global-back" id="globalBackBtn" style="display: none;">
+    <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back
   </div>
 
-  <div class="a2">
-    <div class="card glow-blue" style="padding:18px;text-align:center;margin-bottom:12px;">
-      <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">Welcome back</div>
-      <div style="font-size:17px;font-weight:800;" id="welcome-name">Crypto Trader</div>
-      <div style="font-size:10px;color:var(--text2);margin-top:3px;font-family:'JetBrains Mono',monospace;" id="welcome-id">Smart Exchange Rwanda</div>
+  <!-- HOME PAGE -->
+  <div class="page active" id="homePage">
+    <div class="card" style="text-align: center; padding: 24px;">
+      <div style="font-size: 28px; font-weight: 700;" id="welcomeName">Trader</div>
+      <div style="font-size: 13px; color: #475569; margin-top: 4px;">🇷🇼 Rwanda Crypto Exchange</div>
     </div>
-  </div>
 
-  <div class="a3 rate-grid">
-    <div class="rate-card buy-card">
-      <div class="rate-tag" style="color:var(--green);">Buy Rate</div>
-      <div class="rate-val" style="color:var(--green);" id="home-buy">1,500</div>
-      <div class="rate-unit">RWF / USDT</div>
+    <!-- buy/sell rates -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+      <div class="rate-card">
+        <div style="font-size: 12px; font-weight: 600; color: #10b981;">BUY RATE</div>
+        <div style="font-size: 28px; font-weight: 800;" id="homeBuyRate">---</div>
+        <div style="font-size: 11px;">RWF / USDT</div>
+      </div>
+      <div class="rate-card">
+        <div style="font-size: 12px; font-weight: 600; color: #ef4444;">SELL RATE</div>
+        <div style="font-size: 28px; font-weight: 800;" id="homeSellRate">---</div>
+        <div style="font-size: 11px;">RWF / USDT</div>
+      </div>
     </div>
-    <div class="rate-card sell-card">
-      <div class="rate-tag" style="color:var(--red);">Sell Rate</div>
-      <div class="rate-val" style="color:var(--red);" id="home-sell">1,480</div>
-      <div class="rate-unit">RWF / USDT</div>
-    </div>
-  </div>
 
-  <div class="a4">
+    <!-- menu grid (max 9 items) -->
     <div class="menu-grid">
-      <div class="menu-item c-buy"     onclick="navigate('buy')">    <div class="m-icon">📈</div><div class="m-label">Buy Crypto</div></div>
-      <div class="menu-item c-sell"    onclick="navigate('sell')">   <div class="m-icon">📉</div><div class="m-label">Sell Crypto</div></div>
-      <div class="menu-item c-rates"   onclick="navigate('rates')">  <div class="m-icon">💱</div><div class="m-label">Rates</div></div>
-      <div class="menu-item c-support" onclick="navigate('support')"><div class="m-icon">🎧</div><div class="m-label">Support Center</div></div>
-      <div class="menu-item c-admin"   onclick="navigate('contact')"><div class="m-icon">📞</div><div class="m-label">Contact Admin</div></div>
-      <div class="menu-item c-how"     onclick="navigate('how')">    <div class="m-icon">📖</div><div class="m-label">How It Works</div></div>
-      <div class="menu-item c-sec"     onclick="navigate('security')"><div class="m-icon">🔐</div><div class="m-label">Security Tips</div></div>
-      <div class="menu-item c-about"   onclick="navigate('about')">  <div class="m-icon">🏢</div><div class="m-label">About Us</div></div>
-      <div class="menu-item c-tg"      onclick="openChannel()">      <div class="m-icon">✈️</div><div class="m-label">Telegram Channel</div></div>
-      <div class="menu-item c-faq"     onclick="navigate('faq')">    <div class="m-icon">❓</div><div class="m-label">Help / FAQ</div></div>
-      <div class="menu-item c-admin" id="admin-menu-item" onclick="navigate('admin')" style="display:none;"><div class="m-icon admin-crown">👑</div><div class="m-label" style="color:var(--gold);">Admin Panel</div></div>
+      <div class="menu-item" data-nav="buy"><div class="menu-icon"><i data-lucide="arrow-down-to-line" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Buy Crypto</div></div>
+      <div class="menu-item" data-nav="sell"><div class="menu-icon"><i data-lucide="arrow-up-from-line" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Sell Crypto</div></div>
+      <div class="menu-item" data-nav="rates"><div class="menu-icon"><i data-lucide="activity" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Rates</div></div>
+      <div class="menu-item" data-nav="support"><div class="menu-icon"><i data-lucide="headphones" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Support</div></div>
+      <div class="menu-item" data-nav="contact"><div class="menu-icon"><i data-lucide="phone-call" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Contact</div></div>
+      <div class="menu-item" data-nav="how"><div class="menu-icon"><i data-lucide="book-open" style="width: 24px; height: 24px;"></i></div><div class="menu-label">How it works</div></div>
+      <div class="menu-item" data-nav="security"><div class="menu-icon"><i data-lucide="shield" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Security</div></div>
+      <div class="menu-item" data-nav="about"><div class="menu-icon"><i data-lucide="building-2" style="width: 24px; height: 24px;"></i></div><div class="menu-label">About</div></div>
+      <div class="menu-item" data-nav="faq"><div class="menu-icon"><i data-lucide="message-circle-question" style="width: 24px; height: 24px;"></i></div><div class="menu-label">FAQ</div></div>
+      <div class="menu-item" id="adminMenuItem" style="display: none;" data-nav="admin"><div class="menu-icon"><i data-lucide="settings" style="width: 24px; height: 24px;"></i></div><div class="menu-label">Admin</div></div>
+    </div>
+
+    <!-- posts from supabase -->
+    <div id="postsContainer" class="card" style="margin-top: 8px;">
+      <div style="font-weight: 700; margin-bottom: 12px;">📢 Announcements</div>
+      <div id="postsList">Loading announcements...</div>
     </div>
   </div>
 
-  <div class="a5">
-    <div class="promo-banner" onclick="openChannel()">
-      <div class="promo-icon">📢</div>
-      <div class="promo-text">
-        <strong>Join Our Telegram Channel</strong>
-        Remember to join for latest rates, updates & announcements from Smart Crypto Exchange Rwanda!
+  <!-- BUY PAGE (dynamic steps) -->
+  <div class="page" id="buyPage">
+    <div class="card">
+      <div class="price-hero" style="padding: 16px;">
+        <div class="price-badge">Buy Price</div>
+        <div class="price-number" id="buyDynamicRate">--- RWF</div>
+        <div class="price-sub">per USDT</div>
       </div>
+      <div class="form-group">
+        <label class="form-label">USDT Amount</label>
+        <input type="number" id="buyUsdtAmount" class="form-input" placeholder="e.g. 50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select id="buyMethod" class="form-select">
+          <option value="binance">Binance ID</option>
+          <option value="okx">OKX UID</option>
+          <option value="wallet">Wallet Address</option>
+        </select>
+      </div>
+      <div id="dynamicBuyFields"></div>
+      <div id="buyCalculatedRwf" class="card" style="background: #f1f5f9; margin-top: 12px; text-align: center;">To Pay: 0 RWF</div>
+      <div class="card" style="background: #fef9c3; border-color: #fde047;">
+        <div style="font-weight: 700;">📱 Payment Instruction</div>
+        <div>MoMo: <strong>0793031666</strong> | Name: Lambert Tuyishime</div>
+        <div style="font-size: 12px; margin-top: 8px;">After payment, click submit order.</div>
+      </div>
+      <button class="btn btn-primary" id="submitBuyOrderBtn" style="margin-top: 8px;">Submit Order</button>
     </div>
+  </div>
+
+  <!-- SELL PAGE -->
+  <div class="page" id="sellPage">
+    <div class="card">
+      <div class="price-hero" style="padding: 16px;">
+        <div class="price-badge">Sell Price</div>
+        <div class="price-number" id="sellDynamicRate">--- RWF</div>
+      </div>
+      <div class="form-group"><label class="form-label">USDT Amount</label><input type="number" id="sellUsdtAmount" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Phone (MoMo)</label><input type="tel" id="sellPhone" class="form-input" placeholder="078XXXXXXX"></div>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="sellName" class="form-input" placeholder="Name on MoMo"></div>
+      <div class="card" style="background:#f8fafc;"><div style="font-weight: 700;">Send USDT to (copy address)</div>
+        <div class="wallet-card"><div class="wallet-header"><span>BEP20</span><button class="copy-btn" data-copy="0xbb12ebf7632b4014f1cd9014b70d9f08c516e263">Copy</button></div><div style="font-size: 11px;">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div></div>
+        <div class="wallet-card"><div class="wallet-header"><span>TRC20</span><button class="copy-btn" data-copy="TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W">Copy</button></div><div>TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W</div></div>
+        <div class="wallet-card"><div class="wallet-header"><span>ERC20</span><button class="copy-btn" data-copy="0xbb12ebf7632b4014f1cd9014b70d9f08c516e263">Copy</button></div><div>0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div></div>
+      </div>
+      <button class="btn btn-success" id="submitSellOrderBtn">Submit Sell Order</button>
+    </div>
+  </div>
+
+  <!-- RATES PAGE -->
+  <div class="page" id="ratesPage"><div class="card"><div class="price-hero"><div class="price-badge">Live Buy Rate</div><div id="ratesBuyVal" class="price-number">---</div><div class="price-badge" style="margin-top: 12px;">Live Sell Rate</div><div id="ratesSellVal" class="price-number">---</div></div><div class="card">Spread: <strong id="spreadVal">0</strong> RWF</div></div></div>
+
+  <!-- SUPPORT, CONTACT, HOW, SECURITY, ABOUT, FAQ, ADMIN (simplified) -->
+  <div class="page" id="supportPage"><div class="card"><h3 style="margin-bottom: 8px;">Support Center</h3><p>WhatsApp: +250793031666<br>Telegram: @0735050322<br>Email: infolamva@gmail.com</p><button class="btn btn-outline" onclick="window.open('https://wa.me/250793031666','_blank')">Chat on WhatsApp</button></div></div>
+  <div class="page" id="contactPage"><div class="card"><h3>Admin Contacts</h3><p>📞 +250793031666 (Lambert)<br>✈️ Telegram: @0735050322</p><button class="btn btn-primary" onclick="window.open('https://t.me/0735050322','_blank')">Message Admin</button></div></div>
+  <div class="page" id="howPage"><div class="card"><h3>How it Works</h3><p>1. Choose Buy/Sell<br>2. Follow steps, send payment or crypto<br>3. Admin processes in minutes</p></div></div>
+  <div class="page" id="securityPage"><div class="card"><h3>Security Tips</h3><p>Never share private keys. Only use official contacts. Verify wallet addresses before sending.</p></div></div>
+  <div class="page" id="aboutPage"><div class="card"><h3>About Smart Crypto</h3><p>Rwanda's trusted USDT exchange. Fast, reliable and professional.</p></div></div>
+  <div class="page" id="faqPage"><div class="card"><h3>FAQ</h3><p><strong>Processing time?</strong> 5-15 min after proof.<br><strong>Minimum?</strong> 5 USDT.<br><strong>Fees?</strong> No hidden fees.</p></div></div>
+  <div class="page" id="adminPage"><div class="card"><h3>Admin Panel</h3><div class="form-group"><label class="form-label">Buy Price (RWF)</label><input type="number" id="adminBuyInput" class="form-input"></div><div class="form-group"><label class="form-label">Sell Price (RWF)</label><input type="number" id="adminSellInput" class="form-input"></div><button class="btn btn-primary" id="updatePricesBtn">Update Rates</button><hr><div class="form-group"><label class="form-label">New Post Title</label><input type="text" id="postTitle" class="form-input"></div><div class="form-group"><label class="form-label">Content</label><textarea id="postContent" rows="2" class="form-input"></textarea></div><button class="btn btn-success" id="createPostBtn">Create Post</button><hr><button class="btn btn-outline" id="viewOrdersBtn">View All Orders (console)</button></div></div>
+
+  <div class="bottom-nav">
+    <button class="nav-item" data-nav="home"><i data-lucide="home"></i><span>Home</span></button>
+    <button class="nav-item" data-nav="buy"><i data-lucide="shopping-cart"></i><span>Buy</span></button>
+    <button class="nav-item" data-nav="sell"><i data-lucide="wallet"></i><span>Sell</span></button>
+    <button class="nav-item" data-nav="rates"><i data-lucide="trending-up"></i><span>Rates</span></button>
+    <button class="nav-item" data-nav="support"><i data-lucide="help-circle"></i><span>Help</span></button>
   </div>
 </div>
+<div class="toast" id="toastMsg">Message</div>
 
-<!-- ══════ BUY ══════ -->
-<div class="page" id="page-buy">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Buy Crypto 📈</div>
-  <div class="page-subtitle a1">Send RWF → Receive USDT</div>
-
-  <div class="price-hero a2">
-    <div class="price-label">Current Buy Price</div>
-    <div class="price-amount" id="buy-price-display">1,500</div>
-    <div class="price-unit">RWF per USDT</div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">💳 Payment Details</div>
-    <div class="price-row">
-      <div class="price-row-label">Method</div>
-      <div class="price-row-value" style="color:var(--gold);">MTN MoMo</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Number</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="price-row-value" style="color:var(--green);">0793031666</div>
-        <button class="btn btn-sm btn-outline" onclick="copyText('0793031666','Number')">Copy</button>
-      </div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Name</div>
-      <div class="price-row-value">Lambert Tuyishime</div>
-    </div>
-  </div>
-
-  <div class="card glow-green a4">
-    <div class="card-title">📋 How to Buy</div>
-    <ul class="steps">
-      <li><div class="step-num">1</div><div>Note the <strong>buy price</strong> shown above and decide how much USDT you want</div></li>
-      <li><div class="step-num">2</div><div>Send the equivalent RWF to <strong>MTN MoMo: 0793031666</strong> (Lambert Tuyishime)</div></li>
-      <li><div class="step-num">3</div><div>Take a clear <strong>screenshot</strong> of the MoMo confirmation</div></li>
-      <li><div class="step-num">4</div><div>Send your proof via <strong>WhatsApp or Telegram</strong> using the buttons below</div></li>
-      <li><div class="step-num">5</div><div>Admin confirms receipt and sends your <strong>USDT within minutes</strong></div></li>
-    </ul>
-  </div>
-
-  <div class="a5">
-    <div class="info-box gold" style="margin-bottom:14px;">
-      <p>⚡ <strong>Fast Processing:</strong> Send proof immediately after payment. Delays in sending proof may slow down your transaction.</p>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-wa" onclick="sendBuyProof('whatsapp')">💬 WhatsApp Proof</button>
-      <button class="btn btn-tg" onclick="sendBuyProof('telegram')">✈️ Telegram Proof</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SELL ══════ -->
-<div class="page" id="page-sell">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Sell Crypto 📉</div>
-  <div class="page-subtitle a1">Send USDT → Receive RWF</div>
-
-  <div class="price-hero a2" style="background:linear-gradient(to bottom, rgba(255,77,109,0.06), var(--card));">
-    <div class="price-label">Current Sell Price</div>
-    <div class="price-amount" style="color:var(--red);text-shadow:0 0 28px rgba(255,77,109,0.4);" id="sell-price-display">1,480</div>
-    <div class="price-unit">RWF per USDT</div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">🟡 Send USDT To</div>
-    <div class="price-row">
-      <div class="price-row-label">Binance ID</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="price-row-value" style="color:#f0b90b;">1217578859</div>
-        <button class="btn btn-sm btn-outline" onclick="copyText('1217578859','Binance ID')">Copy</button>
-      </div>
-    </div>
-    <div class="divider" style="margin:10px 0;"></div>
-    <div class="wallet-row" style="margin-bottom:8px;">
-      <div class="wallet-header">
-        <div class="wallet-network bep20">⚡ BEP20 (BNB Chain)</div>
-        <button class="btn btn-sm btn-outline" onclick="copyText('0x4A7B3c9e2F1d8A6C0b5E3f7D2a9C4b8e1F6d3A0','BEP20')">Copy</button>
-      </div>
-      <div class="wallet-addr">0x4A7B3c9e2F1d8A6C0b5E3f7D2a9C4b8e1F6d3A0</div>
-    </div>
-    <div class="wallet-row" style="margin-bottom:8px;">
-      <div class="wallet-header">
-        <div class="wallet-network trc20">🔴 TRC20 (TRON)</div>
-        <button class="btn btn-sm btn-outline" onclick="copyText('TRX9mK2pLqZ8nJwVbF4cXsA1rYeG6dH7uN','TRC20')">Copy</button>
-      </div>
-      <div class="wallet-addr">TRX9mK2pLqZ8nJwVbF4cXsA1rYeG6dH7uN</div>
-    </div>
-    <div class="wallet-row">
-      <div class="wallet-header">
-        <div class="wallet-network erc20">🔷 ERC20 (Ethereum)</div>
-        <button class="btn btn-sm btn-outline" onclick="copyText('0x8C2e1F5a3B9d7E4c0A6f2D8b4E1c9F3a7B5e2D4','ERC20')">Copy</button>
-      </div>
-      <div class="wallet-addr">0x8C2e1F5a3B9d7E4c0A6f2D8b4E1c9F3a7B5e2D4</div>
-    </div>
-  </div>
-
-  <div class="card glow-purple a4">
-    <div class="card-title">📋 How to Sell</div>
-    <ul class="steps">
-      <li><div class="step-num">1</div><div>Contact admin first via WhatsApp or Telegram to initiate the sell</div></li>
-      <li><div class="step-num">2</div><div>Admin will confirm the receiving wallet address for your chosen network</div></li>
-      <li><div class="step-num">3</div><div>Send your <strong>USDT</strong> to the confirmed wallet address</div></li>
-      <li><div class="step-num">4</div><div>Take a screenshot of the transaction and send proof to admin</div></li>
-      <li><div class="step-num">5</div><div>Admin confirms and sends <strong>RWF to your MoMo</strong> immediately</div></li>
-    </ul>
-  </div>
-
-  <div class="a5">
-    <div class="info-box red" style="margin-bottom:14px;">
-      <p>⚠️ <strong>Important:</strong> Always contact admin BEFORE sending crypto. Sending to wrong address without confirmation may result in loss of funds.</p>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-wa" onclick="openWA('Hello Admin, I want to SELL USDT. Please confirm the wallet address.')">💬 WhatsApp</button>
-      <button class="btn btn-tg" onclick="openTG('Hello Admin, I want to SELL USDT. Please confirm the wallet address.')">✈️ Telegram</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ RATES ══════ -->
-<div class="page" id="page-rates">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Live Rates 💱</div>
-  <div class="page-subtitle a1">Current exchange prices</div>
-
-  <div class="a2 rate-grid" style="margin-bottom:14px;">
-    <div class="rate-card buy-card" style="padding:22px 14px;">
-      <div class="rate-tag" style="color:var(--green);">🟢 Buy Rate</div>
-      <div class="rate-val" style="color:var(--green);font-size:30px;" id="rates-buy">1,500</div>
-      <div class="rate-unit">RWF per USDT</div>
-    </div>
-    <div class="rate-card sell-card" style="padding:22px 14px;">
-      <div class="rate-tag" style="color:var(--red);">🔴 Sell Rate</div>
-      <div class="rate-val" style="color:var(--red);font-size:30px;" id="rates-sell">1,480</div>
-      <div class="rate-unit">RWF per USDT</div>
-    </div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">📊 Rate Info</div>
-    <div class="price-row">
-      <div class="price-row-label">Spread</div>
-      <div class="price-row-value" style="color:var(--text2);" id="rates-spread">20 RWF</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Currency Pair</div>
-      <div class="price-row-value">USDT / RWF</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Min Transaction</div>
-      <div class="price-row-value" style="color:var(--blue2);">5 USDT</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Max Transaction</div>
-      <div class="price-row-value" style="color:var(--blue2);">10,000 USDT</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">Processing Time</div>
-      <div class="price-row-value" style="color:var(--green);">5–15 min</div>
-    </div>
-  </div>
-
-  <div class="card glow-blue a4">
-    <div class="card-title">🧮 Quick Calculator</div>
-    <div class="form-group" style="margin-bottom:8px;">
-      <label class="form-label">USDT Amount</label>
-      <input class="form-input" type="number" id="calc-usdt" placeholder="Enter USDT amount" oninput="calcRate()"/>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;">
-      <div style="background:rgba(0,214,143,0.08);border:1px solid rgba(0,214,143,0.2);border-radius:11px;padding:12px;text-align:center;">
-        <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--green);letter-spacing:1px;margin-bottom:4px;">YOU PAY (BUY)</div>
-        <div style="font-size:16px;font-weight:800;color:var(--green);" id="calc-buy-rwf">—</div>
-        <div style="font-size:9px;color:var(--text2);">RWF</div>
-      </div>
-      <div style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);border-radius:11px;padding:12px;text-align:center;">
-        <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--red);letter-spacing:1px;margin-bottom:4px;">YOU GET (SELL)</div>
-        <div style="font-size:16px;font-weight:800;color:var(--red);" id="calc-sell-rwf">—</div>
-        <div style="font-size:9px;color:var(--text2);">RWF</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="a5">
-    <div class="btn-row">
-      <button class="btn btn-green" onclick="navigate('buy')">📈 Buy Now</button>
-      <button class="btn btn-red"   onclick="navigate('sell')">📉 Sell Now</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SUPPORT ══════ -->
-<div class="page" id="page-support">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Support Center 🎧</div>
-  <div class="page-subtitle a1">We're here to help you</div>
-
-  <div class="info-box green a2">
-    <p>⏰ <strong>Available:</strong> Monday – Saturday, 8:00 AM – 9:00 PM (Kigali Time)</p>
-    <p>📍 Fast response via WhatsApp & Telegram</p>
-  </div>
-
-  <div class="a3">
-    <div class="contact-card" onclick="openWA('')">
-      <div class="contact-icon">💬</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:#25d366;">WhatsApp</div>
-        <div class="contact-val">+250 793 031 666</div>
-      </div>
-      <div class="contact-arrow">→</div>
-    </div>
-    <div class="contact-card" onclick="openTG('')">
-      <div class="contact-icon">✈️</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:#229ed9;">Telegram</div>
-        <div class="contact-val">@0735050322</div>
-      </div>
-      <div class="contact-arrow">→</div>
-    </div>
-    <div class="contact-card" onclick="openEmail()">
-      <div class="contact-icon">📧</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:var(--gold);">Email</div>
-        <div class="contact-val">infolamva@gmail.com</div>
-      </div>
-      <div class="contact-arrow">→</div>
-    </div>
-  </div>
-
-  <div class="card a4">
-    <div class="card-title">📋 Common Issues</div>
-    <ul class="steps">
-      <li><div class="step-num">?</div><div><strong>Payment sent but no USDT?</strong> Send your MoMo screenshot via WhatsApp immediately.</div></li>
-      <li><div class="step-num">?</div><div><strong>Wrong amount sent?</strong> Contact admin via WhatsApp before doing anything else.</div></li>
-      <li><div class="step-num">?</div><div><strong>Want to check status?</strong> Message admin with your transaction ID or screenshot.</div></li>
-    </ul>
-  </div>
-
-  <div class="a5">
-    <div class="promo-banner" onclick="openChannel()">
-      <div class="promo-icon">📢</div>
-      <div class="promo-text"><strong>Join Our Telegram Channel</strong>Get real-time rates, news and updates from Smart Crypto Exchange Rwanda.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ CONTACT ADMIN ══════ -->
-<div class="page" id="page-contact">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Contact Admin 📞</div>
-  <div class="page-subtitle a1">Direct admin contact</div>
-
-  <div class="a2">
-    <div class="contact-card" onclick="openWA('')">
-      <div class="contact-icon">💬</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:#25d366;">WhatsApp</div>
-        <div class="contact-val">+250 793 031 666 · Lambert</div>
-      </div>
-      <div class="contact-arrow">→</div>
-    </div>
-    <div class="contact-card" onclick="openTG('')">
-      <div class="contact-icon">✈️</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:#229ed9;">Telegram</div>
-        <div class="contact-val">@0735050322</div>
-      </div>
-      <div class="contact-arrow">→</div>
-    </div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">📬 Quick Messages</div>
-    <button class="btn btn-outline" style="margin-bottom:8px;text-align:left;padding:13px 14px;" onclick="openWA('Hello Admin, I want to BUY USDT. Please assist me.')">📈 I want to Buy USDT</button>
-    <button class="btn btn-outline" style="margin-bottom:8px;text-align:left;padding:13px 14px;" onclick="openWA('Hello Admin, I want to SELL USDT. Please assist me.')">📉 I want to Sell USDT</button>
-    <button class="btn btn-outline" style="margin-bottom:8px;text-align:left;padding:13px 14px;" onclick="openWA('Hello Admin, I have a question about my transaction.')">❓ Transaction Question</button>
-    <button class="btn btn-outline" style="text-align:left;padding:13px 14px;" onclick="openWA('Hello Admin, I need support with the exchange platform.')">🎧 General Support</button>
-  </div>
-
-  <div class="info-box a4">
-    <p>💡 <strong>Tip:</strong> Always include your transaction screenshot when contacting admin about payments. This speeds up processing significantly.</p>
-  </div>
-</div>
-
-<!-- ══════ HOW IT WORKS ══════ -->
-<div class="page" id="page-how">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">How It Works 📖</div>
-  <div class="page-subtitle a1">Simple step-by-step guide</div>
-
-  <div class="card glow-green a2">
-    <div class="card-title">📈 Buying USDT</div>
-    <ul class="steps">
-      <li><div class="step-num">1</div><div>Check the current <strong>buy price</strong> on the home screen or Rates page</div></li>
-      <li><div class="step-num">2</div><div>Calculate how much RWF you need to send for your desired USDT amount</div></li>
-      <li><div class="step-num">3</div><div>Send RWF via <strong>MTN MoMo to 0793031666</strong> (Lambert Tuyishime)</div></li>
-      <li><div class="step-num">4</div><div>Screenshot the MoMo confirmation and send it to admin via WhatsApp or Telegram</div></li>
-      <li><div class="step-num">5</div><div>Provide your <strong>Binance ID or wallet address</strong> to receive USDT</div></li>
-      <li><div class="step-num">6</div><div>Admin sends your USDT — usually within <strong>5–15 minutes</strong></div></li>
-    </ul>
-  </div>
-
-  <div class="card glow-purple a3">
-    <div class="card-title">📉 Selling USDT</div>
-    <ul class="steps">
-      <li><div class="step-num">1</div><div>Check the current <strong>sell price</strong> on the home screen or Rates page</div></li>
-      <li><div class="step-num">2</div><div>Contact admin first to initiate the sell and get the wallet address</div></li>
-      <li><div class="step-num">3</div><div>Send your USDT to the wallet address provided by admin</div></li>
-      <li><div class="step-num">4</div><div>Screenshot the transaction and send proof to admin</div></li>
-      <li><div class="step-num">5</div><div>Provide your <strong>MoMo number</strong> to receive RWF</div></li>
-      <li><div class="step-num">6</div><div>Admin sends RWF to your MoMo — usually within <strong>5–15 minutes</strong></div></li>
-    </ul>
-  </div>
-
-  <div class="info-box green a4">
-    <p>✅ <strong>No hidden fees.</strong> The price shown is exactly what you pay or receive. No commissions added on top.</p>
-  </div>
-
-  <div class="a5 btn-row">
-    <button class="btn btn-green" onclick="navigate('buy')">Start Buying</button>
-    <button class="btn btn-red"   onclick="navigate('sell')">Start Selling</button>
-  </div>
-</div>
-
-<!-- ══════ SECURITY ══════ -->
-<div class="page" id="page-security">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Security Tips 🔐</div>
-  <div class="page-subtitle a1">Stay safe while trading</div>
-
-  <div class="info-box red a2">
-    <p>⚠️ <strong>Never share</strong> your wallet private keys or seed phrases with anyone — including admin.</p>
-  </div>
-
-  <div class="card a3">
-    <div class="sec-item">
-      <div class="sec-icon">🔑</div>
-      <div><div class="sec-title">Protect Your Keys</div><div class="sec-desc">Never share your private keys or seed phrases. Our admin will NEVER ask for them.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">📸</div>
-      <div><div class="sec-title">Screenshot Everything</div><div class="sec-desc">Always take screenshots of your MoMo payments and crypto transactions as proof.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">✅</div>
-      <div><div class="sec-title">Verify Before Sending</div><div class="sec-desc">Always double-check the wallet address or Binance ID before sending any crypto.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">🚫</div>
-      <div><div class="sec-title">Avoid Scammers</div><div class="sec-desc">Our only official contacts are the WhatsApp and Telegram shown in Support Center.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">📱</div>
-      <div><div class="sec-title">Use Official App</div><div class="sec-desc">Only transact through this official Telegram Mini App or verified contact channels.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">⏱️</div>
-      <div><div class="sec-title">Don't Rush</div><div class="sec-desc">Take your time verifying all details before making any payment or crypto transfer.</div></div>
-    </div>
-  </div>
-
-  <div class="a4">
-    <button class="btn btn-primary" onclick="navigate('support')">🎧 Contact Support</button>
-  </div>
-</div>
-
-<!-- ══════ ABOUT ══════ -->
-<div class="page" id="page-about">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">About Us 🏢</div>
-  <div class="page-subtitle a1">Smart Crypto Exchange Rwanda</div>
-
-  <div class="card glow-blue a2" style="text-align:center;padding:24px;">
-    <div style="font-size:48px;margin-bottom:10px;">₿</div>
-    <div style="font-size:16px;font-weight:800;margin-bottom:6px;">Smart Crypto Exchange Rwanda</div>
-    <div style="font-size:12px;color:var(--text2);line-height:1.6;">Your trusted local USDT exchange partner in Rwanda. Fast, reliable and secure manual crypto exchange.</div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">🎯 Our Mission</div>
-    <p style="font-size:13px;color:var(--text2);line-height:1.7;">We make crypto accessible to every Rwandan. Our mission is to provide fast, transparent and secure USDT exchange services with personal admin support — no complicated platforms, just a simple and trusted service.</p>
-  </div>
-
-  <div class="card a4">
-    <div class="card-title">📊 Why Choose Us</div>
-    <div class="sec-item">
-      <div class="sec-icon">⚡</div>
-      <div><div class="sec-title">Fast Processing</div><div class="sec-desc">Most transactions completed in 5–15 minutes after proof submission.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">🤝</div>
-      <div><div class="sec-title">Personal Support</div><div class="sec-desc">Real human admin support — not bots. We care about every transaction.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">💎</div>
-      <div><div class="sec-title">Competitive Rates</div><div class="sec-desc">We offer the best RWF/USDT exchange rates in Rwanda, updated daily.</div></div>
-    </div>
-    <div class="sec-item">
-      <div class="sec-icon">🔒</div>
-      <div><div class="sec-title">Safe & Trusted</div><div class="sec-desc">Hundreds of satisfied customers. Your funds are always safe with us.</div></div>
-    </div>
-  </div>
-
-  <div class="a5">
-    <div class="promo-banner" onclick="openChannel()">
-      <div class="promo-icon">📢</div>
-      <div class="promo-text"><strong>Follow Us on Telegram</strong>Join our channel for live rates, news and exclusive offers.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ FAQ ══════ -->
-<div class="page" id="page-faq">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="page-title a1">Help / FAQ ❓</div>
-  <div class="page-subtitle a1">Frequently asked questions</div>
-
-  <div class="a2">
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">How long does a transaction take? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Most transactions are completed within 5–15 minutes after you send proof of payment to admin. During peak hours it may take up to 30 minutes.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What is the minimum trade amount? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">The minimum transaction amount is 5 USDT. There is no strict maximum, but for large amounts (over 1,000 USDT) please contact admin in advance.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What payment methods are accepted? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">For buying USDT, we accept MTN Mobile Money (MoMo). For selling USDT, we support BEP20, TRC20, and ERC20 networks.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">I sent payment but didn't receive USDT. What do I do? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Contact admin immediately via WhatsApp (+250793031666) with your MoMo transaction screenshot. Admin will verify and process your order.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Are there any fees? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">No hidden fees. The buy/sell rate shown already includes our service margin. What you see is what you pay or receive.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">How are exchange rates updated? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Rates are set by admin based on the global USDT market price. Rates are typically updated daily or during significant market movements.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Is this service safe and legitimate? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Yes. Smart Crypto Exchange Rwanda has served hundreds of customers. We provide personal admin support and transparent transactions. Always use our official contacts only.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Can I trade at night or on weekends? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Admin is available Monday to Saturday, 8:00 AM – 9:00 PM (Kigali time). Transactions outside these hours may be delayed until the next available session.</div>
-    </div>
-  </div>
-
-  <div class="a3" style="margin-top:14px;">
-    <button class="btn btn-primary" onclick="navigate('support')">Still have questions? Contact Support</button>
-  </div>
-</div>
-
-<!-- ══════ ADMIN ══════ -->
-<div class="page" id="page-admin">
-  <button class="back-btn" onclick="navigate('home')">← Back</button>
-  <div class="a1" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-    <div style="font-size:28px;">👑</div>
-    <div>
-      <div class="page-title" style="margin-bottom:0;color:var(--gold);">Admin Panel</div>
-      <div class="page-subtitle" style="margin-bottom:0;">Price Management</div>
-    </div>
-  </div>
-
-  <div class="card glow-blue a2">
-    <div class="card-title">📊 Current Rates (Live)</div>
-    <div class="price-row">
-      <div class="price-row-label">🟢 Buy Price</div>
-      <div class="price-row-value" style="color:var(--green);" id="admin-cur-buy">— RWF</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">🔴 Sell Price</div>
-      <div class="price-row-value" style="color:var(--red);" id="admin-cur-sell">— RWF</div>
-    </div>
-    <div class="price-row">
-      <div class="price-row-label">📈 Spread</div>
-      <div class="price-row-value" style="color:var(--text2);" id="admin-spread">— RWF</div>
-    </div>
-  </div>
-
-  <div class="card a3">
-    <div class="card-title">🟢 Set Buy Price (RWF per USDT)</div>
-    <div class="form-group" style="margin-bottom:11px;">
-      <input class="form-input" type="number" id="admin-buy-input" placeholder="e.g. 1500" min="1"/>
-    </div>
-    <button class="btn btn-green" onclick="savePrice('buy')">✅ Save Buy Price</button>
-  </div>
-
-  <div class="card a4">
-    <div class="card-title">🔴 Set Sell Price (RWF per USDT)</div>
-    <div class="form-group" style="margin-bottom:11px;">
-      <input class="form-input" type="number" id="admin-sell-input" placeholder="e.g. 1480" min="1"/>
-    </div>
-    <button class="btn btn-red" onclick="savePrice('sell')">✅ Save Sell Price</button>
-  </div>
-
-  <div class="a5">
-    <button class="btn btn-gold" onclick="saveAllPrices()">💾 Save Both Prices</button>
-  </div>
-
-  <div class="info-box gold a5" style="margin-top:14px;">
-    <p>💡 Prices are saved to <strong>localStorage</strong> and instantly reflected across all pages for all users on this device.</p>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-item active" onclick="navigate('home')"    data-page="home">   <span class="nav-icon">🏠</span>Home</button>
-  <button class="nav-item"        onclick="navigate('buy')"     data-page="buy">    <span class="nav-icon">📈</span>Buy</button>
-  <button class="nav-item"        onclick="navigate('sell')"    data-page="sell">   <span class="nav-icon">📉</span>Sell</button>
-  <button class="nav-item"        onclick="navigate('rates')"   data-page="rates">  <span class="nav-icon">💱</span>Rates</button>
-  <button class="nav-item"        onclick="navigate('support')" data-page="support"><span class="nav-icon">🎧</span>Support</button>
-</nav>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const ADMIN_ID  = '8616193014';
-const WA_URL    = 'https://wa.me/250793031666';
-const TG_URL    = 'https://t.me/0735050322';
-const TG_CHAN   = 'https://t.me/AIProfitPulse_io';
-const EMAIL     = 'infolamva@gmail.com';
+  const SUPABASE_URL = "https://geaqmxoqhjotswksiepp.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let tgUser = null;
+  let tg = window.Telegram.WebApp;
+  let tgUser = null;
+  const ADMIN_ID = "8616193014"; 
+  let currentBuy = 1500, currentSell = 1480;
 
-// ── INIT ──────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready(); tg.expand();
-      tg.setHeaderColor('#050810');
-      tg.setBackgroundColor('#050810');
-      tgUser = tg.initDataUnsafe?.user || null;
-    }
-  } catch(e) {}
-  loadPrices();
-  updateWelcome();
-  checkAdmin();
-  updateAdminPanel();
-  startTicker();
-});
+  tg.ready(); tg.expand();
+  tgUser = tg.initDataUnsafe?.user || { id: "anonymous", first_name: "Guest" };
+  document.getElementById("welcomeName").innerText = tgUser.first_name || "Crypto Trader";
 
-// ── PRICES ────────────────────────────────
-function getBuy()  { return parseInt(localStorage.getItem('buyPrice'))  || 1500; }
-function getSell() { return parseInt(localStorage.getItem('sellPrice')) || 1480; }
-
-function loadPrices() {
-  const b = getBuy(), s = getSell();
-  const fmt = n => n.toLocaleString();
-  setText('home-buy',           fmt(b));
-  setText('home-sell',          fmt(s));
-  setText('buy-price-display',  fmt(b));
-  setText('sell-price-display', fmt(s));
-  setText('rates-buy',          fmt(b));
-  setText('rates-sell',         fmt(s));
-  setText('rates-spread',       fmt(b - s) + ' RWF');
-  calcRate();
-}
-
-function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
-
-function savePrice(type) {
-  if (type === 'buy') {
-    const v = parseInt(document.getElementById('admin-buy-input').value);
-    if (!v || v < 1) { showToast('Enter a valid buy price', true); return; }
-    localStorage.setItem('buyPrice', v);
-    showToast('✅ Buy price → ' + v.toLocaleString() + ' RWF');
-  } else {
-    const v = parseInt(document.getElementById('admin-sell-input').value);
-    if (!v || v < 1) { showToast('Enter a valid sell price', true); return; }
-    localStorage.setItem('sellPrice', v);
-    showToast('✅ Sell price → ' + v.toLocaleString() + ' RWF');
+  // ----- PRICE REAL-TIME + SUBSCRIPTION -----
+  async function fetchPrices() {
+    const { data, error } = await supabase.from("prices").select("*").order("id", { ascending: false }).limit(1);
+    if(data && data[0]) { currentBuy = data[0].buy; currentSell = data[0].sell; }
+    else { await seedDefaultPrices(); }
+    updateAllUI();
   }
-  loadPrices(); updateAdminPanel();
-}
-
-function saveAllPrices() {
-  const b = parseInt(document.getElementById('admin-buy-input').value);
-  const s = parseInt(document.getElementById('admin-sell-input').value);
-  let saved = 0;
-  if (b > 0) { localStorage.setItem('buyPrice',  b); saved++; }
-  if (s > 0) { localStorage.setItem('sellPrice', s); saved++; }
-  if (!saved) { showToast('Enter at least one price', true); return; }
-  loadPrices(); updateAdminPanel();
-  showToast('✅ Prices saved!');
-}
-
-function updateAdminPanel() {
-  const b = getBuy(), s = getSell();
-  setText('admin-cur-buy',  b.toLocaleString() + ' RWF');
-  setText('admin-cur-sell', s.toLocaleString() + ' RWF');
-  setText('admin-spread',   (b - s).toLocaleString() + ' RWF');
-  const bi = document.getElementById('admin-buy-input');
-  const si = document.getElementById('admin-sell-input');
-  if (bi && !bi.value) bi.placeholder = b;
-  if (si && !si.value) si.placeholder = s;
-}
-
-function calcRate() {
-  const u = parseFloat(document.getElementById('calc-usdt')?.value) || 0;
-  const b = getBuy(), s = getSell();
-  setText('calc-buy-rwf',  u > 0 ? (u * b).toLocaleString() : '—');
-  setText('calc-sell-rwf', u > 0 ? (u * s).toLocaleString() : '—');
-}
-
-// ── WELCOME ───────────────────────────────
-function updateWelcome() {
-  if (tgUser) {
-    setText('welcome-name', ((tgUser.first_name || '') + ' ' + (tgUser.last_name || '')).trim());
-    setText('welcome-id', 'ID: ' + tgUser.id);
+  async function seedDefaultPrices() {
+    await supabase.from("prices").insert([{ buy: 1500, sell: 1480 }]);
   }
-}
+  function updateAllUI() {
+    document.getElementById("homeBuyRate").innerText = currentBuy.toLocaleString();
+    document.getElementById("homeSellRate").innerText = currentSell.toLocaleString();
+    document.getElementById("buyDynamicRate").innerText = currentBuy.toLocaleString() + " RWF";
+    document.getElementById("sellDynamicRate").innerText = currentSell.toLocaleString() + " RWF";
+    document.getElementById("ratesBuyVal").innerText = currentBuy.toLocaleString() + " RWF";
+    document.getElementById("ratesSellVal").innerText = currentSell.toLocaleString() + " RWF";
+    document.getElementById("spreadVal").innerText = (currentBuy - currentSell).toLocaleString();
+    const buyAmt = parseFloat(document.getElementById("buyUsdtAmount")?.value) || 0;
+    if(buyAmt) document.getElementById("buyCalculatedRwf").innerHTML = `To Pay: ${(buyAmt * currentBuy).toLocaleString()} RWF`;
+    else document.getElementById("buyCalculatedRwf").innerHTML = "To Pay: 0 RWF";
+  }
+  supabase.channel('prices-channel').on('postgres_changes', { event: '*', schema: 'public', table: 'prices' }, payload => { if(payload.new) { currentBuy = payload.new.buy; currentSell = payload.new.sell; updateAllUI(); } }).subscribe();
 
-// ── ADMIN CHECK ───────────────────────────
-function checkAdmin() {
-  const uid  = tgUser ? String(tgUser.id) : null;
-  const item = document.getElementById('admin-menu-item');
-  if (item && (uid === ADMIN_ID || !tgUser)) item.style.display = 'flex';
-}
+  // ----- POSTS (home announcements) -----
+  async function loadPosts() {
+    const { data } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(5);
+    const container = document.getElementById("postsList");
+    if(data && data.length) container.innerHTML = data.map(p => `<div style="border-bottom:1px solid #eef2f6; padding: 8px 0;"><strong>${p.title}</strong><p style="font-size:13px; margin-top:4px;">${p.content}</p><span style="font-size:10px; color:#94a3b8;">${new Date(p.created_at).toLocaleString()}</span></div>`).join("");
+    else container.innerHTML = "<div>No announcements yet</div>";
+  }
 
-// ── NAVIGATION ────────────────────────────
-function navigate(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById('page-' + page);
-  if (el) el.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-  window.scrollTo(0, 0);
-  if (page === 'admin')  updateAdminPanel();
-  if (page === 'rates')  loadPrices();
-}
+  // ----- ORDERS -----
+  async function saveOrder(order) {
+    const { error } = await supabase.from("orders").insert([order]);
+    if(error) { showToast("Order error: " + error.message, true); return false; }
+    showToast("Order submitted! Admin will process.");
+    return true;
+  }
+  document.getElementById("submitBuyOrderBtn")?.addEventListener("click", async () => {
+    let amount = parseFloat(document.getElementById("buyUsdtAmount").value);
+    if(!amount || amount<5) { showToast("Minimum 5 USDT", true); return; }
+    let method = document.getElementById("buyMethod").value;
+    let extra = "";
+    if(method === "binance") extra = document.getElementById("binanceIdField")?.value || "";
+    else if(method === "okx") extra = document.getElementById("okxUidField")?.value || "";
+    else if(method === "wallet") extra = document.getElementById("walletAddressField")?.value || "";
+    if(!extra) { showToast("Please fill payment details", true); return; }
+    const order = { user_id: tgUser.id, type: "buy", amount: amount, payment_method: method, wallet_address: extra, phone: "0793031666", name: tgUser.first_name, status: "pending", created_at: new Date() };
+    await saveOrder(order);
+  });
+  document.getElementById("submitSellOrderBtn")?.addEventListener("click", async () => {
+    let amount = parseFloat(document.getElementById("sellUsdtAmount").value);
+    let phone = document.getElementById("sellPhone").value;
+    let name = document.getElementById("sellName").value;
+    if(!amount || amount<5) { showToast("Min 5 USDT", true); return; }
+    if(!phone || !name) { showToast("Phone & name required", true); return; }
+    const order = { user_id: tgUser.id, type: "sell", amount: amount, payment_method: "mobile_money", wallet_address: "", phone: phone, name: name, status: "pending", created_at: new Date() };
+    await saveOrder(order);
+  });
 
-// ── COPY ──────────────────────────────────
-function copyText(text, label) {
-  const fallback = () => {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('📋 ' + label + ' copied!');
-  };
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => showToast('📋 ' + label + ' copied!')).catch(fallback);
-  else fallback();
-}
+  // dynamic buy fields
+  function renderBuyFields() { const method = document.getElementById("buyMethod").value; const container = document.getElementById("dynamicBuyFields"); if(method === "binance") container.innerHTML = `<div class="form-group"><label class="form-label">Binance ID</label><input id="binanceIdField" class="form-input"></div>`; else if(method === "okx") container.innerHTML = `<div class="form-group"><label class="form-label">OKX UID</label><input id="okxUidField" class="form-input"></div>`; else if(method === "wallet") container.innerHTML = `<div class="form-group"><label class="form-label">Wallet Address</label><input id="walletAddressField" class="form-input"></div><div class="form-group"><label class="form-label">Network</label><select class="form-select" id="walletNet"><option>BEP20</option><option>TRC20</option><option>ERC20</option></select></div>`; }
+  document.getElementById("buyMethod")?.addEventListener("change", renderBuyFields);
+  document.getElementById("buyUsdtAmount")?.addEventListener("input", (e) => { let v=parseFloat(e.target.value)||0; document.getElementById("buyCalculatedRwf").innerHTML = `To Pay: ${(v*currentBuy).toLocaleString()} RWF`; });
+  renderBuyFields();
 
-// ── EXTERNAL LINKS ────────────────────────
-function openWA(msg) {
-  const m = msg || 'Hello, I need help with Smart Crypto Exchange Rwanda.';
-  window.open(WA_URL + '?text=' + encodeURIComponent(m), '_blank');
-}
-function openTG(msg) {
-  window.open(TG_URL, '_blank');
-}
-function openChannel() { window.open(TG_CHAN, '_blank'); }
-function openEmail()   { window.open('mailto:' + EMAIL, '_blank'); }
+  // ----- ADMIN FUNCTIONS -----
+  async function updatePrices() {
+    let buy = parseInt(document.getElementById("adminBuyInput").value);
+    let sell = parseInt(document.getElementById("adminSellInput").value);
+    if(!buy || !sell) { showToast("Enter both prices", true); return; }
+    await supabase.from("prices").insert([{ buy: buy, sell: sell }]);
+    showToast("Prices updated (realtime)");
+    fetchPrices();
+  }
+  async function createPost() {
+    let title = document.getElementById("postTitle").value;
+    let content = document.getElementById("postContent").value;
+    if(!title || !content) { showToast("Title & content required", true); return; }
+    await supabase.from("posts").insert([{ title: title, content: content, created_at: new Date() }]);
+    showToast("Post created");
+    loadPosts();
+    document.getElementById("postTitle").value = ""; document.getElementById("postContent").value = "";
+  }
+  function viewOrders() { supabase.from("orders").select("*").then(res => console.table(res.data)); showToast("Check console for orders"); }
+  document.getElementById("updatePricesBtn")?.addEventListener("click", updatePrices);
+  document.getElementById("createPostBtn")?.addEventListener("click", createPost);
+  document.getElementById("viewOrdersBtn")?.addEventListener("click", viewOrders);
+  
+  // admin menu visibility
+  if(tgUser && String(tgUser.id) === ADMIN_ID) document.getElementById("adminMenuItem").style.display = "flex";
+  else document.getElementById("adminMenuItem").style.display = "none";
 
-// ── BUY PROOF ─────────────────────────────
-function sendBuyProof(channel) {
-  const b    = getBuy();
-  const uid  = tgUser ? tgUser.id : 'N/A';
-  const name = tgUser ? ((tgUser.first_name || '') + ' ' + (tgUser.last_name || '')).trim() : 'User';
-  const msg  =
-    `🟢 BUY REQUEST\n\n` +
-    `👤 User: ${name}\n` +
-    `🆔 ID: ${uid}\n` +
-    `💱 Buy Price: ${b.toLocaleString()} RWF/USDT\n\n` +
-    `I have sent payment via MTN MoMo. Please find my transaction screenshot attached.\n\n` +
-    `Please confirm and send my USDT. Thank you! 🙏`;
-  if (channel === 'whatsapp') openWA(msg);
-  else openTG(msg);
-}
+  // ----- UI NAVIGATION -----
+  function navigate(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId + "Page").classList.add("active");
+    const backBtn = document.getElementById("globalBackBtn");
+    if(pageId !== "home") backBtn.style.display = "flex"; else backBtn.style.display = "none";
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    const activeNav = document.querySelector(`.nav-item[data-nav="${pageId}"]`);
+    if(activeNav) activeNav.classList.add("active");
+    if(pageId === "admin") { document.getElementById("adminBuyInput").value = currentBuy; document.getElementById("adminSellInput").value = currentSell; }
+  }
+  document.querySelectorAll(".menu-item[data-nav], .nav-item[data-nav]").forEach(el => { el.addEventListener("click", (e) => { let nav = el.getAttribute("data-nav"); if(nav) navigate(nav); }); });
+  document.getElementById("globalBackBtn").addEventListener("click", () => navigate("home"));
 
-// ── TOAST ─────────────────────────────────
-function showToast(msg, isErr) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isErr ? ' error' : '') + ' show';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2800);
-}
+  // copy listeners
+  document.querySelectorAll(".copy-btn").forEach(btn => { btn.addEventListener("click", (e) => { let text = btn.getAttribute("data-copy"); if(text) { navigator.clipboard.writeText(text); showToast("Copied!"); } }); });
 
-// ── FAQ ───────────────────────────────────
-function toggleFaq(el) {
-  el.closest('.faq-item').classList.toggle('open');
-}
+  function showToast(msg, isErr=false) { let t=document.getElementById("toastMsg"); t.innerText=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2500); }
 
-// ── TICKER ────────────────────────────────
-function startTicker() {
-  const update = () => {
-    const coins = [['BTC',Math.random()>.4],['ETH',Math.random()>.4],['USDT',true],['BNB',Math.random()>.5],['SOL',Math.random()>.4]];
-    const t = document.getElementById('ticker');
-    if (t) t.innerHTML = coins.map(([s,up]) =>
-      `<div class="ticker-item">${s} <span class="ticker-val ${up?'up':'down'}">${up?'+':''}${(Math.random()*3.5).toFixed(1)}%</span></div>`
-    ).join('');
-  };
-  update();
-  setInterval(update, 5000);
-}
+  // extra contact & whatsapp
+  window.openWA = ()=>window.open("https://wa.me/250793031666","_blank");
+  window.openTG = ()=>window.open("https://t.me/0735050322","_blank");
+  
+  fetchPrices(); loadPosts(); updateAllUI();
+  setInterval(()=>{ if(document.getElementById("buyUsdtAmount")?.value) updateAllUI(); }, 300);
+  lucide.createIcons();
 </script>
 </body>
-  </html>
+</html>
