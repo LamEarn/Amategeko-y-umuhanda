@@ -1,1333 +1,1566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Crypto Exchange Rwanda</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8fafc;
-      --bg-card: #ffffff;
-      --border: #e2e8f0;
-      --text-primary: #0f172a;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --accent-buy: #10b981;
-      --accent-sell: #ef4444;
-      --accent-admin: #7c3aed;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --radius: 12px;
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    [data-theme="dark"] {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-card: #1e293b;
-      --border: #334155;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #94a3b8;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      height: 100%;
-      font-family: 'Inter', -apple-system, sans-serif;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      overflow-x: hidden;
-    }
-
-    /* Header */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      backdrop-filter: blur(20px);
-    }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius);
-      background: linear-gradient(135deg, var(--accent-buy), var(--accent-sell));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 18px;
-      color: white;
-      box-shadow: var(--shadow-md);
-    }
-
-    .header-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-    }
-
-    .header-subtitle {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    /* Pages */
-    .page {
-      display: none;
-      min-height: calc(100vh - 80px);
-      padding: 24px 20px 120px;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Back Button */
-    .back-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 0;
-      cursor: pointer;
-      margin-bottom: 24px;
-      transition: var(--transition);
-    }
-
-    .back-btn:hover {
-      color: var(--text-primary);
-    }
-
-    /* Page Titles */
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.025em;
-    }
-
-    .page-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      font-weight: 500;
-      margin-bottom: 32px;
-    }
-
-    /* Cards */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
-    }
-
-    .card:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 20px;
-    }
-
-    /* Price Hero */
-    .price-hero {
-      text-align: center;
-      padding: 32px 24px;
-      border-radius: var(--radius);
-      margin-bottom: 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .price-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
-    }
-
-    .price-amount {
-      font-size: 48px;
-      font-weight: 800;
-      letter-spacing: -0.05em;
-      margin-bottom: 8px;
-    }
-
-    .price-unit {
-      font-size: 14px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    /* Buttons */
-    .btn {
-      width: 100%;
-      padding: 16px 20px;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-buy { background: linear-gradient(135deg, var(--accent-buy), #059669); color: white; }
-    .btn-sell { background: linear-gradient(135deg, var(--accent-sell), #dc2626); color: white; }
-    .btn-admin { background: linear-gradient(135deg, var(--accent-admin), #6d28d9); color: white; }
-    .btn-secondary {
-      background: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-    }
-
-    .btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    /* Forms */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-    }
-
-    .form-input, .form-select {
-      width: 100%;
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg-card);
-      color: var(--text-primary);
-      font-size: 16px;
-      transition: var(--transition);
-      font-family: inherit;
-    }
-
-    .form-input:focus, .form-select:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    /* Info Box */
-    .info-box {
-      background: rgba(59, 130, 246, 0.05);
-      border-left: 4px solid #3b82f6;
-      padding: 20px;
-      border-radius: 0 var(--radius) var(--radius) 0;
-      margin-bottom: 20px;
-    }
-
-    .info-box.buy { border-left-color: var(--accent-buy); background: rgba(16, 185, 129, 0.05); }
-    .info-box.sell { border-left-color: var(--accent-sell); background: rgba(239, 68, 68, 0.05); }
-
-    /* Menu Grid */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .menu-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .menu-item:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .menu-item i {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-
-    .menu-item-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    /* Rate Cards */
-    .rate-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .rate-card {
-      padding: 28px 20px;
-      border-radius: var(--radius);
-      text-align: center;
-      box-shadow: var(--shadow-md);
-    }
-
-    .rate-card.buy {
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      background: rgba(16, 185, 129, 0.03);
-    }
-
-    .rate-card.sell {
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      background: rgba(239, 68, 68, 0.03);
-    }
-
-    /* Posts */
-    .post {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .post-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-
-    .post-meta {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    /* Wallet Row */
-    .wallet-row {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 12px;
-    }
-
-    .wallet-network {
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .wallet-address {
-      font-family: 'SF Mono', Monaco, 'Roboto Mono', monospace;
-      font-size: 13px;
-      color: var(--text-secondary);
-      word-break: break-all;
-      background: rgba(15, 23, 42, 0.05);
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    /* Orders Table */
-    .orders-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .orders-table th,
-    .orders-table td {
-      padding: 12px 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-    }
-
-    .orders-table th {
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-size: 12px;
-    }
-
-    .status {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .status.pending { background: rgba(245, 101, 101, 0.1); color: #ef4444; }
-    .status.completed { background: rgba(16, 185, 129, 0.1); color: var(--accent-buy); }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      top: 90px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 20px;
-      box-shadow: var(--shadow-lg);
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.25s ease;
-      font-weight: 500;
-    }
-
-    .toast.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .toast.success { border-color: var(--accent-buy); color: var(--accent-buy); }
-    .toast.error { border-color: var(--accent-sell); color: var(--accent-sell); }
-
-    /* Bottom Nav */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg-card);
-      border-top: 1px solid var(--border);
-      display: flex;
-      padding: 12px 0;
-      z-index: 100;
-    }
-
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 8px 4px;
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-      border-radius: 12px 12px 0 0;
-    }
-
-    .nav-item.active {
-      color: var(--accent-buy);
-    }
-
-    .nav-item i {
-      font-size: 20px;
-    }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .page { padding: 20px 16px 120px; }
-      .price-amount { font-size: 40px; }
-      .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    }
-
-    /* Loading */
-    .loading {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-secondary);
-    }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border);
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Theme Toggle */
-    .theme-toggle {
-      background: none;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition: var(--transition);
-    }
-
-    .theme-toggle:hover {
-      background: rgba(0,0,0,0.05);
-      color: var(--text-primary);
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Smart Crypto Exchange Rwanda</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --surface2: #1a1a24;
+  --border: #2a2a3a;
+  --border2: #333348;
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --purple: #8b5cf6;
+  --text: #f1f1f5;
+  --text2: #8888aa;
+  --text3: #55556a;
+  --radius: 14px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* HEADER */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,15,0.94); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; height: 58px;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-logo {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-name { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
+.header-sub  { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: 0.3px; margin-top: 1px; }
+.live-dot {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 600; color: var(--green);
+  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 20px; padding: 4px 10px;
+}
+.live-dot span { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 1.4s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+/* PAGES */
+.page { display: none; min-height: calc(100vh - 58px); padding: 16px 14px 90px; animation: fadeUp .2s ease both; }
+.page.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(10,10,15,0.97); backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  display: flex; padding: 8px 4px 12px;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px 2px; border-radius: 10px; cursor: pointer;
+  border: none; background: none; color: var(--text3);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+  transition: color .18s;
+}
+.nav-item svg { width: 20px; height: 20px; stroke-width: 1.8; transition: transform .18s, filter .18s; }
+.nav-item.active { color: var(--blue); }
+.nav-item.active svg { transform: scale(1.12); filter: drop-shadow(0 0 5px rgba(59,130,246,.5)); }
+
+/* CARD */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.card-label {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-label svg { width: 12px; height: 12px; }
+
+/* BUTTONS */
+.btn {
+  width: 100%; padding: 13px 16px; border-radius: 12px; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  transition: opacity .18s, transform .12s; display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+}
+.btn svg { width: 16px; height: 16px; }
+.btn:active { transform: scale(.98); opacity: .9; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-green   { background: var(--green); color: #fff; }
+.btn-red     { background: var(--red); color: #fff; }
+.btn-amber   { background: var(--amber); color: #000; }
+.btn-wa      { background: #25d366; color: #fff; }
+.btn-tg      { background: #229ed9; color: #fff; }
+.btn-ghost   { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+.btn-sm      { padding: 7px 12px; font-size: 12px; width: auto; border-radius: 9px; }
+.btn + .btn  { margin-top: 9px; }
+.btn-row     { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.btn-row .btn { margin-top: 0; }
+
+/* FORM */
+.form-group  { margin-bottom: 12px; }
+.form-label  {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  letter-spacing: 0.4px; margin-bottom: 6px; display: block;
+}
+.form-input  {
+  width: 100%; padding: 12px 14px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 11px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px;
+  outline: none; transition: border-color .18s, box-shadow .18s;
+}
+.form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+.form-input::placeholder { color: var(--text3); }
+select.form-input { cursor: pointer; }
+select.form-input option { background: var(--surface2); }
+
+/* PAGE HEADER */
+.pg-header { margin-bottom: 18px; }
+.pg-back {
+  display: flex; align-items: center; gap: 6px; background: none; border: none;
+  color: var(--text2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; padding: 0; margin-bottom: 14px; transition: color .18s;
+}
+.pg-back:hover { color: var(--text); }
+.pg-back svg  { width: 16px; height: 16px; }
+.pg-title     { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 3px; }
+.pg-sub       { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+/* RATE CARDS */
+.rate-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.rate-card {
+  border-radius: var(--radius); padding: 16px 14px; text-align: center;
+  border: 1px solid; box-shadow: var(--shadow);
+}
+.rate-card.buy  { background: var(--green-dim); border-color: rgba(34,197,94,.25); }
+.rate-card.sell { background: var(--red-dim);   border-color: rgba(239,68,68,.25); }
+.rate-tag  { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.rate-val  { font-size: 26px; font-weight: 800; margin-bottom: 2px; letter-spacing: -1px; }
+.rate-unit { font-size: 9px; color: var(--text2); font-weight: 500; }
+
+/* PRICE HERO */
+.price-hero {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 22px 16px; text-align: center; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.ph-label  { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.ph-val    { font-size: 44px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.ph-unit   { font-size: 12px; color: var(--text2); margin-top: 5px; font-weight: 500; }
+
+/* ROW LIST */
+.row-list .row-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.row-list .row-item:last-child { border-bottom: none; }
+.row-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+.row-val   { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+/* WALLET BLOCK */
+.wallet-block {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 9px;
+}
+.wallet-net  { font-size: 10px; font-weight: 700; letter-spacing: .8px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.wallet-net.bep20 { color: #f0b90b; }
+.wallet-net.trc20 { color: #ef4444; }
+.wallet-net.erc20 { color: #818cf8; }
+.wallet-addr { font-size: 10.5px; color: var(--text2); word-break: break-all; line-height: 1.5; font-family: 'Courier New', monospace; }
+
+/* ALERT BOX */
+.alert {
+  border-radius: 11px; padding: 12px 14px; margin-bottom: 12px;
+  font-size: 12.5px; line-height: 1.6; font-weight: 500;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert.info   { background: var(--blue-dim); border: 1px solid rgba(59,130,246,.25); color: #93c5fd; }
+.alert.success{ background: var(--green-dim); border: 1px solid rgba(34,197,94,.25); color: #86efac; }
+.alert.warn   { background: var(--amber-dim); border: 1px solid rgba(245,158,11,.25); color: #fcd34d; }
+.alert.danger { background: var(--red-dim);   border: 1px solid rgba(239,68,68,.25); color: #fca5a5; }
+.alert strong { color: #fff; }
+
+/* STEPS */
+.steps { list-style: none; }
+.steps li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.5; align-items: flex-start; }
+.steps li:last-child { border-bottom: none; }
+.step-n { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; margin-top: 1px; }
+
+/* CONTACT CARD */
+.contact-row {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 15px; margin-bottom: 9px;
+  display: flex; align-items: center; gap: 13px; cursor: pointer; transition: border-color .18s;
+}
+.contact-row:hover { border-color: var(--border2); }
+.contact-row:active { transform: scale(.99); }
+.contact-icon-wrap { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.contact-icon-wrap svg { width: 18px; height: 18px; }
+.contact-name  { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.contact-sub   { font-size: 11px; color: var(--text2); font-weight: 500; }
+.contact-arrow { margin-left: auto; color: var(--text3); }
+.contact-arrow svg { width: 16px; height: 16px; }
+
+/* MENU GRID */
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+.menu-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 8px 14px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  transition: border-color .18s, transform .12s; box-shadow: var(--shadow);
+}
+.menu-item:active { transform: scale(.96); }
+.menu-item svg { width: 22px; height: 22px; stroke-width: 1.8; }
+.menu-item .m-label { font-size: 11px; font-weight: 600; text-align: center; line-height: 1.3; color: var(--text); }
+.menu-item.mi-buy     { border-color: rgba(34,197,94,.3); }
+.menu-item.mi-buy svg { color: var(--green); }
+.menu-item.mi-sell     { border-color: rgba(239,68,68,.3); }
+.menu-item.mi-sell svg { color: var(--red); }
+.menu-item.mi-rates     { border-color: rgba(245,158,11,.3); }
+.menu-item.mi-rates svg { color: var(--amber); }
+.menu-item.mi-support     { border-color: rgba(59,130,246,.3); }
+.menu-item.mi-support svg { color: var(--blue); }
+.menu-item.mi-contact     { border-color: rgba(139,92,246,.3); }
+.menu-item.mi-contact svg { color: var(--purple); }
+.menu-item.mi-how     { border-color: rgba(34,197,94,.2); }
+.menu-item.mi-how svg { color: var(--green); }
+.menu-item.mi-sec svg { color: var(--amber); }
+.menu-item.mi-about svg { color: var(--blue); }
+.menu-item.mi-tg svg  { color: #229ed9; }
+
+/* TICKER */
+.ticker {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 13px; margin-bottom: 12px;
+  display: flex; gap: 18px; overflow-x: auto; white-space: nowrap;
+  font-size: 11px; font-weight: 600;
+}
+.ticker::-webkit-scrollbar { display: none; }
+.ti { display: inline-flex; gap: 5px; align-items: center; color: var(--text2); }
+.ti .up   { color: var(--green); }
+.ti .down { color: var(--red); }
+
+/* PROMO */
+.promo {
+  background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(139,92,246,.08));
+  border: 1px solid rgba(59,130,246,.25); border-radius: var(--radius);
+  padding: 14px 15px; margin-bottom: 12px; display: flex; gap: 12px;
+  align-items: center; cursor: pointer; transition: transform .12s;
+}
+.promo:active { transform: scale(.99); }
+.promo-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(34,158,217,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.promo-icon svg { width: 20px; height: 20px; color: #229ed9; }
+.promo-title { font-size: 13px; font-weight: 700; color: #93c5fd; margin-bottom: 2px; }
+.promo-sub   { font-size: 11px; color: var(--text2); line-height: 1.4; }
+
+/* TOAST */
+.toast {
+  position: fixed; top: 66px; left: 50%; transform: translateX(-50%) translateY(-10px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 600;
+  z-index: 9999; opacity: 0; pointer-events: none; transition: all .25s; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); display: flex; align-items: center; gap: 7px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok  { color: var(--green); border-color: rgba(34,197,94,.35); }
+.toast.err { color: var(--red);   border-color: rgba(239,68,68,.35); }
+.toast svg { width: 15px; height: 15px; }
+
+/* FAQ */
+.faq-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.faq-q { padding: 13px 15px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.faq-q svg { width: 14px; height: 14px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+.faq-a { padding: 0 15px 13px; font-size: 12.5px; color: var(--text2); line-height: 1.65; display: none; }
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-q svg { transform: rotate(180deg); }
+
+/* SEC ITEM */
+.sec-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.sec-row:last-child { border-bottom: none; }
+.sec-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sec-icon svg { width: 15px; height: 15px; color: var(--amber); }
+.sec-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sec-desc  { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* STEP WIZARD */
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+.step-indicator { display: flex; gap: 6px; margin-bottom: 18px; }
+.step-dot { height: 4px; border-radius: 2px; background: var(--border); transition: background .2s, flex .2s; flex: 1; }
+.step-dot.done { background: var(--blue); }
+
+/* ORDER CARD */
+.order-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 15px; margin-bottom: 9px;
+}
+.order-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.order-type { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
+.order-type.buy  { background: var(--green-dim); color: var(--green); }
+.order-type.sell { background: var(--red-dim);   color: var(--red); }
+.order-status { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+.order-status.pending   { background: var(--amber-dim); color: var(--amber); }
+.order-status.completed { background: var(--green-dim); color: var(--green); }
+.order-details { font-size: 11.5px; color: var(--text2); line-height: 1.6; }
+.order-id { font-size: 10px; color: var(--text3); margin-top: 6px; font-family: monospace; }
+
+/* LOADING */
+.loader { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px; color: var(--text2); font-size: 13px; }
+.spin { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* ADMIN TAG */
+.admin-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--amber-dim); border: 1px solid rgba(245,158,11,.3);
+  color: var(--amber); font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 5px; letter-spacing: .5px; text-transform: uppercase;
+  margin-left: 6px;
+}
+
+/* POST CARD */
+.post-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 15px; margin-bottom: 9px;
+}
+.post-title { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.post-body  { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+.post-date  { font-size: 10px; color: var(--text3); margin-top: 7px; }
+
+/* CALC BOX */
+.calc-box { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 10px; }
+.calc-result { border-radius: 11px; padding: 12px; text-align: center; }
+.calc-result.buy  { background: var(--green-dim); border: 1px solid rgba(34,197,94,.2); }
+.calc-result.sell { background: var(--red-dim);   border: 1px solid rgba(239,68,68,.2); }
+.cr-label { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+.cr-val   { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+.cr-unit  { font-size: 9px; color: var(--text2); margin-top: 2px; }
+
+/* ANIMATIONS */
+.a1 { animation: fadeUp .25s ease .04s both; }
+.a2 { animation: fadeUp .25s ease .08s both; }
+.a3 { animation: fadeUp .25s ease .12s both; }
+.a4 { animation: fadeUp .25s ease .16s both; }
+.a5 { animation: fadeUp .25s ease .20s both; }
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header-content">
-      <div class="logo">₿</div>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <i data-lucide="bitcoin" style="width:18px;height:18px;color:#fff;"></i>
+    </div>
+    <div>
+      <div class="header-name">Smart Crypto RW</div>
+      <div class="header-sub">Exchange Rwanda</div>
+    </div>
+  </div>
+  <div class="live-dot"><span></span>LIVE</div>
+</header>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i data-lucide="check-circle" id="toast-icon"></i><span id="toast-msg"></span></div>
+
+<!-- ═══════════════════ HOME ═══════════════════ -->
+<div class="page active" id="page-home">
+  <div class="ticker a1" id="ticker"></div>
+
+  <div class="a2" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:13px;">
+    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i data-lucide="user" style="width:20px;height:20px;color:#fff;"></i>
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">Welcome back</div>
+      <div style="font-size:16px;font-weight:800;letter-spacing:-.3px;" id="welcome-name">Trader</div>
+      <div style="font-size:10px;color:var(--text3);font-weight:500;margin-top:1px;" id="welcome-id"></div>
+    </div>
+  </div>
+
+  <div class="a3 rate-row">
+    <div class="rate-card buy">
+      <div class="rate-tag" style="color:var(--green);">Buy Rate</div>
+      <div class="rate-val" style="color:var(--green);" id="home-buy">—</div>
+      <div class="rate-unit">RWF / USDT</div>
+    </div>
+    <div class="rate-card sell">
+      <div class="rate-tag" style="color:var(--red);">Sell Rate</div>
+      <div class="rate-val" style="color:var(--red);" id="home-sell">—</div>
+      <div class="rate-unit">RWF / USDT</div>
+    </div>
+  </div>
+
+  <div class="a4 menu-grid">
+    <div class="menu-item mi-buy"     onclick="navigate('buy')">     <i data-lucide="trending-up"></i>    <span class="m-label">Buy Crypto</span></div>
+    <div class="menu-item mi-sell"    onclick="navigate('sell')">    <i data-lucide="trending-down"></i>  <span class="m-label">Sell Crypto</span></div>
+    <div class="menu-item mi-rates"   onclick="navigate('rates')">   <i data-lucide="bar-chart-2"></i>    <span class="m-label">Rates</span></div>
+    <div class="menu-item mi-support" onclick="navigate('support')"> <i data-lucide="headphones"></i>     <span class="m-label">Support</span></div>
+    <div class="menu-item mi-contact" onclick="navigate('contact')"> <i data-lucide="phone"></i>          <span class="m-label">Contact Admin</span></div>
+    <div class="menu-item mi-how"     onclick="navigate('how')">     <i data-lucide="book-open"></i>      <span class="m-label">How It Works</span></div>
+    <div class="menu-item mi-sec"     onclick="navigate('security')"><i data-lucide="shield-check"></i>   <span class="m-label">Security</span></div>
+    <div class="menu-item mi-about"   onclick="navigate('about')">   <i data-lucide="info"></i>           <span class="m-label">About Us</span></div>
+    <div class="menu-item mi-tg"      onclick="openChannel()">       <i data-lucide="send"></i>           <span class="m-label">Channel</span></div>
+  </div>
+
+  <!-- admin item injected by JS -->
+  <div id="admin-menu-wrap" style="display:none;margin-bottom:12px;">
+    <div class="menu-item" style="border-color:rgba(245,158,11,.35);flex-direction:row;justify-content:center;gap:10px;padding:14px;" onclick="navigate('admin')">
+      <i data-lucide="layout-dashboard" style="width:20px;height:20px;color:var(--amber);"></i>
+      <span class="m-label" style="color:var(--amber);">Admin Panel</span>
+      <span class="admin-tag">Admin</span>
+    </div>
+  </div>
+
+  <div class="a5 promo" onclick="openChannel()">
+    <div class="promo-icon"><i data-lucide="send"></i></div>
+    <div>
+      <div class="promo-title">Join Our Telegram Channel</div>
+      <div class="promo-sub">Live rates, updates & announcements from Smart Crypto Exchange Rwanda.</div>
+    </div>
+  </div>
+
+  <!-- Posts -->
+  <div id="posts-section">
+    <div class="card-label" style="margin-bottom:8px;padding-left:2px;">
+      <i data-lucide="rss" style="width:12px;height:12px;"></i> Latest Updates
+    </div>
+    <div id="posts-list"><div class="loader"><div class="spin"></div> Loading posts…</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ BUY ═══════════════════ -->
+<div class="page" id="page-buy">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Buy Crypto</div>
+    <div class="pg-sub">Send RWF · Receive USDT</div>
+  </div>
+
+  <!-- Step dots -->
+  <div class="step-indicator a1">
+    <div class="step-dot done" id="buy-dot-1"></div>
+    <div class="step-dot"      id="buy-dot-2"></div>
+    <div class="step-dot"      id="buy-dot-3"></div>
+    <div class="step-dot"      id="buy-dot-4"></div>
+  </div>
+
+  <!-- Step 1: Amount -->
+  <div class="wizard-step active" id="buy-s1">
+    <div class="price-hero a1">
+      <div class="ph-label">Current Buy Price</div>
+      <div class="ph-val" style="color:var(--green);" id="buy-price-display">—</div>
+      <div class="ph-unit">RWF per USDT</div>
+    </div>
+    <div class="card a2">
+      <div class="card-label"><i data-lucide="coins"></i> How much USDT do you want?</div>
+      <div class="form-group">
+        <label class="form-label">USDT Amount</label>
+        <input class="form-input" type="number" id="buy-usdt-amount" placeholder="e.g. 50" min="5" step="1" oninput="updateBuyCalc()"/>
+      </div>
+      <div id="buy-rwf-preview" style="display:none;background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px;text-align:center;margin-top:4px;">
+        <div style="font-size:10px;color:var(--green);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;">You Will Pay</div>
+        <div style="font-size:28px;font-weight:800;color:var(--green);letter-spacing:-1px;" id="buy-rwf-val">—</div>
+        <div style="font-size:10px;color:var(--text2);">RWF via MTN MoMo</div>
+      </div>
+    </div>
+    <button class="btn btn-primary a3" onclick="buyNext(1)">
+      <i data-lucide="arrow-right"></i> Continue
+    </button>
+  </div>
+
+  <!-- Step 2: Payment method -->
+  <div class="wizard-step" id="buy-s2">
+    <div class="card a1">
+      <div class="card-label"><i data-lucide="credit-card"></i> Choose How You Want to Receive USDT</div>
+      <div class="form-group">
+        <label class="form-label">Delivery Method</label>
+        <select class="form-input" id="buy-method" onchange="renderBuyMethod()">
+          <option value="">— Select method —</option>
+          <option value="binance">Binance ID</option>
+          <option value="okx">OKX UID</option>
+          <option value="wallet">Crypto Wallet Address</option>
+        </select>
+      </div>
+      <div id="buy-method-fields"></div>
+    </div>
+    <div class="btn-row a2">
+      <button class="btn btn-ghost" onclick="buyBack(2)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-primary" onclick="buyNext(2)"><i data-lucide="arrow-right"></i> Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Payment instructions -->
+  <div class="wizard-step" id="buy-s3">
+    <div class="alert warn a1">
+      <i data-lucide="alert-triangle"></i>
+      <div>Send exactly <strong id="buy-s3-amount">—</strong> RWF to the MoMo number below, then click Continue.</div>
+    </div>
+    <div class="card a2">
+      <div class="card-label"><i data-lucide="smartphone"></i> MTN MoMo Payment</div>
+      <div class="row-list">
+        <div class="row-item">
+          <span class="row-label">Mobile Money</span>
+          <span class="row-val" style="color:var(--amber);">MTN MoMo</span>
+        </div>
+        <div class="row-item">
+          <span class="row-label">Number</span>
+          <span class="row-val">0793031666 <button class="btn btn-sm btn-ghost" onclick="copyText('0793031666','Number')"><i data-lucide="copy" style="width:12px;height:12px;"></i></button></span>
+        </div>
+        <div class="row-item">
+          <span class="row-label">Name</span>
+          <span class="row-val">Lambert Tuyishime</span>
+        </div>
+        <div class="row-item">
+          <span class="row-label">Amount</span>
+          <span class="row-val" style="color:var(--green);" id="buy-s3-rwf">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row a3">
+      <button class="btn btn-ghost" onclick="buyBack(3)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-primary" onclick="buyNext(3)">I've Sent Payment <i data-lucide="arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 4: Submit order -->
+  <div class="wizard-step" id="buy-s4">
+    <div class="alert success a1">
+      <i data-lucide="check-circle"></i>
+      <div>Almost done! Review your order and submit it. Admin will verify and process within 5–15 minutes.</div>
+    </div>
+    <div class="card a2" id="buy-summary">
+      <div class="card-label"><i data-lucide="file-text"></i> Order Summary</div>
+    </div>
+    <div class="a3 btn-row">
+      <button class="btn btn-ghost" onclick="buyBack(4)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-green" id="buy-submit-btn" onclick="submitBuyOrder()">
+        <i data-lucide="check"></i> Submit Order
+      </button>
+    </div>
+    <div class="a4">
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px;">Also notify admin with your MoMo screenshot:</div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-wa btn-sm" style="width:100%;" onclick="sendBuyProof('wa')"><i data-lucide="message-circle"></i> WhatsApp</button>
+        <button class="btn btn-tg btn-sm" style="width:100%;" onclick="sendBuyProof('tg')"><i data-lucide="send"></i> Telegram</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SELL ═══════════════════ -->
+<div class="page" id="page-sell">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Sell Crypto</div>
+    <div class="pg-sub">Send USDT · Receive RWF</div>
+  </div>
+
+  <div class="step-indicator a1">
+    <div class="step-dot done" id="sell-dot-1"></div>
+    <div class="step-dot"      id="sell-dot-2"></div>
+    <div class="step-dot"      id="sell-dot-3"></div>
+    <div class="step-dot"      id="sell-dot-4"></div>
+  </div>
+
+  <!-- Step 1: Amount -->
+  <div class="wizard-step active" id="sell-s1">
+    <div class="price-hero a1" style="background:var(--red-dim);border-color:rgba(239,68,68,.2);">
+      <div class="ph-label">Current Sell Price</div>
+      <div class="ph-val" style="color:var(--red);" id="sell-price-display">—</div>
+      <div class="ph-unit">RWF per USDT</div>
+    </div>
+    <div class="card a2">
+      <div class="card-label"><i data-lucide="coins"></i> How much USDT do you want to sell?</div>
+      <div class="form-group">
+        <label class="form-label">USDT Amount</label>
+        <input class="form-input" type="number" id="sell-usdt-amount" placeholder="e.g. 50" min="5" step="1" oninput="updateSellCalc()"/>
+      </div>
+      <div id="sell-rwf-preview" style="display:none;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px;text-align:center;margin-top:4px;">
+        <div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;">You Will Receive</div>
+        <div style="font-size:28px;font-weight:800;color:var(--red);letter-spacing:-1px;" id="sell-rwf-val">—</div>
+        <div style="font-size:10px;color:var(--text2);">RWF via MTN MoMo</div>
+      </div>
+    </div>
+    <button class="btn btn-red a3" onclick="sellNext(1)"><i data-lucide="arrow-right"></i> Continue</button>
+  </div>
+
+  <!-- Step 2: Payout details -->
+  <div class="wizard-step" id="sell-s2">
+    <div class="card a1">
+      <div class="card-label"><i data-lucide="smartphone"></i> Your MoMo Payout Details</div>
+      <div class="form-group">
+        <label class="form-label">Phone Number (MoMo)</label>
+        <input class="form-input" type="tel" id="sell-phone" placeholder="e.g. 07xxxxxxxx"/>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Registered Name on MoMo</label>
+        <input class="form-input" type="text" id="sell-name" placeholder="Full name on MoMo account"/>
+      </div>
+    </div>
+    <div class="btn-row a2">
+      <button class="btn btn-ghost" onclick="sellBack(2)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-red"   onclick="sellNext(2)"><i data-lucide="arrow-right"></i> Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Send USDT -->
+  <div class="wizard-step" id="sell-s3">
+    <div class="alert info a1">
+      <i data-lucide="info"></i>
+      <div>Send exactly <strong id="sell-s3-usdt">—</strong> USDT to one of the wallets below, then submit your order.</div>
+    </div>
+    <div class="a2">
+      <div class="wallet-block">
+        <div class="wallet-net bep20">BEP20 · BNB Smart Chain <button class="btn btn-sm btn-ghost" onclick="copyText('0xbb12ebf7632b4014f1cd9014b70d9f08c516e263','BEP20')"><i data-lucide="copy" style="width:11px;height:11px;"></i></button></div>
+        <div class="wallet-addr">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
+      </div>
+      <div class="wallet-block">
+        <div class="wallet-net trc20">TRC20 · TRON <button class="btn btn-sm btn-ghost" onclick="copyText('TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W','TRC20')"><i data-lucide="copy" style="width:11px;height:11px;"></i></button></div>
+        <div class="wallet-addr">TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W</div>
+      </div>
+      <div class="wallet-block">
+        <div class="wallet-net erc20">ERC20 · Ethereum <button class="btn btn-sm btn-ghost" onclick="copyText('0xbb12ebf7632b4014f1cd9014b70d9f08c516e263','ERC20')"><i data-lucide="copy" style="width:11px;height:11px;"></i></button></div>
+        <div class="wallet-addr">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
+      </div>
+    </div>
+    <div class="alert warn a3">
+      <i data-lucide="alert-triangle"></i>
+      <div><strong>Important:</strong> Always contact admin BEFORE sending to confirm the correct wallet.</div>
+    </div>
+    <div class="btn-row a4">
+      <button class="btn btn-ghost" onclick="sellBack(3)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-red"   onclick="sellNext(3)">I've Sent USDT <i data-lucide="arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 4: Submit -->
+  <div class="wizard-step" id="sell-s4">
+    <div class="alert success a1">
+      <i data-lucide="check-circle"></i>
+      <div>Review and submit. Admin will verify your transfer and send RWF to your MoMo within minutes.</div>
+    </div>
+    <div class="card a2" id="sell-summary">
+      <div class="card-label"><i data-lucide="file-text"></i> Order Summary</div>
+    </div>
+    <div class="a3 btn-row">
+      <button class="btn btn-ghost" onclick="sellBack(4)"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn btn-green" id="sell-submit-btn" onclick="submitSellOrder()">
+        <i data-lucide="check"></i> Submit Order
+      </button>
+    </div>
+    <div class="a4">
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px;">Also send proof to admin:</div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-wa btn-sm" style="width:100%;" onclick="sendSellProof('wa')"><i data-lucide="message-circle"></i> WhatsApp</button>
+        <button class="btn btn-tg btn-sm" style="width:100%;" onclick="sendSellProof('tg')"><i data-lucide="send"></i> Telegram</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ RATES ═══════════════════ -->
+<div class="page" id="page-rates">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Live Rates</div>
+    <div class="pg-sub">USDT / RWF · Updated in real-time</div>
+  </div>
+
+  <div class="a1 rate-row" style="margin-bottom:12px;">
+    <div class="rate-card buy" style="padding:20px 14px;">
+      <div class="rate-tag" style="color:var(--green);">Buy Rate</div>
+      <div class="rate-val" style="color:var(--green);" id="rates-buy">—</div>
+      <div class="rate-unit">RWF per USDT</div>
+    </div>
+    <div class="rate-card sell" style="padding:20px 14px;">
+      <div class="rate-tag" style="color:var(--red);">Sell Rate</div>
+      <div class="rate-val" style="color:var(--red);" id="rates-sell">—</div>
+      <div class="rate-unit">RWF per USDT</div>
+    </div>
+  </div>
+
+  <div class="card a2">
+    <div class="card-label"><i data-lucide="info"></i> Exchange Info</div>
+    <div class="row-list">
+      <div class="row-item"><span class="row-label">Spread</span><span class="row-val" id="rates-spread">—</span></div>
+      <div class="row-item"><span class="row-label">Pair</span><span class="row-val">USDT / RWF</span></div>
+      <div class="row-item"><span class="row-label">Min Trade</span><span class="row-val" style="color:var(--blue);">5 USDT</span></div>
+      <div class="row-item"><span class="row-label">Max Trade</span><span class="row-val" style="color:var(--blue);">10,000 USDT</span></div>
+      <div class="row-item"><span class="row-label">Processing</span><span class="row-val" style="color:var(--green);">5 – 15 min</span></div>
+    </div>
+  </div>
+
+  <div class="card a3">
+    <div class="card-label"><i data-lucide="calculator"></i> Quick Calculator</div>
+    <div class="form-group">
+      <label class="form-label">USDT Amount</label>
+      <input class="form-input" type="number" id="calc-usdt" placeholder="Enter USDT amount" oninput="calcRate()"/>
+    </div>
+    <div class="calc-box">
+      <div class="calc-result buy">
+        <div class="cr-label" style="color:var(--green);">You Pay (Buy)</div>
+        <div class="cr-val" style="color:var(--green);" id="calc-buy-rwf">—</div>
+        <div class="cr-unit">RWF</div>
+      </div>
+      <div class="calc-result sell">
+        <div class="cr-label" style="color:var(--red);">You Get (Sell)</div>
+        <div class="cr-val" style="color:var(--red);" id="calc-sell-rwf">—</div>
+        <div class="cr-unit">RWF</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a4 btn-row">
+    <button class="btn btn-green" onclick="navigate('buy')"><i data-lucide="trending-up"></i> Buy Now</button>
+    <button class="btn btn-red"   onclick="navigate('sell')"><i data-lucide="trending-down"></i> Sell Now</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ SUPPORT ═══════════════════ -->
+<div class="page" id="page-support">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Support Center</div>
+    <div class="pg-sub">Mon – Sat · 8:00 AM – 9:00 PM</div>
+  </div>
+
+  <div class="alert success a1">
+    <i data-lucide="clock"></i>
+    <div><strong>Available:</strong> Monday – Saturday, 8:00 AM – 9:00 PM (Kigali Time). Fast response via WhatsApp.</div>
+  </div>
+
+  <div class="a2">
+    <div class="contact-row" onclick="openWA('')">
+      <div class="contact-icon-wrap" style="background:rgba(37,211,102,.12);"><i data-lucide="message-circle" style="width:18px;height:18px;color:#25d366;"></i></div>
       <div>
-        <div class="header-title">Crypto Exchange</div>
-        <div class="header-subtitle">Rwanda</div>
+        <div class="contact-name" style="color:#25d366;">WhatsApp</div>
+        <div class="contact-sub">+250 793 031 666</div>
       </div>
+      <div class="contact-arrow"><i data-lucide="chevron-right"></i></div>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">
-      <i data-lucide="sun"></i>
-    </button>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <!-- Home Page -->
-  <div class="page active" id="page-home">
-    <div class="rate-grid">
-      <div class="rate-card buy">
-        <div class="price-label" style="color: var(--accent-buy);">Buy Rate</div>
-        <div class="price-amount" id="home-buy-rate" style="color: var(--accent-buy);">--</div>
-        <div class="price-unit">RWF per USDT</div>
+    <div class="contact-row" onclick="openTG()">
+      <div class="contact-icon-wrap" style="background:rgba(34,158,217,.12);"><i data-lucide="send" style="width:18px;height:18px;color:#229ed9;"></i></div>
+      <div>
+        <div class="contact-name" style="color:#229ed9;">Telegram</div>
+        <div class="contact-sub">@0735050322</div>
       </div>
-      <div class="rate-card sell">
-        <div class="price-label" style="color: var(--accent-sell);">Sell Rate</div>
-        <div class="price-amount" id="home-sell-rate" style="color: var(--accent-sell);">--</div>
-        <div class="price-unit">RWF per USDT</div>
-      </div>
+      <div class="contact-arrow"><i data-lucide="chevron-right"></i></div>
     </div>
-
-    <div class="card">
-      <div class="card-title">
-        <i data-lucide="user" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-        Welcome
+    <div class="contact-row" onclick="openEmail()">
+      <div class="contact-icon-wrap" style="background:var(--amber-dim);"><i data-lucide="mail" style="width:18px;height:18px;color:var(--amber);"></i></div>
+      <div>
+        <div class="contact-name" style="color:var(--amber);">Email</div>
+        <div class="contact-sub">infolamva@gmail.com</div>
       </div>
-      <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;" id="user-name">Loading...</div>
-      <div style="font-size: 14px; color: var(--text-secondary);" id="user-id"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">
-        <i data-lucide="file-text" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-        Announcements
-      </div>
-      <div id="posts-container">
-        <div class="loading">
-          <div class="spinner"></div>
-          Loading posts...
-        </div>
-      </div>
-    </div>
-
-    <div class="menu-grid" id="home-menu">
-      <!-- Menu items populated by JS -->
+      <div class="contact-arrow"><i data-lucide="chevron-right"></i></div>
     </div>
   </div>
 
-  <!-- Buy Page -->
-  <div class="page" id="page-buy">
-    <button class="back-btn" onclick="navigate('home')">
-      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
-      Back
+  <div class="card a3">
+    <div class="card-label"><i data-lucide="help-circle"></i> Common Issues</div>
+    <ul class="steps">
+      <li><div class="step-n">?</div><div><strong>Sent payment but no USDT?</strong> Send your MoMo screenshot to admin on WhatsApp right away.</div></li>
+      <li><div class="step-n">?</div><div><strong>Wrong amount sent?</strong> Contact admin immediately before doing anything else.</div></li>
+      <li><div class="step-n">?</div><div><strong>Want to check order status?</strong> Share your transaction ID or screenshot with admin.</div></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════ CONTACT ═══════════════════ -->
+<div class="page" id="page-contact">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Contact Admin</div>
+    <div class="pg-sub">Direct admin contact</div>
+  </div>
+
+  <div class="a1">
+    <div class="contact-row" onclick="openWA('')">
+      <div class="contact-icon-wrap" style="background:rgba(37,211,102,.12);"><i data-lucide="message-circle" style="width:18px;height:18px;color:#25d366;"></i></div>
+      <div><div class="contact-name" style="color:#25d366;">WhatsApp</div><div class="contact-sub">+250 793 031 666 · Lambert</div></div>
+      <div class="contact-arrow"><i data-lucide="chevron-right"></i></div>
+    </div>
+    <div class="contact-row" onclick="openTG()">
+      <div class="contact-icon-wrap" style="background:rgba(34,158,217,.12);"><i data-lucide="send" style="width:18px;height:18px;color:#229ed9;"></i></div>
+      <div><div class="contact-name" style="color:#229ed9;">Telegram</div><div class="contact-sub">@0735050322</div></div>
+      <div class="contact-arrow"><i data-lucide="chevron-right"></i></div>
+    </div>
+  </div>
+
+  <div class="card a2">
+    <div class="card-label"><i data-lucide="zap"></i> Quick Messages</div>
+    <button class="btn btn-ghost" style="justify-content:flex-start;margin-bottom:8px;" onclick="openWA('Hello Admin, I want to BUY USDT. Please assist me.')">
+      <i data-lucide="trending-up" style="color:var(--green);"></i> I want to Buy USDT
     </button>
-    <div class="page-title">Buy USDT</div>
-    <div class="page-subtitle">Enter amount and payment details</div>
+    <button class="btn btn-ghost" style="justify-content:flex-start;margin-bottom:8px;" onclick="openWA('Hello Admin, I want to SELL USDT. Please assist me.')">
+      <i data-lucide="trending-down" style="color:var(--red);"></i> I want to Sell USDT
+    </button>
+    <button class="btn btn-ghost" style="justify-content:flex-start;margin-bottom:8px;" onclick="openWA('Hello Admin, I have a question about my transaction.')">
+      <i data-lucide="help-circle" style="color:var(--amber);"></i> Transaction Question
+    </button>
+    <button class="btn btn-ghost" style="justify-content:flex-start;" onclick="openWA('Hello Admin, I need general support.')">
+      <i data-lucide="headphones" style="color:var(--blue);"></i> General Support
+    </button>
+  </div>
+</div>
 
-    <div class="price-hero">
-      <div class="price-label">Current Buy Rate</div>
-      <div class="price-amount" id="buy-rate-display">--</div>
-      <div class="price-unit">RWF per USDT</div>
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<div class="page" id="page-how">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">How It Works</div>
+    <div class="pg-sub">Step-by-step guide</div>
+  </div>
+
+  <div class="card a1">
+    <div class="card-label"><i data-lucide="trending-up"></i> Buying USDT</div>
+    <ul class="steps">
+      <li><div class="step-n">1</div><div>Check the current <strong>buy price</strong> on the home or Rates page</div></li>
+      <li><div class="step-n">2</div><div>Enter your desired USDT amount — the RWF to pay is calculated automatically</div></li>
+      <li><div class="step-n">3</div><div>Choose how you want to receive USDT: Binance ID, OKX, or wallet address</div></li>
+      <li><div class="step-n">4</div><div>Send RWF via <strong>MTN MoMo 0793031666</strong> (Lambert Tuyishime)</div></li>
+      <li><div class="step-n">5</div><div>Submit your order and send the MoMo screenshot to admin</div></li>
+      <li><div class="step-n">6</div><div>Admin verifies and sends your USDT — usually within <strong>5–15 minutes</strong></div></li>
+    </ul>
+  </div>
+
+  <div class="card a2">
+    <div class="card-label"><i data-lucide="trending-down"></i> Selling USDT</div>
+    <ul class="steps">
+      <li><div class="step-n">1</div><div>Check the current <strong>sell price</strong> on the home or Rates page</div></li>
+      <li><div class="step-n">2</div><div>Enter the USDT amount you want to sell</div></li>
+      <li><div class="step-n">3</div><div>Provide your <strong>MoMo phone number and name</strong> for payout</div></li>
+      <li><div class="step-n">4</div><div>Send USDT to the provided wallet address (BEP20 / TRC20 / ERC20)</div></li>
+      <li><div class="step-n">5</div><div>Submit your order — admin sends RWF to your MoMo within minutes</div></li>
+    </ul>
+  </div>
+
+  <div class="alert success a3">
+    <i data-lucide="check-circle"></i>
+    <div><strong>No hidden fees.</strong> The price shown is exactly what you pay or receive.</div>
+  </div>
+
+  <div class="a4 btn-row">
+    <button class="btn btn-green" onclick="navigate('buy')"><i data-lucide="trending-up"></i> Start Buying</button>
+    <button class="btn btn-red"   onclick="navigate('sell')"><i data-lucide="trending-down"></i> Start Selling</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ SECURITY ═══════════════════ -->
+<div class="page" id="page-security">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Security Tips</div>
+    <div class="pg-sub">Stay safe while trading</div>
+  </div>
+
+  <div class="alert danger a1">
+    <i data-lucide="alert-triangle"></i>
+    <div><strong>Never share</strong> your wallet private keys or seed phrases with anyone — including admin.</div>
+  </div>
+
+  <div class="card a2">
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="key"></i></div>
+      <div><div class="sec-title">Protect Your Keys</div><div class="sec-desc">Never share private keys or seed phrases. Admin will NEVER ask for them.</div></div>
     </div>
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="camera"></i></div>
+      <div><div class="sec-title">Screenshot Everything</div><div class="sec-desc">Always screenshot MoMo payments and crypto transfers as evidence.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="check-square"></i></div>
+      <div><div class="sec-title">Verify Before Sending</div><div class="sec-desc">Double-check wallet address or Binance ID before sending any crypto.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="shield-off"></i></div>
+      <div><div class="sec-title">Avoid Scammers</div><div class="sec-desc">Our only official contacts are those shown in the Support Center.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="smartphone"></i></div>
+      <div><div class="sec-title">Use Official App Only</div><div class="sec-desc">Only transact through this official Telegram Mini App.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon"><i data-lucide="clock"></i></div>
+      <div><div class="sec-title">Don't Rush</div><div class="sec-desc">Take your time verifying all details before any payment or transfer.</div></div>
+    </div>
+  </div>
+</div>
 
+<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<div class="page" id="page-about">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">About Us</div>
+    <div class="pg-sub">Smart Crypto Exchange Rwanda</div>
+  </div>
+
+  <div class="card a1" style="text-align:center;padding:24px 16px;">
+    <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+      <i data-lucide="bitcoin" style="width:30px;height:30px;color:#fff;"></i>
+    </div>
+    <div style="font-size:17px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px;">Smart Crypto Exchange Rwanda</div>
+    <div style="font-size:12.5px;color:var(--text2);line-height:1.65;">Your trusted local USDT exchange partner in Rwanda. Fast, reliable and secure manual crypto exchange.</div>
+  </div>
+
+  <div class="card a2">
+    <div class="card-label"><i data-lucide="target"></i> Our Mission</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;">We make crypto accessible to every Rwandan. Fast, transparent and secure USDT exchange with personal admin support — no complicated platforms, just a trusted service.</p>
+  </div>
+
+  <div class="card a3">
+    <div class="card-label"><i data-lucide="star"></i> Why Choose Us</div>
+    <div class="sec-row">
+      <div class="sec-icon" style="background:var(--blue-dim);"><i data-lucide="zap" style="color:var(--blue);"></i></div>
+      <div><div class="sec-title">Fast Processing</div><div class="sec-desc">Most transactions done in 5–15 minutes after proof submission.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon" style="background:var(--green-dim);"><i data-lucide="users" style="color:var(--green);"></i></div>
+      <div><div class="sec-title">Personal Support</div><div class="sec-desc">Real human admin support — not bots. We care about every transaction.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon" style="background:var(--amber-dim);"><i data-lucide="bar-chart-2" style="color:var(--amber);"></i></div>
+      <div><div class="sec-title">Competitive Rates</div><div class="sec-desc">Best RWF/USDT rates in Rwanda, updated daily.</div></div>
+    </div>
+    <div class="sec-row">
+      <div class="sec-icon" style="background:var(--red-dim);"><i data-lucide="shield" style="color:var(--red);"></i></div>
+      <div><div class="sec-title">Safe & Trusted</div><div class="sec-desc">Hundreds of satisfied customers. Your funds are always safe with us.</div></div>
+    </div>
+  </div>
+
+  <div class="a4 promo" onclick="openChannel()">
+    <div class="promo-icon"><i data-lucide="send"></i></div>
+    <div>
+      <div class="promo-title">Follow Us on Telegram</div>
+      <div class="promo-sub">Live rates, news and exclusive offers from our channel.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ FAQ ═══════════════════ -->
+<div class="page" id="page-faq">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div class="pg-title">Help / FAQ</div>
+    <div class="pg-sub">Frequently asked questions</div>
+  </div>
+
+  <div class="a1">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How long does a transaction take? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Most transactions complete within 5–15 minutes after sending proof of payment. During peak hours it may take up to 30 minutes.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What is the minimum trade amount? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Minimum is 5 USDT. For amounts over 1,000 USDT please contact admin in advance.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What payment methods are accepted? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">For buying: MTN Mobile Money. For selling: BEP20, TRC20, or ERC20 network transfers.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">I sent payment but didn't receive USDT. What do I do? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Contact admin immediately via WhatsApp (+250793031666) with your MoMo transaction screenshot.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Are there any fees? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">No hidden fees. The buy/sell rate shown already includes our service margin.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How are exchange rates updated? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Rates are set by admin based on the global USDT market price, typically updated daily.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is this service safe and legitimate? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Yes. Smart Crypto Exchange Rwanda has served hundreds of customers with full transparency. Always use our official contacts only.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I trade at night or on weekends? <i data-lucide="chevron-down"></i></div>
+      <div class="faq-a">Admin is available Monday to Saturday, 8:00 AM – 9:00 PM (Kigali time).</div>
+    </div>
+  </div>
+
+  <div class="a2" style="margin-top:14px;">
+    <button class="btn btn-primary" onclick="navigate('support')"><i data-lucide="headphones"></i> Contact Support</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ ADMIN ═══════════════════ -->
+<div class="page" id="page-admin">
+  <div class="pg-header">
+    <button class="pg-back" onclick="navigate('home')"><i data-lucide="arrow-left"></i> Back</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="pg-title" style="color:var(--amber);">Admin Panel</div>
+      <span class="admin-tag">Admin</span>
+    </div>
+    <div class="pg-sub">Price & Content Management</div>
+  </div>
+
+  <!-- Current Rates -->
+  <div class="card glow-blue a1">
+    <div class="card-label"><i data-lucide="activity"></i> Live Rates</div>
+    <div class="row-list">
+      <div class="row-item"><span class="row-label">Buy Price</span><span class="row-val" style="color:var(--green);" id="admin-cur-buy">—</span></div>
+      <div class="row-item"><span class="row-label">Sell Price</span><span class="row-val" style="color:var(--red);" id="admin-cur-sell">—</span></div>
+      <div class="row-item"><span class="row-label">Spread</span><span class="row-val" id="admin-spread">—</span></div>
+    </div>
+  </div>
+
+  <!-- Set Prices -->
+  <div class="card a2">
+    <div class="card-label"><i data-lucide="edit-3"></i> Update Prices</div>
     <div class="form-group">
-      <label class="form-label">USDT Amount</label>
-      <input class="form-input" type="number" id="buy-amount" placeholder="Enter USDT amount" min="5">
+      <label class="form-label">Buy Price (RWF per USDT)</label>
+      <input class="form-input" type="number" id="admin-buy-input" placeholder="e.g. 1500" min="1"/>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Payment Method</label>
-      <select class="form-select" id="buy-payment-method" onchange="togglePaymentFields('buy')">
-        <option value="">Select method</option>
-        <option value="binance">Binance Pay</option>
-        <option value="okx">OKX</option>
-        <option value="wallet">Wallet Address</option>
-      </select>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label">Sell Price (RWF per USDT)</label>
+      <input class="form-input" type="number" id="admin-sell-input" placeholder="e.g. 1480" min="1"/>
     </div>
-
-    <!-- Dynamic fields -->
-    <div id="buy-payment-fields"></div>
-
-    <div class="form-group">
-      <label class="form-label">RWF to Pay</label>
-      <div style="font-size: 24px; font-weight: 700; color: var(--accent-buy); padding: 16px; background: rgba(16, 185, 129, 0.05); border-radius: var(--radius); text-align: center;" id="buy-rwf-total">--</div>
-    </div>
-
-    <div class="info-box buy">
-      <strong>Payment Details:</strong><br>
-      MTN MoMo: <strong>0793031666</strong><br>
-      Name: <strong>Lambert Tuyishime</strong>
-    </div>
-
-    <button class="btn btn-buy" onclick="submitBuyOrder()" id="buy-submit-btn" disabled>
-      <i data-lucide="send"></i>
-      Submit Buy Order
+    <button class="btn btn-amber" onclick="adminSavePrices()">
+      <i data-lucide="save"></i> Save Prices to Supabase
     </button>
   </div>
 
-  <!-- Sell Page -->
-  <div class="page" id="page-sell">
-    <button class="back-btn" onclick="navigate('home')">
-      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
-      Back
-    </button>
-    <div class="page-title">Sell USDT</div>
-    <div class="page-subtitle">Enter details to receive RWF</div>
-
-    <div class="price-hero">
-      <div class="price-label">Current Sell Rate</div>
-      <div class="price-amount" id="sell-rate-display" style="color: var(--accent-sell);">--</div>
-      <div class="price-unit">RWF per USDT</div>
-    </div>
-
+  <!-- Create Post -->
+  <div class="card a3">
+    <div class="card-label"><i data-lucide="plus-circle"></i> Create Post / Announcement</div>
     <div class="form-group">
-      <label class="form-label">USDT Amount</label>
-      <input class="form-input" type="number" id="sell-amount" placeholder="Enter USDT amount" min="5">
+      <label class="form-label">Title</label>
+      <input class="form-input" type="text" id="post-title" placeholder="Post title"/>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Phone Number (MoMo)</label>
-      <input class="form-input" type="tel" id="sell-phone" placeholder="+250 79...">
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label">Content</label>
+      <textarea class="form-input" id="post-content" rows="4" placeholder="Write your announcement or update here…" style="resize:vertical;min-height:90px;"></textarea>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Full Name (MoMo registered)</label>
-      <input class="form-input" type="text" id="sell-name" placeholder="Full name">
-    </div>
-
-    <div class="card">
-      <div class="card-title">Our Receiving Wallets</div>
-      <div class="wallet-row">
-        <div class="wallet-network" style="color: #f0b90b;">
-          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
-          BEP20
-        </div>
-        <div class="wallet-address">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
-      </div>
-      <div class="wallet-row">
-        <div class="wallet-network" style="color: #ef0027;">
-          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
-          TRC20
-        </div>
-        <div class="wallet-address">TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W</div>
-      </div>
-      <div class="wallet-row">
-        <div class="wallet-network" style="color: #627eea;">
-          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
-          ERC20
-        </div>
-        <div class="wallet-address">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
-      </div>
-    </div>
-
-    <button class="btn btn-sell" onclick="submitSellOrder()" id="sell-submit-btn" disabled>
-      <i data-lucide="send"></i>
-      Submit Sell Order
+    <button class="btn btn-primary" onclick="adminCreatePost()">
+      <i data-lucide="send"></i> Publish Post
     </button>
   </div>
 
-  <!-- Admin Panel -->
-  <div class="page" id="page-admin">
-    <button class="back-btn" onclick="navigate('home')">
-      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
-      Back
-    </button>
-    <div class="page-title">Admin Panel</div>
-    <div class="page-subtitle">Manage prices, posts & orders</div>
-
-    <div class="card">
-      <div class="card-title">Current Rates</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
-        <div>
-          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Buy Rate</div>
-          <div style="font-size: 28px; font-weight: 700; color: var(--accent-buy);" id="admin-buy-current">--</div>
-        </div>
-        <div>
-          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Sell Rate</div>
-          <div style="font-size: 28px; font-weight: 700; color: var(--accent-sell);" id="admin-sell-current">--</div>
-        </div>
-      </div>
+  <!-- Orders -->
+  <div class="card a4">
+    <div class="card-label" style="justify-content:space-between;">
+      <span style="display:flex;align-items:center;gap:6px;"><i data-lucide="list"></i> All Orders</span>
+      <button class="btn btn-ghost btn-sm" onclick="loadAdminOrders()"><i data-lucide="refresh-cw" style="width:12px;height:12px;"></i> Refresh</button>
     </div>
+    <div id="admin-orders-list"><div class="loader"><div class="spin"></div> Loading…</div></div>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="card-title">Update Buy Rate</div>
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="navigate('home')"    data-page="home">   <i data-lucide="home"></i>Home</button>
+  <button class="nav-item"        onclick="navigate('buy')"     data-page="buy">    <i data-lucide="trending-up"></i>Buy</button>
+  <button class="nav-item"        onclick="navigate('sell')"    data-page="sell">   <i data-lucide="trending-down"></i>Sell</button>
+  <button class="nav-item"        onclick="navigate('rates')"   data-page="rates">  <i data-lucide="bar-chart-2"></i>Rates</button>
+  <button class="nav-item"        onclick="navigate('support')" data-page="support"><i data-lucide="headphones"></i>Support</button>
+</nav>
+
+<script>
+// ═══ CONFIG ═══════════════════════════════════════════
+const SB_URL    = 'https://geaqmxoqhjotswksiepp.supabase.co';
+const SB_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo';
+const ADMIN_ID  = '8616193014';
+const WA_URL    = 'https://wa.me/250793031666';
+const TG_ADMIN  = 'https://t.me/0735050322';
+const TG_CHAN   = 'https://t.me/AIProfitPulse_io';
+const EMAIL     = 'infolamva@gmail.com';
+
+// ═══ INIT ═════════════════════════════════════════════
+let sb, tgUser = null, prices = { buy: 1500, sell: 1480 };
+
+window.addEventListener('DOMContentLoaded', async () => {
+  lucide.createIcons();
+
+  // Supabase
+  sb = supabase.createClient(SB_URL, SB_KEY);
+
+  // Telegram
+  try {
+    if (window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready(); tg.expand();
+      tg.setHeaderColor('#0a0a0f');
+      tg.setBackgroundColor('#0a0a0f');
+      tgUser = tg.initDataUnsafe?.user || null;
+    }
+  } catch(e) {}
+
+  updateWelcome();
+  checkAdmin();
+  await fetchPrices();
+  subscribeToPrice();
+  loadPosts();
+  startTicker();
+});
+
+// ═══ SUPABASE: PRICES ═════════════════════════════════
+async function fetchPrices() {
+  try {
+    const { data, error } = await sb.from('prices').select('*').order('id').limit(1).single();
+    if (data) { prices.buy = data.buy; prices.sell = data.sell; }
+  } catch(e) { console.warn('fetchPrices:', e); }
+  applyPrices();
+}
+
+function subscribeToPrice() {
+  sb.channel('prices-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'prices' }, payload => {
+      if (payload.new) { prices.buy = payload.new.buy; prices.sell = payload.new.sell; applyPrices(); }
+    }).subscribe();
+}
+
+function applyPrices() {
+  const f = n => Number(n).toLocaleString();
+  setText('home-buy',          f(prices.buy));
+  setText('home-sell',         f(prices.sell));
+  setText('buy-price-display', f(prices.buy));
+  setText('sell-price-display',f(prices.sell));
+  setText('rates-buy',         f(prices.buy));
+  setText('rates-sell',        f(prices.sell));
+  setText('rates-spread',      f(prices.buy - prices.sell) + ' RWF');
+  setText('admin-cur-buy',     f(prices.buy) + ' RWF');
+  setText('admin-cur-sell',    f(prices.sell) + ' RWF');
+  setText('admin-spread',      f(prices.buy - prices.sell) + ' RWF');
+  updateBuyCalc(); updateSellCalc(); calcRate();
+}
+
+// ═══ SUPABASE: POSTS ══════════════════════════════════
+async function loadPosts() {
+  const el = document.getElementById('posts-list');
+  try {
+    const { data, error } = await sb.from('posts').select('*').order('created_at', { ascending: false }).limit(10);
+    if (!data || data.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:18px;font-size:12px;color:var(--text3);">No announcements yet.</div>';
+      return;
+    }
+    el.innerHTML = data.map(p => `
+      <div class="post-card">
+        <div class="post-title">${escHtml(p.title)}</div>
+        <div class="post-body">${escHtml(p.content)}</div>
+        <div class="post-date">${new Date(p.created_at).toLocaleString()}</div>
+      </div>`).join('');
+    lucide.createIcons();
+  } catch(e) { el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text3);">Could not load posts.</div>'; }
+}
+
+// ═══ ADMIN: SAVE PRICES ═══════════════════════════════
+async function adminSavePrices() {
+  const b = parseFloat(document.getElementById('admin-buy-input').value);
+  const s = parseFloat(document.getElementById('admin-sell-input').value);
+  if (!b || !s || b < 1 || s < 1) { showToast('Enter valid buy and sell prices', true); return; }
+  if (s >= b) { showToast('Sell price must be less than buy price', true); return; }
+  try {
+    // Upsert row id=1
+    const { error } = await sb.from('prices').upsert({ id: 1, buy: b, sell: s });
+    if (error) throw error;
+    prices.buy = b; prices.sell = s;
+    applyPrices();
+    showToast('Prices saved to Supabase');
+  } catch(e) { showToast('Failed to save prices', true); console.error(e); }
+}
+
+// ═══ ADMIN: CREATE POST ═══════════════════════════════
+async function adminCreatePost() {
+  const title   = document.getElementById('post-title').value.trim();
+  const content = document.getElementById('post-content').value.trim();
+  if (!title || !content) { showToast('Enter both title and content', true); return; }
+  try {
+    const { error } = await sb.from('posts').insert({ title, content });
+    if (error) throw error;
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-content').value = '';
+    showToast('Post published');
+    loadPosts();
+  } catch(e) { showToast('Failed to publish post', true); console.error(e); }
+}
+
+// ═══ ADMIN: ORDERS ════════════════════════════════════
+async function loadAdminOrders() {
+  const el = document.getElementById('admin-orders-list');
+  el.innerHTML = '<div class="loader"><div class="spin"></div> Loading…</div>';
+  try {
+    const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
+    if (!data || data.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:18px;font-size:12px;color:var(--text3);">No orders yet.</div>';
+      return;
+    }
+    el.innerHTML = data.map(o => `
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-type ${o.type}">${o.type.toUpperCase()}</span>
+          <span class="order-status ${o.status}">${o.status}</span>
+        </div>
+        <div class="order-details">
+          ${o.amount} USDT · ${o.payment_method || '—'}<br>
+          ${o.phone ? 'Phone: ' + o.phone + '<br>' : ''}
+          ${o.wallet_address ? 'Wallet: ' + o.wallet_address.slice(0,20) + '…<br>' : ''}
+          ${o.name ? 'Name: ' + o.name : ''}
+        </div>
+        <div class="order-id">ID: ${o.id} · User: ${o.user_id}</div>
+      </div>`).join('');
+    lucide.createIcons();
+  } catch(e) { el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text3);">Could not load orders.</div>'; }
+}
+
+// ═══ BUY WIZARD ═══════════════════════════════════════
+let buyData = {};
+
+function updateBuyCalc() {
+  const u = parseFloat(document.getElementById('buy-usdt-amount')?.value) || 0;
+  const rwf = u * prices.buy;
+  const preview = document.getElementById('buy-rwf-preview');
+  if (preview) {
+    preview.style.display = u > 0 ? 'block' : 'none';
+    setText('buy-rwf-val', u > 0 ? rwf.toLocaleString() : '—');
+  }
+}
+
+function renderBuyMethod() {
+  const m = document.getElementById('buy-method').value;
+  const el = document.getElementById('buy-method-fields');
+  if (m === 'binance') {
+    el.innerHTML = `<div class="form-group"><label class="form-label">Your Binance ID</label><input class="form-input" type="text" id="buy-binance-id" placeholder="Enter your Binance UID"/></div>`;
+  } else if (m === 'okx') {
+    el.innerHTML = `<div class="form-group"><label class="form-label">Your OKX UID</label><input class="form-input" type="text" id="buy-okx-uid" placeholder="Enter your OKX UID"/></div>`;
+  } else if (m === 'wallet') {
+    el.innerHTML = `
       <div class="form-group">
-        <label class="form-label">Buy Price (RWF per USDT)</label>
-        <input class="form-input" type="number" id="admin-buy-price" placeholder="e.g. 1520">
+        <label class="form-label">Network</label>
+        <select class="form-input" id="buy-network">
+          <option value="">— Select network —</option>
+          <option value="BEP20">BEP20 (BNB Smart Chain)</option>
+          <option value="TRC20">TRC20 (TRON)</option>
+          <option value="ERC20">ERC20 (Ethereum)</option>
+        </select>
       </div>
-      <button class="btn btn-buy" onclick="updatePrice('buy')">
-        <i data-lucide="save"></i>
-        Update Buy Rate
-      </button>
-    </div>
+      <div class="form-group"><label class="form-label">Wallet Address</label><input class="form-input" type="text" id="buy-wallet-addr" placeholder="Enter your wallet address"/></div>`;
+  } else { el.innerHTML = ''; }
+  lucide.createIcons();
+}
 
-    <div class="card">
-      <div class="card-title">Update Sell Rate</div>
-      <div class="form-group">
-        <label class="form-label">Sell Price (RWF per USDT)</label>
-        <input class="form-input" type="number" id="admin-sell-price" placeholder="e.g. 1500">
-      </div>
-      <button class="btn btn-sell" onclick="updatePrice('sell')">
-        <i data-lucide="save"></i>
-        Update Sell Rate
-      </button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Create Announcement</div>
-      <div class="form-group">
-        <label class="form-label">Title</label>
-        <input class="form-input" type="text" id="post-title">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Content</label>
-        <textarea class="form-input" id="post-content" rows="3" placeholder="Announcement message..."></textarea>
-      </div>
-      <button class="btn btn-primary" onclick="createPost()">
-        <i data-lucide="plus"></i>
-        Create Post
-      </button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Recent Orders</div>
-      <div style="max-height: 400px; overflow-y: auto;">
-        <table class="orders-table" id="orders-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Loading orders...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" onclick="navigate('home')" data-page="home">
-      <i data-lucide="home"></i>
-      <span>Home</span>
-    </button>
-    <button class="nav-item" onclick="showBuy()" data-page="buy">
-      <i data-lucide="arrow-up"></i>
-      <span>Buy</span>
-    </button>
-    <button class="nav-item" onclick="showSell()" data-page="sell">
-      <i data-lucide="arrow-down"></i>
-      <span>Sell</span>
-    </button>
-  </nav>
-
-  <script>
-    // Configuration
-    const SUPABASE_URL = 'https://geaqmxoqhjotswksiepp.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo';
-    
-    const ADMIN_USER_ID = '8616193014'; // Set your Telegram user ID here
-    const BOT_TOKEN = '8611866459:AAH6MamdCrj1XSyy1d2LtFL6nv_TgYYEuDQ';
-    const WA_NUMBER = '250793031666';
-    
-    let supabase;
-    let currentUser = null;
-    let prices = { buy: 1500, sell: 1480 };
-    let realtimeSubs = [];
-
-    // Initialize
-    async function init() {
-      // Init Supabase
-      supabase = createSupabaseClient();
-      
-      // Telegram WebApp
-      if (window.Telegram?.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('#ffffff');
-        tg.setBackgroundColor('#f8fafc');
-        currentUser = tg.initDataUnsafe?.user;
-      }
-
-      // Load data
-      await Promise.all([
-        loadPrices(),
-        loadPosts(),
-        loadUser(),
-        checkAdminAccess()
-      ]);
-
-      // Setup realtime
-      setupRealtime();
-
-      // Init Lucide icons
-      lucide.createIcons();
-
-      // Event listeners
-      document.addEventListener('input', handleInputChange);
+function buyNext(step) {
+  if (step === 1) {
+    const amt = parseFloat(document.getElementById('buy-usdt-amount').value);
+    if (!amt || amt < 5) { showToast('Minimum 5 USDT', true); return; }
+    buyData.amount = amt;
+    buyData.rwf = amt * prices.buy;
+    setText('buy-s3-amount', buyData.rwf.toLocaleString());
+    setText('buy-s3-rwf', buyData.rwf.toLocaleString() + ' RWF');
+    buyGoTo(2);
+  } else if (step === 2) {
+    const m = document.getElementById('buy-method').value;
+    if (!m) { showToast('Select a delivery method', true); return; }
+    buyData.method = m;
+    if (m === 'binance') {
+      const v = document.getElementById('buy-binance-id')?.value.trim();
+      if (!v) { showToast('Enter your Binance ID', true); return; }
+      buyData.wallet_address = 'Binance:' + v;
+      buyData.payment_method = 'Binance';
+    } else if (m === 'okx') {
+      const v = document.getElementById('buy-okx-uid')?.value.trim();
+      if (!v) { showToast('Enter your OKX UID', true); return; }
+      buyData.wallet_address = 'OKX:' + v;
+      buyData.payment_method = 'OKX';
+    } else if (m === 'wallet') {
+      const net  = document.getElementById('buy-network')?.value;
+      const addr = document.getElementById('buy-wallet-addr')?.value.trim();
+      if (!net) { showToast('Select a network', true); return; }
+      if (!addr) { showToast('Enter your wallet address', true); return; }
+      buyData.wallet_address = net + ':' + addr;
+      buyData.payment_method = 'Wallet (' + net + ')';
     }
+    buyGoTo(3);
+  } else if (step === 3) {
+    buildBuySummary();
+    buyGoTo(4);
+  }
+}
 
-    function createSupabaseClient() {
-      return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+function buyBack(step) { buyGoTo(step - 1); }
 
-    // Load user data
-    async function loadUser() {
-      if (!currentUser) return;
-      
-      document.getElementById('user-name').textContent = 
-        `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'User';
-      document.getElementById('user-id').textContent = `ID: ${currentUser.id}`;
-    }
+function buyGoTo(n) {
+  document.querySelectorAll('#page-buy .wizard-step').forEach((s, i) => s.classList.toggle('active', i + 1 === n));
+  for (let i = 1; i <= 4; i++) {
+    const d = document.getElementById('buy-dot-' + i);
+    if (d) d.classList.toggle('done', i <= n);
+  }
+  window.scrollTo(0, 0);
+}
 
-    // Load prices
-    async function loadPrices() {
-      try {
-        const { data, error } = await supabase
-          .from('prices')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1);
-        
-        if (data && data.length > 0) {
-          prices = { buy: data[0].buy, sell: data[0].sell };
-        }
-        
-        updatePriceDisplays();
-      } catch (error) {
-        console.error('Error loading prices:', error);
-      }
-    }
+function buildBuySummary() {
+  const el = document.getElementById('buy-summary');
+  el.innerHTML = `
+    <div class="card-label"><i data-lucide="file-text"></i> Order Summary</div>
+    <div class="row-list">
+      <div class="row-item"><span class="row-label">Type</span><span class="row-val" style="color:var(--green);">BUY</span></div>
+      <div class="row-item"><span class="row-label">Amount</span><span class="row-val">${buyData.amount} USDT</span></div>
+      <div class="row-item"><span class="row-label">You Pay</span><span class="row-val" style="color:var(--amber);">${buyData.rwf.toLocaleString()} RWF</span></div>
+      <div class="row-item"><span class="row-label">Delivery</span><span class="row-val">${buyData.payment_method}</span></div>
+      <div class="row-item"><span class="row-label">Destination</span><span class="row-val" style="font-size:11px;word-break:break-all;">${buyData.wallet_address}</span></div>
+    </div>`;
+  lucide.createIcons();
+}
 
-    // Update all price displays
-    function updatePriceDisplays() {
-      const elements = {
-        'home-buy-rate': prices.buy,
-        'home-sell-rate': prices.sell,
-        'buy-rate-display': prices.buy,
-        'sell-rate-display': prices.sell,
-        'admin-buy-current': prices.buy,
-        'admin-sell-current': prices.sell
-      };
+async function submitBuyOrder() {
+  const btn = document.getElementById('buy-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="width:16px;height:16px;"></div> Submitting…';
+  try {
+    const order = {
+      user_id: tgUser ? String(tgUser.id) : 'anonymous',
+      type: 'buy',
+      amount: buyData.amount,
+      payment_method: buyData.payment_method,
+      wallet_address: buyData.wallet_address,
+      phone: null,
+      name: tgUser ? ((tgUser.first_name || '') + ' ' + (tgUser.last_name || '')).trim() : 'Unknown',
+      status: 'pending'
+    };
+    const { error } = await sb.from('orders').insert(order);
+    if (error) throw error;
+    showToast('Order submitted successfully!');
+    setTimeout(() => { resetBuy(); navigate('home'); }, 1800);
+  } catch(e) {
+    showToast('Failed to submit order. Please contact admin.', true);
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="check"></i> Submit Order';
+    lucide.createIcons();
+  }
+}
 
-      Object.entries(elements).forEach(([id, value]) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = new Intl.NumberFormat().format(value);
-      });
+function resetBuy() {
+  buyData = {};
+  buyGoTo(1);
+  const a = document.getElementById('buy-usdt-amount');
+  if (a) { a.value = ''; }
+  updateBuyCalc();
+}
 
-      updateCalculations();
-    }
+// ═══ SELL WIZARD ══════════════════════════════════════
+let sellData = {};
 
-    // Load posts
-    async function loadPosts() {
-      try {
-        const { data } = await supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        renderPosts(data || []);
-      } catch (error) {
-        console.error('Error loading posts:', error);
-        document.getElementById('posts-container').innerHTML = 
-          '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No announcements</div>';
-      }
-    }
+function updateSellCalc() {
+  const u = parseFloat(document.getElementById('sell-usdt-amount')?.value) || 0;
+  const rwf = u * prices.sell;
+  const preview = document.getElementById('sell-rwf-preview');
+  if (preview) {
+    preview.style.display = u > 0 ? 'block' : 'none';
+    setText('sell-rwf-val', u > 0 ? rwf.toLocaleString() : '—');
+  }
+}
 
-    function renderPosts(posts) {
-      const container = document.getElementById('posts-container');
-      if (!posts.length) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No announcements</div>';
-        return;
-      }
+function sellNext(step) {
+  if (step === 1) {
+    const amt = parseFloat(document.getElementById('sell-usdt-amount').value);
+    if (!amt || amt < 5) { showToast('Minimum 5 USDT', true); return; }
+    sellData.amount = amt;
+    sellData.rwf = amt * prices.sell;
+    sellGoTo(2);
+  } else if (step === 2) {
+    const ph   = document.getElementById('sell-phone').value.trim();
+    const name = document.getElementById('sell-name').value.trim();
+    if (!ph) { showToast('Enter your MoMo phone number', true); return; }
+    if (!name) { showToast('Enter your registered MoMo name', true); return; }
+    sellData.phone = ph;
+    sellData.name  = name;
+    setText('sell-s3-usdt', sellData.amount + ' USDT');
+    sellGoTo(3);
+  } else if (step === 3) {
+    buildSellSummary();
+    sellGoTo(4);
+  }
+}
 
-      container.innerHTML = posts.map(post => `
-        <div class="post">
-          <div class="post-title">${post.title}</div>
-          <div class="post-meta">${new Date(post.created_at).toLocaleDateString()}</div>
-          <div>${post.content}</div>
-        </div>
-      `).join('');
-    }
+function sellBack(step) { sellGoTo(step - 1); }
 
-    // Setup realtime subscriptions
-    function setupRealtime() {
-      // Prices realtime
-      const pricesSub = supabase
-        .channel('prices')
-        .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'prices' }, 
-          () => loadPrices()
-        )
-        .subscribe();
+function sellGoTo(n) {
+  document.querySelectorAll('#page-sell .wizard-step').forEach((s, i) => s.classList.toggle('active', i + 1 === n));
+  for (let i = 1; i <= 4; i++) {
+    const d = document.getElementById('sell-dot-' + i);
+    if (d) d.classList.toggle('done', i <= n);
+  }
+  window.scrollTo(0, 0);
+}
 
-      realtimeSubs.push(pricesSub);
+function buildSellSummary() {
+  const el = document.getElementById('sell-summary');
+  el.innerHTML = `
+    <div class="card-label"><i data-lucide="file-text"></i> Order Summary</div>
+    <div class="row-list">
+      <div class="row-item"><span class="row-label">Type</span><span class="row-val" style="color:var(--red);">SELL</span></div>
+      <div class="row-item"><span class="row-label">Amount</span><span class="row-val">${sellData.amount} USDT</span></div>
+      <div class="row-item"><span class="row-label">You Receive</span><span class="row-val" style="color:var(--green);">${sellData.rwf.toLocaleString()} RWF</span></div>
+      <div class="row-item"><span class="row-label">MoMo Phone</span><span class="row-val">${sellData.phone}</span></div>
+      <div class="row-item"><span class="row-label">Registered Name</span><span class="row-val">${sellData.name}</span></div>
+    </div>`;
+  lucide.createIcons();
+}
 
-      // Posts realtime
-      const postsSub = supabase
-        .channel('posts')
-        .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'posts' }, 
-          () => loadPosts()
-        )
-        .subscribe();
+async function submitSellOrder() {
+  const btn = document.getElementById('sell-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="width:16px;height:16px;"></div> Submitting…';
+  try {
+    const order = {
+      user_id: tgUser ? String(tgUser.id) : 'anonymous',
+      type: 'sell',
+      amount: sellData.amount,
+      payment_method: 'MTN MoMo',
+      wallet_address: null,
+      phone: sellData.phone,
+      name: sellData.name,
+      status: 'pending'
+    };
+    const { error } = await sb.from('orders').insert(order);
+    if (error) throw error;
+    showToast('Order submitted successfully!');
+    setTimeout(() => { resetSell(); navigate('home'); }, 1800);
+  } catch(e) {
+    showToast('Failed to submit order. Please contact admin.', true);
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="check"></i> Submit Order';
+    lucide.createIcons();
+  }
+}
 
-      realtimeSubs.push(postsSub);
+function resetSell() {
+  sellData = {};
+  sellGoTo(1);
+  const a = document.getElementById('sell-usdt-amount');
+  if (a) { a.value = ''; }
+  updateSellCalc();
+}
 
-      // Orders realtime (admin only)
-      if (isAdmin()) {
-        const ordersSub = supabase
-          .channel('orders')
-          .on('postgres_changes', 
-            { event: '*', schema: 'public', table: 'orders' }, 
-            () => loadOrders()
-          )
-          .subscribe();
-        realtimeSubs.push(ordersSub);
-      }
-    }
+// ═══ PROOF MESSAGES ═══════════════════════════════════
+function sendBuyProof(ch) {
+  const uid  = tgUser ? tgUser.id : 'N/A';
+  const name = tgUser ? ((tgUser.first_name||'') + ' ' + (tgUser.last_name||'')).trim() : 'User';
+  const msg = `BUY REQUEST\n\nUser: ${name}\nTelegram ID: ${uid}\nAmount: ${buyData.amount || '?'} USDT\nPaying: ${buyData.rwf ? buyData.rwf.toLocaleString() : '?'} RWF\nDelivery: ${buyData.payment_method || '?'}\nDestination: ${buyData.wallet_address || '?'}\nBuy Price: ${prices.buy.toLocaleString()} RWF/USDT\n\nI have sent payment via MTN MoMo. Screenshot attached.`;
+  if (ch === 'wa') openWA(msg); else openTG();
+}
 
-    // Admin check
-    function checkAdminAccess() {
-      if (!currentUser) return;
-      
-      if (currentUser.id == ADMIN_USER_ID) {
-        addAdminMenu();
-      }
-    }
+function sendSellProof(ch) {
+  const uid  = tgUser ? tgUser.id : 'N/A';
+  const name = tgUser ? ((tgUser.first_name||'') + ' ' + (tgUser.last_name||'')).trim() : 'User';
+  const msg = `SELL REQUEST\n\nUser: ${name}\nTelegram ID: ${uid}\nAmount: ${sellData.amount || '?'} USDT\nExpected: ${sellData.rwf ? sellData.rwf.toLocaleString() : '?'} RWF\nMoMo: ${sellData.phone || '?'}\nName: ${sellData.name || '?'}\nSell Price: ${prices.sell.toLocaleString()} RWF/USDT\n\nI have sent USDT. Transaction screenshot attached.`;
+  if (ch === 'wa') openWA(msg); else openTG();
+}
 
-    function addAdminMenu() {
-      const menuGrid = document.getElementById('home-menu');
-      const adminItem = document.createElement('div');
-      adminItem.className = 'menu-item';
-      adminItem.innerHTML = `
-        <i data-lucide="shield" style="width: 24px; height: 24px; color: var(--accent-admin);"></i>
-        <div class="menu-item-label">Admin</div>
-      `;
-      adminItem.onclick = () => navigate('admin');
-      menuGrid.appendChild(adminItem);
-      
-      lucide.createIcons();
-    }
+// ═══ RATES CALCULATOR ═════════════════════════════════
+function calcRate() {
+  const u = parseFloat(document.getElementById('calc-usdt')?.value) || 0;
+  setText('calc-buy-rwf',  u > 0 ? (u * prices.buy).toLocaleString()  : '—');
+  setText('calc-sell-rwf', u > 0 ? (u * prices.sell).toLocaleString() : '—');
+}
 
-    // Navigation
-    function navigate(page) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(`page-${page}`).classList.add('active');
-      
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.page === page);
-      });
+// ═══ WELCOME ══════════════════════════════════════════
+function updateWelcome() {
+  if (tgUser) {
+    setText('welcome-name', ((tgUser.first_name || '') + ' ' + (tgUser.last_name || '')).trim());
+    setText('welcome-id', 'Telegram ID: ' + tgUser.id);
+  }
+}
 
-      if (page === 'admin') {
-        loadOrders();
-      }
-      
-      lucide.createIcons();
-    }
+// ═══ ADMIN CHECK ══════════════════════════════════════
+function checkAdmin() {
+  const uid  = tgUser ? String(tgUser.id) : null;
+  const wrap = document.getElementById('admin-menu-wrap');
+  if (wrap && (uid === ADMIN_ID || !tgUser)) wrap.style.display = 'block';
+}
 
-    function showBuy() { navigate('buy'); }
-    function showSell() { navigate('sell'); }
+// ═══ NAVIGATE ════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  window.scrollTo(0, 0);
+  if (page === 'admin') { loadAdminOrders(); }
+  if (page === 'rates') { applyPrices(); }
+  lucide.createIcons();
+}
 
-    // Form handling
-    function handleInputChange(e) {
-      const target = e.target;
-      if (target.id.includes('amount') || target.id.includes('price')) {
-        updateCalculations();
-        toggleSubmitButtons();
-      }
-    }
+// ═══ HELPERS ══════════════════════════════════════════
+function setText(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    function togglePaymentFields(type) {
-      const method = document.getElementById(`${type}-payment-method`).value;
-      const container = document.getElementById(`${type}-payment-fields`);
-      
-      const fields = {
-        binance: `
-          <div class="form-group">
-            <label class="form-label">Binance ID</label>
-            <input class="form-input" type="text" id="${type}-binance-id" placeholder="Your Binance ID">
-          </div>
-        `,
-        okx: `
-          <div class="form-group">
-            <label class="form-label">OKX UID</label>
-            <input class="form-input" type="text" id="${type}-okx-uid" placeholder="Your OKX UID">
-          </div>
-        `,
-        wallet: `
-          <div class="form-group">
-            <label class="form-label">Network</label>
-            <select class="form-select" id="${type}-network">
-              <option value="BEP20">BEP20 (BNB Smart Chain)</option>
-              <option value="TRC20">TRC20 (TRON)</option>
-              <option value="ERC20">ERC20 (Ethereum)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Wallet Address</label>
-            <input class="form-input" type="text" id="${type}-wallet-address" placeholder="0x...">
-          </div>
-        `
-      };
+function copyText(text, label) {
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast(label + ' copied');
+  };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => showToast(label + ' copied')).catch(fallback);
+  else fallback();
+}
 
-      container.innerHTML = fields[method] || '';
-      toggleSubmitButtons();
-    }
+function openWA(msg) {
+  const m = msg || 'Hello, I need help with Smart Crypto Exchange Rwanda.';
+  window.open(WA_URL + '?text=' + encodeURIComponent(m), '_blank');
+}
+function openTG()      { window.open(TG_ADMIN, '_blank'); }
+function openChannel() { window.open(TG_CHAN, '_blank'); }
+function openEmail()   { window.open('mailto:' + EMAIL, '_blank'); }
 
-    function updateCalculations() {
-      const buyAmount = parseFloat(document.getElementById('buy-amount')?.value) || 0;
-      const sellAmount = parseFloat(document.getElementById('sell-amount')?.value) || 0;
-      
-      const buyRwf = document.getElementById('buy-rwf-total');
-      if (buyAmount > 0 && buyRwf) {
-        buyRwf.textContent = new Intl.NumberFormat().format(buyAmount * prices.buy) + ' RWF';
-      }
-    }
+function showToast(msg, isErr) {
+  const t   = document.getElementById('toast');
+  const ico = document.getElementById('toast-icon');
+  const txt = document.getElementById('toast-msg');
+  txt.textContent = msg;
+  ico.setAttribute('data-lucide', isErr ? 'x-circle' : 'check-circle');
+  t.className = 'toast ' + (isErr ? 'err' : 'ok') + ' show';
+  lucide.createIcons();
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-    function toggleSubmitButtons() {
-      const buyBtn = document.getElementById('buy-submit-btn');
-      const sellBtn = document.getElementById('sell-submit-btn');
-      
-      if (buyBtn) {
-        const amount = document.getElementById('buy-amount')?.value;
-        const method = document.getElementById('buy-payment-method')?.value;
-        buyBtn.disabled = !amount || !method || parseFloat(amount) < 5;
-      }
-      
-      if (sellBtn) {
-        const amount = document.getElementById('sell-amount')?.value;
-        const phone = document.getElementById('sell-phone')?.value;
-        const name = document.getElementById('sell-name')?.value;
-        sellBtn.disabled = !amount || !phone || !name || parseFloat(amount) < 5;
-      }
-    }
+function toggleFaq(el) { el.closest('.faq-item').classList.toggle('open'); }
 
-    // Submit Buy Order
-    async function submitBuyOrder() {
-      const amount = parseFloat(document.getElementById('buy-amount').value);
-      const method = document.getElementById('buy-payment-method').value;
-      let details = {};
-      
-      if (method === 'binance') {
-        details.binanceId = document.getElementById('buy-binance-id').value;
-      } else if (method === 'okx') {
-        details.okxUid = document.getElementById('buy-okx-uid').value;
-      } else if (method === 'wallet') {
-        details.network = document.getElementById('buy-network').value;
-        details.walletAddress = document.getElementById('buy-wallet-address').value;
-      }
-
-      try {
-        showToast('Creating order...', 'success');
-        
-        const { error } = await supabase
-          .from('orders')
-          .insert({
-            user_id: currentUser?.id || 'anonymous',
-            type: 'buy',
-            amount,
-            payment_method: method,
-            ...details,
-            phone: '',
-            name: currentUser?.first_name || '',
-            status: 'pending',
-            created_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-        
-        showToast('✅ Buy order created successfully!', 'success');
-        sendOrderNotification('buy', amount, details);
-        clearBuyForm();
-      } catch (error) {
-        showToast('Error creating order: ' + error.message, 'error');
-      }
-    }
-
-    // Submit Sell Order
-    async function submitSellOrder() {
-      const amount = parseFloat(document.getElementById('sell-amount').value);
-      const phone = document.getElementById('sell-phone').value;
-      const name = document.getElementById('sell-name').value;
-
-      try {
-        showToast('Creating order...', 'success');
-        
-        const { error } = await supabase
-          .from('orders')
-          .insert({
-            user_id: currentUser?.id || 'anonymous',
-            type: 'sell',
-            amount,
-            payment_method: 'direct',
-            wallet_address: '',
-            phone,
-            name,
-            status: 'pending',
-            created_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-        
-        showToast('✅ Sell order created successfully!', 'success');
-        sendOrderNotification('sell', amount, { phone, name });
-      } catch (error) {
-        showToast('Error creating order: ' + error.message, 'error');
-      }
-    }
-
-    function clearBuyForm() {
-      document.getElementById('buy-amount').value = '';
-      document.getElementById('buy-payment-method').value = '';
-      document.getElementById('buy-payment-fields').innerHTML = '';
-      document.getElementById('buy-rwf-total').textContent = '--';
-      document.getElementById('buy-submit-btn').disabled = true;
-    }
-
-    // Admin functions
-    async function updatePrice(type) {
-      const value = parseFloat(document.getElementById(`admin-${type}-price`).value);
-      if (!value || value < 0) {
-        showToast('Please enter a valid price', 'error');
-        return;
-      }
-
-      try {
-        const { error } = await supabase
-          .from('prices')
-          .upsert({
-            id: 1,
-            [type]: value,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
-
-        if (error) throw error;
-        
-        prices[type] = value;
-        updatePriceDisplays();
-        showToast(`✅ ${type.toUpperCase()} price updated`, 'success');
-      } catch (error) {
-        showToast('Error updating price', 'error');
-      }
-    }
-
-    async function createPost() {
-      const title = document.getElementById('post-title').value.trim();
-      const content = document.getElementById('post-content').value.trim();
-      
-      if (!title || !content) {
-        showToast('Please fill title and content', 'error');
-        return;
-      }
-
-      try {
-        const { error } = await supabase
-          .from('posts')
-          .insert({
-            title,
-            content,
-            created_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-        
-        document.getElementById('post-title').value = '';
-        document.getElementById('post-content').value = '';
-        showToast('✅ Post created successfully', 'success');
-      } catch (error) {
-        showToast('Error creating post', 'error');
-      }
-    }
-
-    async function loadOrders() {
-      if (!isAdmin()) return;
-      
-      try {
-        const { data } = await supabase
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        
-        renderOrders(data || []);
-      } catch (error) {
-        console.error('Error loading orders:', error);
-      }
-    }
-
-    function renderOrders(orders) {
-      const tbody = document.querySelector('#orders-table tbody');
-      if (!orders.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No orders</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = orders.map(order => `
-        <tr>
-          <td>${order.id}</td>
-          <td>${order.user_id}</td>
-          <td>${order.type.toUpperCase()}</td>
-          <td>${order.amount} USDT</td>
-          <td><span class="status ${order.status}">${order.status}</span></td>
-        </tr>
-      `).join('');
-    }
-
-    function isAdmin() {
-      return currentUser && currentUser.id == ADMIN_USER_ID;
-    }
-
-    // Telegram notifications
-    async function sendOrderNotification(type, amount, details) {
-      const message = `🔔 *New ${type.toUpperCase()} Order*\n\n` +
-        `👤 User: ${currentUser?.first_name || 'Anonymous'} (${currentUser?.id})\n` +
-        `💰 Amount: ${amount} USDT\n` +
-        `📱 Phone: ${details.phone || 'N/A'}\n` +
-        `💳 Method: ${details.payment_method || 'Direct'}\n\n` +
-        `_New order received_`;
-
-      // Send to Telegram bot (simplified)
-      console.log('Order notification:', message);
-    }
-
-    // Utility functions
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = `toast ${type} show`;
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    function toggleTheme() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-      lucide.createIcons();
-    }
-
-    // Initialize on load
-    window.addEventListener('DOMContentLoaded', init);
-
-    // Cleanup on unload
-    window.addEventListener('beforeunload', () => {
-      realtimeSubs.forEach(sub => supabase.removeChannel(sub));
-    });
-  </script>
+// ═══ TICKER ═══════════════════════════════════════════
+function startTicker() {
+  const coins = ['BTC','ETH','BNB','SOL','MATIC','XRP'];
+  const update = () => {
+    const t = document.getElementById('ticker');
+    if (!t) return;
+    t.innerHTML = coins.map(c => {
+      const up  = Math.random() > 0.4;
+      const pct = (Math.random() * 4).toFixed(1);
+      return `<div class="ti">${c} <span class="${up?'up':'down'}">${up?'+':'-'}${pct}%</span></div>`;
+    }).join('');
+  };
+  update(); setInterval(update, 5000);
+}
+</script>
 </body>
-    </html>
+</html>
