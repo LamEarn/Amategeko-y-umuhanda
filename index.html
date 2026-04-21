@@ -1,412 +1,1333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Exchange Rwanda</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #ffffff;
-            --surface: #f8fafc;
-            --border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --green: #10b981;
-            --red: #ef4444;
-            --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Crypto Exchange Rwanda</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --accent-buy: #10b981;
+      --accent-sell: #ef4444;
+      --accent-admin: #7c3aed;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--surface); 
-            color: var(--text-main);
-            line-height: 1.5;
-        }
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+    }
 
-        /* Subtle Rwanda Money Overlay Background */
-        .bg-overlay {
-            position: fixed; inset: 0; z-index: -1;
-            background-image: url('https://www.bnr.rw/fileadmin/templates/images/bnr_logo.png'); /* Replace with subtle pattern */
-            background-repeat: no-repeat; background-position: center;
-            opacity: 0.03; filter: grayscale(1);
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .container { max-width: 500px; margin: 0 auto; padding-bottom: 80px; }
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
 
-        /* Top Bar */
-        .top-bar {
-            position: fixed; top: 0; width: 100%; max-width: 500px;
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 16px; display: flex; align-items: center; z-index: 1000;
-        }
-        .back-btn { 
-            background: none; border: none; padding: 8px; cursor: pointer; color: var(--text-main);
-            display: none; align-items: center;
-        }
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+    }
 
-        /* Layout Units */
-        .card {
-            background: white; border: 1px solid var(--border);
-            border-radius: 16px; padding: 16px; margin: 12px;
-            box-shadow: var(--shadow);
-        }
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        /* Menu Grid */
-        .menu-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px;
-        }
-        .menu-item {
-            background: white; border: 1px solid var(--border); border-radius: 12px;
-            padding: 16px 8px; display: flex; flex-direction: column; align-items: center;
-            text-align: center; gap: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .menu-item:active { transform: scale(0.95); background: var(--surface); }
-        .menu-item span { font-size: 11px; font-weight: 600; color: var(--text-main); }
-        .icon { width: 24px; height: 24px; stroke: var(--primary); stroke-width: 2; fill: none; }
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent-buy), var(--accent-sell));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
 
-        /* Rates Display */
-        .rate-box { display: flex; justify-content: space-between; gap: 12px; }
-        .rate-card { flex: 1; text-align: center; padding: 12px; border-radius: 12px; background: #f1f5f9; }
-        .rate-val { font-size: 18px; font-weight: 700; color: var(--primary); }
-        .rate-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
 
-        /* Forms */
-        .input-group { margin-bottom: 16px; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-        input, select {
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-            font-family: inherit; font-size: 15px; outline: none;
-        }
-        input:focus { border-color: var(--primary); }
+    .header-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
 
-        .btn {
-            width: 100%; padding: 14px; border-radius: 12px; border: none;
-            font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:disabled { background: var(--text-muted); }
+    /* Pages */
+    .page {
+      display: none;
+      min-height: calc(100vh - 80px);
+      padding: 24px 20px 120px;
+      animation: fadeIn 0.3s ease-out;
+    }
 
-        /* Page Management */
-        .page { display: none; padding-top: 70px; animation: slideUp 0.3s ease-out; }
-        .active-page { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .page.active {
+      display: block;
+    }
 
-        /* Admin UI */
-        .admin-only { border-left: 4px solid #f59e0b; }
-        .status-badge { 
-            padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; 
-            text-transform: uppercase; 
-        }
-        .status-pending { background: #fef3c7; color: #92400e; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .loading-overlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.7);
-            display: none; align-items: center; justify-content: center; z-index: 2000;
-        }
-    </style>
+    /* Back Button */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 0;
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: var(--transition);
+    }
+
+    .back-btn:hover {
+      color: var(--text-primary);
+    }
+
+    /* Page Titles */
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.025em;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 32px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+
+    /* Price Hero */
+    .price-hero {
+      text-align: center;
+      padding: 32px 24px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .price-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .price-amount {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+    }
+
+    .price-unit {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-buy { background: linear-gradient(135deg, var(--accent-buy), #059669); color: white; }
+    .btn-sell { background: linear-gradient(135deg, var(--accent-sell), #dc2626); color: white; }
+    .btn-admin { background: linear-gradient(135deg, var(--accent-admin), #6d28d9); color: white; }
+    .btn-secondary {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(59, 130, 246, 0.05);
+      border-left: 4px solid #3b82f6;
+      padding: 20px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-bottom: 20px;
+    }
+
+    .info-box.buy { border-left-color: var(--accent-buy); background: rgba(16, 185, 129, 0.05); }
+    .info-box.sell { border-left-color: var(--accent-sell); background: rgba(239, 68, 68, 0.05); }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .menu-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .menu-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .menu-item i {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .menu-item-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Rate Cards */
+    .rate-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .rate-card {
+      padding: 28px 20px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .rate-card.buy {
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.03);
+    }
+
+    .rate-card.sell {
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.03);
+    }
+
+    /* Posts */
+    .post {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .post-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .post-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Wallet Row */
+    .wallet-row {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+
+    .wallet-network {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wallet-address {
+      font-family: 'SF Mono', Monaco, 'Roboto Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+      word-break: break-all;
+      background: rgba(15, 23, 42, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* Orders Table */
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .orders-table th,
+    .orders-table td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .orders-table th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 12px;
+    }
+
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status.pending { background: rgba(245, 101, 101, 0.1); color: #ef4444; }
+    .status.completed { background: rgba(16, 185, 129, 0.1); color: var(--accent-buy); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      font-weight: 500;
+    }
+
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success { border-color: var(--accent-buy); color: var(--accent-buy); }
+    .toast.error { border-color: var(--accent-sell); color: var(--accent-sell); }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 12px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 4px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .nav-item.active {
+      color: var(--accent-buy);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .page { padding: 20px 16px 120px; }
+      .price-amount { font-size: 40px; }
+      .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    }
+
+    /* Loading */
+    .loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      background: none;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(0,0,0,0.05);
+      color: var(--text-primary);
+    }
+  </style>
 </head>
 <body>
-    <div class="bg-overlay"></div>
-    <div class="loading-overlay" id="loading"><span>Processing...</span></div>
 
-    <div class="top-bar">
-        <button id="backBtn" class="back-btn" onclick="showHome()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span style="margin-left: 4px; font-weight: 600;">Back</span>
-        </button>
-        <div id="appTitle" style="margin-left: auto; font-weight: 700; font-size: 14px;">EXCHANGE RWANDA</div>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="logo">₿</div>
+      <div>
+        <div class="header-title">Crypto Exchange</div>
+        <div class="header-subtitle">Rwanda</div>
+      </div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">
+      <i data-lucide="sun"></i>
+    </button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Home Page -->
+  <div class="page active" id="page-home">
+    <div class="rate-grid">
+      <div class="rate-card buy">
+        <div class="price-label" style="color: var(--accent-buy);">Buy Rate</div>
+        <div class="price-amount" id="home-buy-rate" style="color: var(--accent-buy);">--</div>
+        <div class="price-unit">RWF per USDT</div>
+      </div>
+      <div class="rate-card sell">
+        <div class="price-label" style="color: var(--accent-sell);">Sell Rate</div>
+        <div class="price-amount" id="home-sell-rate" style="color: var(--accent-sell);">--</div>
+        <div class="price-unit">RWF per USDT</div>
+      </div>
     </div>
 
-    <div class="container">
-        <div id="homePage" class="page active-page">
-            <div class="card">
-                <p id="welcomeUser" style="font-size: 13px; color: var(--text-muted);">Welcome</p>
-                <h2 id="userName" style="font-size: 20px; margin-bottom: 12px;">Trader</h2>
-                <div class="rate-box">
-                    <div class="rate-card">
-                        <div class="rate-label">Buy USDT</div>
-                        <div class="rate-val" id="buyRate">0.00</div>
-                    </div>
-                    <div class="rate-card">
-                        <div class="rate-label">Sell USDT</div>
-                        <div class="rate-val" id="sellRate">0.00</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-grid">
-                <div class="menu-item" onclick="showPage('buyPage')">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    <span>Buy</span>
-                </div>
-                <div class="menu-item" onclick="showPage('sellPage')">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
-                    <span>Sell</span>
-                </div>
-                <div class="menu-item" onclick="showPage('ordersPage')">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    <span>Orders</span>
-                </div>
-                <div id="adminBtn" class="menu-item" style="display:none;" onclick="showPage('adminPage')">
-                    <svg class="icon" style="stroke: #f59e0b" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    <span>Admin</span>
-                </div>
-            </div>
-
-            <div id="postsList"></div>
-        </div>
-
-        <div id="buyPage" class="page">
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">Buy USDT</h3>
-                <div class="input-group">
-                    <label>Amount (USDT)</label>
-                    <input type="number" id="buyAmount" placeholder="0.00" oninput="calcBuy()">
-                </div>
-                <div class="input-group">
-                    <label>Receive via</label>
-                    <select id="buyMethod" onchange="toggleBuyFields()">
-                        <option value="binance">Binance Pay</option>
-                        <option value="okx">OKX UID</option>
-                        <option value="wallet">Direct Wallet Address</option>
-                    </select>
-                </div>
-                
-                <div id="buyDynamicFields"></div>
-
-                <div class="rate-card" style="margin-bottom: 16px;">
-                    <div class="rate-label">You pay</div>
-                    <div class="rate-val" id="buyTotal">0 RWF</div>
-                </div>
-
-                <div class="card admin-only" style="margin: 0 0 16px 0; background: #fefce8;">
-                    <p style="font-size: 12px; font-weight: 600;">Payment Instruction:</p>
-                    <p style="font-size: 14px;">MoMo: <strong>0793031666</strong></p>
-                    <p style="font-size: 12px; color: var(--text-muted);">Name: Lambert Tuyishime</p>
-                </div>
-
-                <button class="btn btn-primary" onclick="submitOrder('buy')">Confirm Purchase</button>
-            </div>
-        </div>
-
-        <div id="sellPage" class="page">
-            <div class="card">
-                <h3 style="margin-bottom: 16px;">Sell USDT</h3>
-                <div class="input-group">
-                    <label>Amount (USDT)</label>
-                    <input type="number" id="sellAmount" placeholder="0.00" oninput="calcSell()">
-                </div>
-                <div class="input-group">
-                    <label>Your Phone (MoMo)</label>
-                    <input type="text" id="sellPhone" placeholder="078...">
-                </div>
-                <div class="input-group">
-                    <label>MoMo Name</label>
-                    <input type="text" id="sellName" placeholder="Account Name">
-                </div>
-
-                <div class="rate-card" style="margin-bottom: 16px;">
-                    <div class="rate-label">You receive</div>
-                    <div class="rate-val" id="sellTotal">0 RWF</div>
-                </div>
-
-                <div class="card" style="margin: 0 0 16px 0; border: 1px dashed var(--primary);">
-                    <p style="font-size: 11px; font-weight: 700; color: var(--primary);">DEPOSIT ADDRESSES:</p>
-                    <p style="font-size: 11px; word-break: break-all; margin-top: 4px;"><strong>BEP20:</strong> 0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</p>
-                    <p style="font-size: 11px; word-break: break-all;"><strong>TRC20:</strong> TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W</p>
-                </div>
-
-                <button class="btn btn-primary" onclick="submitOrder('sell')">Submit Order</button>
-            </div>
-        </div>
-
-        <div id="ordersPage" class="page">
-            <div id="orderList"></div>
-        </div>
-
-        <div id="adminPage" class="page">
-            <div class="card admin-only">
-                <h3>Admin Control</h3>
-                <div class="input-group" style="margin-top:12px;">
-                    <label>Buy Rate (RWF)</label>
-                    <input type="number" id="adminBuyRate">
-                </div>
-                <div class="input-group">
-                    <label>Sell Rate (RWF)</label>
-                    <input type="number" id="adminSellRate">
-                </div>
-                <button class="btn btn-primary" onclick="updateRates()">Update Prices</button>
-            </div>
-
-            <div class="card">
-                <label>New Announcement</label>
-                <input type="text" id="postTitle" placeholder="Title" style="margin-bottom:8px;">
-                <textarea id="postContent" placeholder="Content..." style="width:100%; height:80px; padding:10px; border-radius:10px; border:1px solid var(--border); font-family:inherit;"></textarea>
-                <button class="btn btn-primary" style="margin-top:8px;" onclick="createPost()">Post Update</button>
-            </div>
-        </div>
+    <div class="card">
+      <div class="card-title">
+        <i data-lucide="user" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+        Welcome
+      </div>
+      <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;" id="user-name">Loading...</div>
+      <div style="font-size: 14px; color: var(--text-secondary);" id="user-id"></div>
     </div>
 
-    <script>
-        const SB_URL = "https://geaqmxoqhjotswksiepp.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo";
-        const supabase = typeof supabase !== 'undefined' ? supabase : window.supabase.createClient(SB_URL, SB_KEY);
-        
-        let currentRates = { buy: 0, sell: 0 };
+    <div class="card">
+      <div class="card-title">
+        <i data-lucide="file-text" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+        Announcements
+      </div>
+      <div id="posts-container">
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading posts...
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-grid" id="home-menu">
+      <!-- Menu items populated by JS -->
+    </div>
+  </div>
+
+  <!-- Buy Page -->
+  <div class="page" id="page-buy">
+    <button class="back-btn" onclick="navigate('home')">
+      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      Back
+    </button>
+    <div class="page-title">Buy USDT</div>
+    <div class="page-subtitle">Enter amount and payment details</div>
+
+    <div class="price-hero">
+      <div class="price-label">Current Buy Rate</div>
+      <div class="price-amount" id="buy-rate-display">--</div>
+      <div class="price-unit">RWF per USDT</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">USDT Amount</label>
+      <input class="form-input" type="number" id="buy-amount" placeholder="Enter USDT amount" min="5">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Payment Method</label>
+      <select class="form-select" id="buy-payment-method" onchange="togglePaymentFields('buy')">
+        <option value="">Select method</option>
+        <option value="binance">Binance Pay</option>
+        <option value="okx">OKX</option>
+        <option value="wallet">Wallet Address</option>
+      </select>
+    </div>
+
+    <!-- Dynamic fields -->
+    <div id="buy-payment-fields"></div>
+
+    <div class="form-group">
+      <label class="form-label">RWF to Pay</label>
+      <div style="font-size: 24px; font-weight: 700; color: var(--accent-buy); padding: 16px; background: rgba(16, 185, 129, 0.05); border-radius: var(--radius); text-align: center;" id="buy-rwf-total">--</div>
+    </div>
+
+    <div class="info-box buy">
+      <strong>Payment Details:</strong><br>
+      MTN MoMo: <strong>0793031666</strong><br>
+      Name: <strong>Lambert Tuyishime</strong>
+    </div>
+
+    <button class="btn btn-buy" onclick="submitBuyOrder()" id="buy-submit-btn" disabled>
+      <i data-lucide="send"></i>
+      Submit Buy Order
+    </button>
+  </div>
+
+  <!-- Sell Page -->
+  <div class="page" id="page-sell">
+    <button class="back-btn" onclick="navigate('home')">
+      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      Back
+    </button>
+    <div class="page-title">Sell USDT</div>
+    <div class="page-subtitle">Enter details to receive RWF</div>
+
+    <div class="price-hero">
+      <div class="price-label">Current Sell Rate</div>
+      <div class="price-amount" id="sell-rate-display" style="color: var(--accent-sell);">--</div>
+      <div class="price-unit">RWF per USDT</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">USDT Amount</label>
+      <input class="form-input" type="number" id="sell-amount" placeholder="Enter USDT amount" min="5">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Phone Number (MoMo)</label>
+      <input class="form-input" type="tel" id="sell-phone" placeholder="+250 79...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Full Name (MoMo registered)</label>
+      <input class="form-input" type="text" id="sell-name" placeholder="Full name">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Our Receiving Wallets</div>
+      <div class="wallet-row">
+        <div class="wallet-network" style="color: #f0b90b;">
+          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
+          BEP20
+        </div>
+        <div class="wallet-address">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
+      </div>
+      <div class="wallet-row">
+        <div class="wallet-network" style="color: #ef0027;">
+          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
+          TRC20
+        </div>
+        <div class="wallet-address">TMhpeHCWaYFmA6R9D5GkUaUprHyumL8h9W</div>
+      </div>
+      <div class="wallet-row">
+        <div class="wallet-network" style="color: #627eea;">
+          <i data-lucide="network" style="width: 16px; height: 16px;"></i>
+          ERC20
+        </div>
+        <div class="wallet-address">0xbb12ebf7632b4014f1cd9014b70d9f08c516e263</div>
+      </div>
+    </div>
+
+    <button class="btn btn-sell" onclick="submitSellOrder()" id="sell-submit-btn" disabled>
+      <i data-lucide="send"></i>
+      Submit Sell Order
+    </button>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="page" id="page-admin">
+    <button class="back-btn" onclick="navigate('home')">
+      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      Back
+    </button>
+    <div class="page-title">Admin Panel</div>
+    <div class="page-subtitle">Manage prices, posts & orders</div>
+
+    <div class="card">
+      <div class="card-title">Current Rates</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+        <div>
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Buy Rate</div>
+          <div style="font-size: 28px; font-weight: 700; color: var(--accent-buy);" id="admin-buy-current">--</div>
+        </div>
+        <div>
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Sell Rate</div>
+          <div style="font-size: 28px; font-weight: 700; color: var(--accent-sell);" id="admin-sell-current">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Update Buy Rate</div>
+      <div class="form-group">
+        <label class="form-label">Buy Price (RWF per USDT)</label>
+        <input class="form-input" type="number" id="admin-buy-price" placeholder="e.g. 1520">
+      </div>
+      <button class="btn btn-buy" onclick="updatePrice('buy')">
+        <i data-lucide="save"></i>
+        Update Buy Rate
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Update Sell Rate</div>
+      <div class="form-group">
+        <label class="form-label">Sell Price (RWF per USDT)</label>
+        <input class="form-input" type="number" id="admin-sell-price" placeholder="e.g. 1500">
+      </div>
+      <button class="btn btn-sell" onclick="updatePrice('sell')">
+        <i data-lucide="save"></i>
+        Update Sell Rate
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Create Announcement</div>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" type="text" id="post-title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Content</label>
+        <textarea class="form-input" id="post-content" rows="3" placeholder="Announcement message..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="createPost()">
+        <i data-lucide="plus"></i>
+        Create Post
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Orders</div>
+      <div style="max-height: 400px; overflow-y: auto;">
+        <table class="orders-table" id="orders-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Loading orders...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="navigate('home')" data-page="home">
+      <i data-lucide="home"></i>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" onclick="showBuy()" data-page="buy">
+      <i data-lucide="arrow-up"></i>
+      <span>Buy</span>
+    </button>
+    <button class="nav-item" onclick="showSell()" data-page="sell">
+      <i data-lucide="arrow-down"></i>
+      <span>Sell</span>
+    </button>
+  </nav>
+
+  <script>
+    // Configuration
+    const SUPABASE_URL = 'https://geaqmxoqhjotswksiepp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYXFteG9xaGpvdHN3a3NpZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1OTU4NTUsImV4cCI6MjA5MjE3MTg1NX0.Gucg8T8XIwvk_uX_h02fhPd8CO_MIKTxhl_r2Xleixo';
+    
+    const ADMIN_USER_ID = '8616193014'; // Set your Telegram user ID here
+    const BOT_TOKEN = '8611866459:AAH6MamdCrj1XSyy1d2LtFL6nv_TgYYEuDQ';
+    const WA_NUMBER = '250793031666';
+    
+    let supabase;
+    let currentUser = null;
+    let prices = { buy: 1500, sell: 1480 };
+    let realtimeSubs = [];
+
+    // Initialize
+    async function init() {
+      // Init Supabase
+      supabase = createSupabaseClient();
+      
+      // Telegram WebApp
+      if (window.Telegram?.WebApp) {
         const tg = window.Telegram.WebApp;
-        const ADMIN_TG_ID = "123456789"; // Replace with your actual TG ID
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#ffffff');
+        tg.setBackgroundColor('#f8fafc');
+        currentUser = tg.initDataUnsafe?.user;
+      }
 
-        function initApp() {
-            tg.ready();
-            tg.expand();
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('userName').innerText = user.first_name;
-                if (String(user.id) === ADMIN_TG_ID) {
-                    document.getElementById('adminBtn').style.display = 'flex';
-                }
-            }
-            
-            fetchRates();
-            fetchPosts();
-            subscribeRealtime();
-            toggleBuyFields();
+      // Load data
+      await Promise.all([
+        loadPrices(),
+        loadPosts(),
+        loadUser(),
+        checkAdminAccess()
+      ]);
+
+      // Setup realtime
+      setupRealtime();
+
+      // Init Lucide icons
+      lucide.createIcons();
+
+      // Event listeners
+      document.addEventListener('input', handleInputChange);
+    }
+
+    function createSupabaseClient() {
+      return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // Load user data
+    async function loadUser() {
+      if (!currentUser) return;
+      
+      document.getElementById('user-name').textContent = 
+        `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'User';
+      document.getElementById('user-id').textContent = `ID: ${currentUser.id}`;
+    }
+
+    // Load prices
+    async function loadPrices() {
+      try {
+        const { data, error } = await supabase
+          .from('prices')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (data && data.length > 0) {
+          prices = { buy: data[0].buy, sell: data[0].sell };
         }
+        
+        updatePriceDisplays();
+      } catch (error) {
+        console.error('Error loading prices:', error);
+      }
+    }
 
-        // --- Navigation ---
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
-            document.getElementById('backBtn').style.display = 'flex';
-            if (id === 'ordersPage') fetchOrders();
-        }
+    // Update all price displays
+    function updatePriceDisplays() {
+      const elements = {
+        'home-buy-rate': prices.buy,
+        'home-sell-rate': prices.sell,
+        'buy-rate-display': prices.buy,
+        'sell-rate-display': prices.sell,
+        'admin-buy-current': prices.buy,
+        'admin-sell-current': prices.sell
+      };
 
-        function showHome() {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById('homePage').classList.add('active-page');
-            document.getElementById('backBtn').style.display = 'none';
-        }
+      Object.entries(elements).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = new Intl.NumberFormat().format(value);
+      });
 
-        // --- Realtime Price System ---
-        async function fetchRates() {
-            const { data } = await supabase.from('prices').select('*').eq('id', 1).single();
-            if (data) {
-                currentRates = data;
-                document.getElementById('buyRate').innerText = data.buy;
-                document.getElementById('sellRate').innerText = data.sell;
-                document.getElementById('adminBuyRate').value = data.buy;
-                document.getElementById('adminSellRate').value = data.sell;
-            }
-        }
+      updateCalculations();
+    }
 
-        function subscribeRealtime() {
-            supabase.channel('custom-all-channel')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'prices' }, (payload) => {
-                fetchRates();
-            }).subscribe();
-        }
+    // Load posts
+    async function loadPosts() {
+      try {
+        const { data } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        renderPosts(data || []);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        document.getElementById('posts-container').innerHTML = 
+          '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No announcements</div>';
+      }
+    }
 
-        // --- Logic ---
-        function calcBuy() {
-            const amount = document.getElementById('buyAmount').value;
-            document.getElementById('buyTotal').innerText = (amount * currentRates.buy).toLocaleString() + " RWF";
-        }
+    function renderPosts(posts) {
+      const container = document.getElementById('posts-container');
+      if (!posts.length) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No announcements</div>';
+        return;
+      }
 
-        function calcSell() {
-            const amount = document.getElementById('sellAmount').value;
-            document.getElementById('sellTotal').innerText = (amount * currentRates.sell).toLocaleString() + " RWF";
-        }
+      container.innerHTML = posts.map(post => `
+        <div class="post">
+          <div class="post-title">${post.title}</div>
+          <div class="post-meta">${new Date(post.created_at).toLocaleDateString()}</div>
+          <div>${post.content}</div>
+        </div>
+      `).join('');
+    }
 
-        function toggleBuyFields() {
-            const method = document.getElementById('buyMethod').value;
-            const container = document.getElementById('buyDynamicFields');
-            if (method === 'binance') {
-                container.innerHTML = '<div class="input-group"><label>Binance ID</label><input type="text" id="buyRef" placeholder="Enter ID"></div>';
-            } else if (method === 'okx') {
-                container.innerHTML = '<div class="input-group"><label>OKX UID</label><input type="text" id="buyRef" placeholder="Enter UID"></div>';
-            } else {
-                container.innerHTML = '<div class="input-group"><label>Wallet Address & Network</label><input type="text" id="buyRef" placeholder="Address (e.g. BEP20)"></div>';
-            }
-        }
+    // Setup realtime subscriptions
+    function setupRealtime() {
+      // Prices realtime
+      const pricesSub = supabase
+        .channel('prices')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'prices' }, 
+          () => loadPrices()
+        )
+        .subscribe();
 
-        // --- Database Actions ---
-        async function submitOrder(type) {
-            document.getElementById('loading').style.display = 'flex';
-            const user = tg.initDataUnsafe?.user;
-            
-            const payload = {
-                user_id: user?.id || 'guest',
-                user_name: user?.first_name || 'Anonymous',
-                type: type,
-                amount: type === 'buy' ? document.getElementById('buyAmount').value : document.getElementById('sellAmount').value,
-                method: type === 'buy' ? document.getElementById('buyMethod').value : 'crypto_transfer',
-                wallet_address: type === 'buy' ? document.getElementById('buyRef').value : 'See System Wallets',
-                phone: type === 'sell' ? document.getElementById('sellPhone').value : 'N/A',
-                status: 'pending'
-            };
+      realtimeSubs.push(pricesSub);
 
-            const { error } = await supabase.from('orders').insert([payload]);
-            document.getElementById('loading').style.display = 'none';
-            
-            if (!error) {
-                tg.showAlert("Order submitted successfully! Admin will process it shortly.");
-                showHome();
-            } else {
-                tg.showAlert("Error: " + error.message);
-            }
-        }
+      // Posts realtime
+      const postsSub = supabase
+        .channel('posts')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'posts' }, 
+          () => loadPosts()
+        )
+        .subscribe();
 
-        async function updateRates() {
-            const buy = document.getElementById('adminBuyRate').value;
-            const sell = document.getElementById('adminSellRate').value;
-            const { error } = await supabase.from('prices').update({ buy, sell }).eq('id', 1);
-            if (!error) tg.showAlert("Rates Updated Live");
-        }
+      realtimeSubs.push(postsSub);
 
-        async function fetchPosts() {
-            const { data } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-            const list = document.getElementById('postsList');
-            list.innerHTML = data.map(post => `
-                <div class="card">
-                    <p style="font-size:10px; color:var(--text-muted);">${new Date(post.created_at).toLocaleDateString()}</p>
-                    <h4 style="margin:4px 0;">${post.title}</h4>
-                    <p style="font-size:13px; color:var(--text-muted);">${post.content}</p>
-                </div>
-            `).join('');
-        }
+      // Orders realtime (admin only)
+      if (isAdmin()) {
+        const ordersSub = supabase
+          .channel('orders')
+          .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'orders' }, 
+            () => loadOrders()
+          )
+          .subscribe();
+        realtimeSubs.push(ordersSub);
+      }
+    }
 
-        async function fetchOrders() {
-            const user = tg.initDataUnsafe?.user;
-            let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
-            
-            // If not admin, only show own orders
-            if (String(user?.id) !== ADMIN_TG_ID) {
-                query = query.eq('user_id', user?.id);
-            }
+    // Admin check
+    function checkAdminAccess() {
+      if (!currentUser) return;
+      
+      if (currentUser.id == ADMIN_USER_ID) {
+        addAdminMenu();
+      }
+    }
 
-            const { data } = await query;
-            const list = document.getElementById('orderList');
-            list.innerHTML = data.map(order => `
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="font-weight:700;">${order.type.toUpperCase()} ${order.amount} USDT</span>
-                        <span class="status-badge status-${order.status}">${order.status}</span>
-                    </div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
-                        Method: ${order.method} | ${new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                </div>
-            `).join('');
-        }
+    function addAdminMenu() {
+      const menuGrid = document.getElementById('home-menu');
+      const adminItem = document.createElement('div');
+      adminItem.className = 'menu-item';
+      adminItem.innerHTML = `
+        <i data-lucide="shield" style="width: 24px; height: 24px; color: var(--accent-admin);"></i>
+        <div class="menu-item-label">Admin</div>
+      `;
+      adminItem.onclick = () => navigate('admin');
+      menuGrid.appendChild(adminItem);
+      
+      lucide.createIcons();
+    }
 
-        window.onload = initApp;
-    </script>
+    // Navigation
+    function navigate(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page-${page}`).classList.add('active');
+      
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === page);
+      });
+
+      if (page === 'admin') {
+        loadOrders();
+      }
+      
+      lucide.createIcons();
+    }
+
+    function showBuy() { navigate('buy'); }
+    function showSell() { navigate('sell'); }
+
+    // Form handling
+    function handleInputChange(e) {
+      const target = e.target;
+      if (target.id.includes('amount') || target.id.includes('price')) {
+        updateCalculations();
+        toggleSubmitButtons();
+      }
+    }
+
+    function togglePaymentFields(type) {
+      const method = document.getElementById(`${type}-payment-method`).value;
+      const container = document.getElementById(`${type}-payment-fields`);
+      
+      const fields = {
+        binance: `
+          <div class="form-group">
+            <label class="form-label">Binance ID</label>
+            <input class="form-input" type="text" id="${type}-binance-id" placeholder="Your Binance ID">
+          </div>
+        `,
+        okx: `
+          <div class="form-group">
+            <label class="form-label">OKX UID</label>
+            <input class="form-input" type="text" id="${type}-okx-uid" placeholder="Your OKX UID">
+          </div>
+        `,
+        wallet: `
+          <div class="form-group">
+            <label class="form-label">Network</label>
+            <select class="form-select" id="${type}-network">
+              <option value="BEP20">BEP20 (BNB Smart Chain)</option>
+              <option value="TRC20">TRC20 (TRON)</option>
+              <option value="ERC20">ERC20 (Ethereum)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Wallet Address</label>
+            <input class="form-input" type="text" id="${type}-wallet-address" placeholder="0x...">
+          </div>
+        `
+      };
+
+      container.innerHTML = fields[method] || '';
+      toggleSubmitButtons();
+    }
+
+    function updateCalculations() {
+      const buyAmount = parseFloat(document.getElementById('buy-amount')?.value) || 0;
+      const sellAmount = parseFloat(document.getElementById('sell-amount')?.value) || 0;
+      
+      const buyRwf = document.getElementById('buy-rwf-total');
+      if (buyAmount > 0 && buyRwf) {
+        buyRwf.textContent = new Intl.NumberFormat().format(buyAmount * prices.buy) + ' RWF';
+      }
+    }
+
+    function toggleSubmitButtons() {
+      const buyBtn = document.getElementById('buy-submit-btn');
+      const sellBtn = document.getElementById('sell-submit-btn');
+      
+      if (buyBtn) {
+        const amount = document.getElementById('buy-amount')?.value;
+        const method = document.getElementById('buy-payment-method')?.value;
+        buyBtn.disabled = !amount || !method || parseFloat(amount) < 5;
+      }
+      
+      if (sellBtn) {
+        const amount = document.getElementById('sell-amount')?.value;
+        const phone = document.getElementById('sell-phone')?.value;
+        const name = document.getElementById('sell-name')?.value;
+        sellBtn.disabled = !amount || !phone || !name || parseFloat(amount) < 5;
+      }
+    }
+
+    // Submit Buy Order
+    async function submitBuyOrder() {
+      const amount = parseFloat(document.getElementById('buy-amount').value);
+      const method = document.getElementById('buy-payment-method').value;
+      let details = {};
+      
+      if (method === 'binance') {
+        details.binanceId = document.getElementById('buy-binance-id').value;
+      } else if (method === 'okx') {
+        details.okxUid = document.getElementById('buy-okx-uid').value;
+      } else if (method === 'wallet') {
+        details.network = document.getElementById('buy-network').value;
+        details.walletAddress = document.getElementById('buy-wallet-address').value;
+      }
+
+      try {
+        showToast('Creating order...', 'success');
+        
+        const { error } = await supabase
+          .from('orders')
+          .insert({
+            user_id: currentUser?.id || 'anonymous',
+            type: 'buy',
+            amount,
+            payment_method: method,
+            ...details,
+            phone: '',
+            name: currentUser?.first_name || '',
+            status: 'pending',
+            created_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+        
+        showToast('✅ Buy order created successfully!', 'success');
+        sendOrderNotification('buy', amount, details);
+        clearBuyForm();
+      } catch (error) {
+        showToast('Error creating order: ' + error.message, 'error');
+      }
+    }
+
+    // Submit Sell Order
+    async function submitSellOrder() {
+      const amount = parseFloat(document.getElementById('sell-amount').value);
+      const phone = document.getElementById('sell-phone').value;
+      const name = document.getElementById('sell-name').value;
+
+      try {
+        showToast('Creating order...', 'success');
+        
+        const { error } = await supabase
+          .from('orders')
+          .insert({
+            user_id: currentUser?.id || 'anonymous',
+            type: 'sell',
+            amount,
+            payment_method: 'direct',
+            wallet_address: '',
+            phone,
+            name,
+            status: 'pending',
+            created_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+        
+        showToast('✅ Sell order created successfully!', 'success');
+        sendOrderNotification('sell', amount, { phone, name });
+      } catch (error) {
+        showToast('Error creating order: ' + error.message, 'error');
+      }
+    }
+
+    function clearBuyForm() {
+      document.getElementById('buy-amount').value = '';
+      document.getElementById('buy-payment-method').value = '';
+      document.getElementById('buy-payment-fields').innerHTML = '';
+      document.getElementById('buy-rwf-total').textContent = '--';
+      document.getElementById('buy-submit-btn').disabled = true;
+    }
+
+    // Admin functions
+    async function updatePrice(type) {
+      const value = parseFloat(document.getElementById(`admin-${type}-price`).value);
+      if (!value || value < 0) {
+        showToast('Please enter a valid price', 'error');
+        return;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('prices')
+          .upsert({
+            id: 1,
+            [type]: value,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+
+        if (error) throw error;
+        
+        prices[type] = value;
+        updatePriceDisplays();
+        showToast(`✅ ${type.toUpperCase()} price updated`, 'success');
+      } catch (error) {
+        showToast('Error updating price', 'error');
+      }
+    }
+
+    async function createPost() {
+      const title = document.getElementById('post-title').value.trim();
+      const content = document.getElementById('post-content').value.trim();
+      
+      if (!title || !content) {
+        showToast('Please fill title and content', 'error');
+        return;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('posts')
+          .insert({
+            title,
+            content,
+            created_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+        
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-content').value = '';
+        showToast('✅ Post created successfully', 'success');
+      } catch (error) {
+        showToast('Error creating post', 'error');
+      }
+    }
+
+    async function loadOrders() {
+      if (!isAdmin()) return;
+      
+      try {
+        const { data } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        
+        renderOrders(data || []);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    }
+
+    function renderOrders(orders) {
+      const tbody = document.querySelector('#orders-table tbody');
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No orders</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = orders.map(order => `
+        <tr>
+          <td>${order.id}</td>
+          <td>${order.user_id}</td>
+          <td>${order.type.toUpperCase()}</td>
+          <td>${order.amount} USDT</td>
+          <td><span class="status ${order.status}">${order.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function isAdmin() {
+      return currentUser && currentUser.id == ADMIN_USER_ID;
+    }
+
+    // Telegram notifications
+    async function sendOrderNotification(type, amount, details) {
+      const message = `🔔 *New ${type.toUpperCase()} Order*\n\n` +
+        `👤 User: ${currentUser?.first_name || 'Anonymous'} (${currentUser?.id})\n` +
+        `💰 Amount: ${amount} USDT\n` +
+        `📱 Phone: ${details.phone || 'N/A'}\n` +
+        `💳 Method: ${details.payment_method || 'Direct'}\n\n` +
+        `_New order received_`;
+
+      // Send to Telegram bot (simplified)
+      console.log('Order notification:', message);
+    }
+
+    // Utility functions
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      lucide.createIcons();
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+
+    // Cleanup on unload
+    window.addEventListener('beforeunload', () => {
+      realtimeSubs.forEach(sub => supabase.removeChannel(sub));
+    });
+  </script>
 </body>
-</html>
+    </html>
